@@ -3,14 +3,24 @@
 <head>
   <link rel="stylesheet" href="popup-reset.css">
   <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="popup-checkbox.css">
   <meta charset="UTF-8">
   <title>Extract colors</title>
 </head>
 <body>
 
 <div class="actions-div">
-  <button class="btn go-btn">Generate color report</button>
+  <button class="btn go-btn hidden">Generate color report</button>
+
+  <label class="container">Visible only
+    <input type="checkbox" checked="checked" class="visible-only-input">
+    <span class="checkmark"></span>
+  </label>
+
   <button class="btn toggle-theme-btn">Toggle theme</button>
+  <button class="btn copy-img-btn">Copy image</button>
+
+  <a href="#" download="colors.jpg" class="download-img-a">Download Image</a>
 </div>
 <div class="text-div"></div>
 <div class="content-div"></div>

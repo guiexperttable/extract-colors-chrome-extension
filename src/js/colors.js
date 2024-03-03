@@ -97,64 +97,8 @@ const getColors = () => {
   //   return [...new Set(arr)];
   // }
 
-  /*
-  function  createColorImage(colors) {
-    const canvas = document.createElement('canvas');
 
-    const color_boxes_per_row = 4;
 
-    const color_box_width = 140;
-    const color_box_height = 100;
-    const color_box_padding = 20;
-    const color_rows = Math.ceil(colors.length / color_boxes_per_row);
-
-    const img_width = ((color_box_width + (color_box_padding * 2)) * color_boxes_per_row) + (color_box_padding * 2);
-    const img_height = ((color_box_height + (color_box_padding * 2) + 60) * color_rows) + (color_box_padding * 2);
-
-    canvas.height = img_height;
-    canvas.width = img_width;
-
-    const img = canvas.getContext('2d');
-
-    if (img) {
-      const imageData = img.createImageData(img_width, img_height);
-
-      img.putImageData(imageData, 0, 0);
-
-      img.fillStyle = 'white';
-      img.fillRect(0, 0, img_width, img_height);
-
-      img.font = '14px Quicksand';
-
-      let colorCounter = 0;
-      for (let r = 0; r < color_rows; r++) {
-        const co_y = color_box_padding * 2 + ((((color_box_padding * 2) + color_box_height) + 60) * r);
-        for (let c = 0; c < color_boxes_per_row; c++) {
-          if (colorCounter === colors.length) {
-            break;
-          } else {
-            const co_x = color_box_padding * 2 + (((color_box_padding * 2) + color_box_width) * c);
-
-            img.shadowBlur = 3;
-            img.shadowColor = 'rgba(0,0,0,0.3)';
-            img.fillStyle = colors[colorCounter];
-            img.fillRect(co_x, co_y, color_box_width, color_box_height);
-
-            img.fillStyle = '#000';
-            img.textAlign = 'center';
-            img.fillText(hexToRgb(colors[colorCounter]), co_x + (color_box_width / 2), co_y + color_box_height + 20);
-            img.fillText(colors[colorCounter], co_x + (color_box_width / 2), co_y + color_box_height + 50);
-
-            colorCounter++;
-          }
-        }
-      }
-    }
-
-    return canvas.toDataURL('image/jpg');
-  }
-
-   */
 
 
 

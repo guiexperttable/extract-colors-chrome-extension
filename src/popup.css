@@ -6,6 +6,12 @@ html[data-theme="dark"] {
     --ge-btn-border: #00b7ff;
     --ge-btn-border-hover: cyan;
     --ge-colored-div-border: #fffc;
+
+    --ge-checkbox-bg : var(--ge-body-bg);
+    --ge-checkbox-checked-bg : var(--ge-btn-border);
+    --ge-checkbox-hover-bg : var(--ge-btn-border-hover);
+    --ge-checkbox-border : var(--ge-btn-border);
+    --ge-checkbox-marker : var(--ge-body-color);
 }
 
 html[data-theme="light"] {
@@ -14,6 +20,12 @@ html[data-theme="light"] {
     --ge-btn-border: #00b7ff;
     --ge-btn-border-hover: #00e7e7;
     --ge-colored-div-border: #000c;
+
+    --ge-checkbox-bg : var(--ge-body-bg);
+    --ge-checkbox-checked-bg : var(--ge-btn-border);
+    --ge-checkbox-hover-bg : var(--ge-btn-border-hover);
+    --ge-checkbox-border : var(--ge-btn-border);
+    --ge-checkbox-marker : var(--ge-body-color);
 }
 
 html {
@@ -43,13 +55,21 @@ body {
 .btn:hover {
     border: 1px solid var(--ge-btn-border-hover);
 }
-
+.hidden {
+    display: none;
+}
+.inline {
+    display: inline;
+}
 .actions-div {
     display: flex;
+    align-items: center;
     justify-content: flex-start;
     gap: 16px;
 }
-
+a {
+    color: var(--ge-btn-border);
+}
 .text-div {
     padding: 8px 0;
 }
