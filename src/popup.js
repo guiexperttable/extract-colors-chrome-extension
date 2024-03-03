@@ -1,6 +1,8 @@
 const btnOk = document.querySelector(".go-btn");
 const btnToggleTheme = document.querySelector(".toggle-theme-btn");
 const btnCopyImage = document.querySelector(".copy-img-btn");
+const btnCopyValues = document.querySelector(".copy-values-btn");
+const btnCopyHtml = document.querySelector(".copy-html-btn");
 const checkboxToggleVisible = document.querySelector(".visible-only-input");
 const divText = document.querySelector(".text-div");
 const downLoadImgLink = document.querySelector(".download-img-a");
@@ -8,17 +10,34 @@ const downLoadImgLink = document.querySelector(".download-img-a");
 
 let currentTheme = 'dark';
 let visibleOnly = true;
+let grabbedData = {};
+let currentColors = [];
 
+/**
+ * Checks if an array contains an object using a comparator function.
+ *
+ * @param {Array} arr - The array to check.
+ * @param {Object} obj - The object to look for.
+ * @param {Function} comparator - The comparator function to use.
+ *                               Should accept two parameters: item (array element) and obj (search object),
+ *                               and return a boolean indicating whether they match or not.
+ * @return {boolean} - Returns true if the array contains the object, false otherwise.
+ */
 function arrayContainsObject(arr, obj, comparator) {
   return arr.some(item => comparator(item, obj));
 }
 
+/**
+ * Checks if the sum of RGB values of two objects are equal.
+ *
+ * @param {Object} o1 - The first color object to compare.
+ * @param {Object} o2 - The second color object to compare.
+ * @param {number} o1.sum - The sum of RGB values of o1.
+ * @param {number} o2.sum - The sum of RGB values of o2.
+ * @return {boolean} Returns true if the sum of RGB values of o1 and o2 are equal, otherwise false.
+ */
 function isColorEqual(o1, o2) {
   return o1.sum === o2.sum;
-}
-
-function isColorEqualStrict(o1, o2) {
-  return o1.rgba === o2.rgba;
 }
 
 
@@ -36,6 +55,10 @@ function isColorEqualStrict(o1, o2) {
  * @return {string} - The base64 encoded data URL of the generated image.
  */
 function createColorImage(colors) {
+  return createColorImageCanvas(colors).toDataURL('image/png');
+}
+
+function createColorImageCanvas(colors) {
   const canvas = document.createElement('canvas');
 
   const color_boxes_per_row = 4;
@@ -65,7 +88,9 @@ function createColorImage(colors) {
 
     let colorCounter = 0;
     for (let r = 0; r < color_rows; r++) {
+
       const co_y = color_box_padding * 2 + ((((color_box_padding * 2) + color_box_height) + 60) * r);
+
       for (let c = 0; c < color_boxes_per_row; c++) {
         if (colorCounter === colors.length) {
           break;
@@ -89,7 +114,7 @@ function createColorImage(colors) {
     }
   }
 
-  return canvas.toDataURL('image/jpg');
+  return canvas;
 }
 
 
@@ -108,7 +133,7 @@ const renderColors = (colors) => {
   const buf = [''];
   colors.forEach(color => {
     buf.push(`
-        <div class="color_box all active">
+        <div>
           <div class="colored-div" style="background-color: ${color.rgba}"></div>
           <div class="color_box-text hex">${color.hex}</div>
           <div class="color_box-text rgb">${color.rgba}</div>
@@ -123,6 +148,7 @@ const grabColors = () => {
     divText.innerText = 'Analysing...';
 
     scrapColors().then(data => {
+      grabbedData = data;
       divText.innerText = '';
       const colors = getUniqColors(
         data
@@ -136,12 +162,11 @@ const grabColors = () => {
               .map(item=>item.color)
           )
       ).sort((a,b)=> a.sum - b.sum);
+
+      currentColors = [...colors];
       document.querySelector('.content-div').innerHTML = renderColors(colors);
       downLoadImgLink.setAttribute('href', createColorImage(colors));
-
-      console.log(data);
-      console.log('colors', colors);
-      console.log(data.extractedColors.map(item=>item.bgColor).concat(data.extractedColors.map(item=>item.color)));
+      // console.log(data);
     });
 }
 
@@ -152,6 +177,68 @@ btnToggleTheme.addEventListener("click", async () => {
   document.querySelector('html').setAttribute('data-theme', currentTheme);
 });
 
+btnCopyValues.addEventListener("click", async () => {
+  const buf = [];
+  for (const color of currentColors) {
+    buf.push(`${color.rgba}`);
+  }
+  navigator.clipboard
+    .writeText(buf.join('\n'))
+    .then(() => divText.innerText = `Data copied do clipboard.`);
+});
+
+
+btnCopyHtml.addEventListener("click", async () => {
+  const box = document.querySelector('.content-div').innerHTML;
+  const html =`
+  <html lang="en" data-theme="light">
+    <style>
+      html, body {
+          width: 600px;
+      }
+      .content-div {
+          width: 600px;
+          display: grid;
+          grid-gap: 16px;
+          grid-template-columns: repeat(auto-fit, 100px);
+      }
+      .colored-div {
+          width: 70px;
+          height: 70px;
+          border: 1px solid #000;
+          border-radius: 2px;
+      }
+    </style>
+    <body>
+      <div class="content-div">
+        ${box}
+      </div>   
+    </body>
+  </html>
+  `;
+  console.log(html);
+  navigator.clipboard
+    .write([new ClipboardItem({
+      'text/html': new Blob([html], {type: 'text/html'})
+    })])
+    .then(() => divText.innerText = `HTML copied do clipboard.`);
+});
+
+
+btnCopyImage.addEventListener("click", async () => {
+  const canvas = createColorImageCanvas(currentColors);
+  // Copy canvas to blob
+  canvas.toBlob(blob=>{
+    // Create ClipboardItem with blob and it's type, and add to an array
+    const data = [new ClipboardItem({ [blob.type]: blob })];
+
+    // Write the data to the clipboard
+    navigator.clipboard
+      .write(data)
+      .then(() => divText.innerText = `Image copied do clipboard.`);
+  });
+});
+
 checkboxToggleVisible.addEventListener('change', function() {
   visibleOnly = this.checked;
   grabColors();
@@ -159,9 +246,5 @@ checkboxToggleVisible.addEventListener('change', function() {
 
 
 // Go:
-// btnOk.click();
 grabColors();
 
-
-
-//     navigator.clipboard.writeText(csv).then(() => alert(`Data copied do clipboard.`))
