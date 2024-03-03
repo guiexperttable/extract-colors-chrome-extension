@@ -35,10 +35,10 @@ const getColors = () => {
     return '#' + componentToHex(parseInt(rgbArr[0])) + componentToHex(parseInt(rgbArr[1])) + componentToHex(parseInt(rgbArr[2]));
   }
 
-  function hexToRgb(hex) {
-    const [r, g, b] = getRgbComponentsFromHex(hex);
-    return `rgb(${parseInt(r, 16)}, ${parseInt(g, 16)}, ${parseInt(b, 16)})`;
-  }
+  // function hexToRgb(hex) {
+  //   const [r, g, b] = getRgbComponentsFromHex(hex);
+  //   return `rgb(${parseInt(r, 16)}, ${parseInt(g, 16)}, ${parseInt(b, 16)})`;
+  // }
 
   // function sortHex(hexArray) {
   //   const orderedHex = hexArray.map(hex => {
@@ -53,22 +53,22 @@ const getColors = () => {
   //   return orderedHex.map(a => a.hex);
   // }
 
-  function extractColorsFromElement(element) {
-    const visible = [];
-    const hidden = [];
-    document.querySelectorAll(element).forEach(el => {
-      const style = getComputedStyle(el);
-      const bgColor = rgbToHex(style.backgroundColor);
-      const color = rgbToHex(style.color);
-
-      if (isVisible(el)) {
-        visible.push(bgColor, color);
-      } else {
-        hidden.push(bgColor, color);
-      }
-    });
-    return [visible, hidden];
-  }
+  // function extractColorsFromElement(element) {
+  //   const visible = [];
+  //   const hidden = [];
+  //   document.querySelectorAll(element).forEach(el => {
+  //     const style = getComputedStyle(el);
+  //     const bgColor = rgbToHex(style.backgroundColor);
+  //     const color = rgbToHex(style.color);
+  //
+  //     if (isVisible(el)) {
+  //       visible.push(bgColor, color);
+  //     } else {
+  //       hidden.push(bgColor, color);
+  //     }
+  //   });
+  //   return [visible, hidden];
+  // }
 
 
   /**
@@ -93,9 +93,9 @@ const getColors = () => {
     return true;
   }
 
-  function unique(arr) {
-    return [...new Set(arr)];
-  }
+  // function unique(arr) {
+  //   return [...new Set(arr)];
+  // }
 
   /*
   function  createColorImage(colors) {
@@ -246,18 +246,8 @@ const getColors = () => {
   }
 
   function getResult() {
-    // let extractedColors = [];
-    // for (let i = 0; i < elements.length; i++) {
-    //   const colors = extractColorsFromElement(elements[i]);
-    //   extractedColors = extractedColors.concat(colors);
-    // }
-    //
-
-
     return {
-      // html: buf.join('').replace(/###/g, '#'),
       extractedColors: extractColors().sort((a, b) => (a.bgColor.sum > b.bgColor.sum) ? 1 : -1)
-
     };
   }
   
