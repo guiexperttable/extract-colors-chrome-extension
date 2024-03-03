@@ -1,10 +1,15 @@
 {
-  "name": "Extract colors Extension",
-  "description": "Extract colors from webpage",
+  "name": "Extract Colors DevTool",
+  "description": "Extract Colors from Webpage is a powerful developer tool designed to simplify the process of extracting color palettes from any webpage.",
   "version": "1.0.0",
   "manifest_version": 3,
   "permissions": ["storage", "activeTab", "scripting"],
   "action": {
     "default_popup": "popup.html"
+  },
+  "icons": {
+    "128": "icon/logo-128.png",
+    "48": "icon/logo-48.png",
+    "16": "icon/logo-16.png"
   }
 }

@@ -1,0 +1,10 @@
+{
+  "name": "extract-colors-extension",
+  "version": "1.0.0",
+  "description": "Extract Colors from Webpage is a powerful developer tool designed to simplify the process of extracting color palettes from any webpage.",
+  "scripts": {
+    "build": "zip -r dist/extract-colors-extension.zip src/*"
+  },
+  "license": "MIT",
+  "author": "GUI Expert GmbH <info@gui.expert>"
+}

@@ -149,18 +149,7 @@ const getColors = () => {
     let colorsVisible = [];
     let colorsHidden = [];
 
-    const elements = [
-      'p',
-      'div',
-      'a',
-      'button',
-      'span',
-      'h1',
-      'h2',
-      'h3',
-      'li',
-      'ul',
-    ];
+    const elements = ['p','div','a','button','input','span','h1','h2','h3','li','ul','td'];
 
     for (let i = 0; i < elements.length; i++) {
       const colors = extractColorsFromElement(elements[i]);
