@@ -107,7 +107,7 @@ function drawColorBox(imgContext, color, x, y, color_box_width, color_box_height
  */
 function createColorImageCanvas(colors) {
   const canvas = document.createElement('canvas');
-  const numberOfColorBoxesPerRow = 4;
+  const numberOfColorBoxesPerRow = 5;
   const boxWidth = 140;
   const colorBoxHeight = 100;
   const padding = 20;
@@ -196,7 +196,7 @@ const renderColors = (colors) => {
   colors.forEach(color => {
     buf.push(`
         <div>
-          <div onclick="copyColor(this)" class="colored-div" data-color="${color.rgba}" style="background-color: ${color.rgba}"></div>
+          <div class="colored-div" data-color="${color.rgba}" style="background-color: ${color.rgba}"></div>
           <div class="color_box-text hex">${color.hex}</div>
           <div class="color_box-text rgb">${color.rgba}</div>
         </div>
@@ -207,16 +207,6 @@ const renderColors = (colors) => {
 };
 
 
-/**
- * Copies the color value from the target element to the clipboard.
- *
- * @param {Event} event - The event object containing information about the event.
- */
-function copyColor(event) {
-  const colorDiv = event.target;
-  const color = colorDiv.getAttribute('data-color');
-  navigator.clipboard.writeText(color).then(() => setLabelText(`${color} copied to clipboard.`));
-}
 
 /**
  * Function to grab colors and update the UI.
@@ -245,8 +235,24 @@ const grabColors = () => {
 
     currentColors = [...colors];
     divContent.innerHTML = renderColors(colors);
+    divContent
+      .querySelectorAll('div[data-color]')
+      .forEach(ele=>
+        ele.addEventListener('click', ()=> copyColor(ele))
+      );
     downLoadImgLink.setAttribute('href', createColorImage(colors));
   });
+}
+
+
+/**
+ * Copies the color value from the target element to the clipboard.
+ *
+ * @param {HTMLDivElement} colorDiv - The target of the click.
+ */
+function copyColor(colorDiv) {
+  const color = colorDiv.getAttribute('data-color');
+  navigator.clipboard.writeText(color).then(() => setLabelText(`${color} copied to clipboard.`));
 }
 
 

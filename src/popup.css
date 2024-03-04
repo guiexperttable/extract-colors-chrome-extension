@@ -6,6 +6,7 @@ html[data-theme="dark"] {
     --ge-btn-border: #00b7ff;
     --ge-btn-border-hover: cyan;
     --ge-colored-div-border: #fffc;
+    --ge-message-color: #00e004;
 
     --ge-checkbox-bg : var(--ge-body-bg);
     --ge-checkbox-checked-bg : var(--ge-btn-border);
@@ -20,6 +21,7 @@ html[data-theme="light"] {
     --ge-btn-border: #00b7ff;
     --ge-btn-border-hover: #00e7e7;
     --ge-colored-div-border: #000c;
+    --ge-message-color: #0098db;
 
     --ge-checkbox-bg : var(--ge-body-bg);
     --ge-checkbox-checked-bg : var(--ge-btn-border);
@@ -40,7 +42,7 @@ body {
     width: calc(var(--ge-box-div-width) * var(--column-count) + var(--ge-content-div-gap) * calc(var(--column-count) - 1) + 2 * var(--ge-padding));
     min-height: 120px;
     display: grid;
-    grid-template-rows: 30px 30px 1fr;
+    grid-template-rows: 30px 48px 1fr;
     padding: 16px;
     background-color: var(--ge-body-bg);
     color: var(--ge-body-color);
@@ -77,7 +79,8 @@ a {
     color: var(--ge-btn-border);
 }
 .text-div {
-    padding: 8px 0;
+    padding: 16px 0;
+    color: var(--ge-message-color);
 }
 .content-div {
     display: grid;
