@@ -1,7 +1,7 @@
 html {
     --ge-checkbox-size: 20px;
     --ge-label-gap: 6px;
-    --ge-checkmark-top: -2px;
+    --ge-checkmarl-top: 4px;
 }
 
 
@@ -30,7 +30,7 @@ html {
 /* Create a custom checkbox */
 .checkmark {
     position: absolute;
-    top: var(--ge-checkmark-top);
+    top: var(--ge-checkmarl-top);
     left: 0;
     height: var(--ge-checkbox-size);
     width: var(--ge-checkbox-size);

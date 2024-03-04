@@ -8,10 +8,20 @@ const divText = document.querySelector(".text-div");
 const downLoadImgLink = document.querySelector(".download-img-a");
 
 
-let currentTheme = 'dark';
-let visibleOnly = true;
+
+let data = {
+  currentTheme: 'dark',
+  visibleOnly: true
+};
+
 let grabbedData = {};
 let currentColors = [];
+
+
+function storeData() {
+  chrome.storage.sync.set(data);
+}
+
 
 /**
  * Checks if an array contains an object using a comparator function.
@@ -154,7 +164,7 @@ const grabColors = () => {
         data
           .extractedColors
           .filter(
-            item => !visibleOnly || item.visible
+            item => !data.visibleOnly || item.visible
           )
           .map(item=>item.bgColor)
           .concat(
@@ -170,27 +180,33 @@ const grabColors = () => {
     });
 }
 
-btnOk.addEventListener("click", grabColors);
 
-btnToggleTheme.addEventListener("click", async () => {
-  currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-  document.querySelector('html').setAttribute('data-theme', currentTheme);
-});
+function updateHtmlDataThemeAttribute() {
+  document.querySelector('html').setAttribute('data-theme', data.currentTheme);
+}
 
-btnCopyValues.addEventListener("click", async () => {
-  const buf = [];
-  for (const color of currentColors) {
-    buf.push(`${color.rgba}`);
-  }
-  navigator.clipboard
-    .writeText(buf.join('\n'))
-    .then(() => divText.innerText = `Data copied do clipboard.`);
-});
+function initListener() {
+  btnOk.addEventListener("click", grabColors);
 
+  btnToggleTheme.addEventListener("click", async () => {
+    data.currentTheme = data.currentTheme === 'light' ? 'dark' : 'light';
+    updateHtmlDataThemeAttribute();
+    storeData();
+  });
 
-btnCopyHtml.addEventListener("click", async () => {
-  const box = document.querySelector('.content-div').innerHTML;
-  const html =`
+  btnCopyValues.addEventListener("click", async () => {
+    const buf = [];
+    for (const color of currentColors) {
+      buf.push(`${color.rgba}`);
+    }
+    navigator.clipboard
+      .writeText(buf.join('\n'))
+      .then(() => divText.innerText = `Data copied do clipboard.`);
+  });
+
+  btnCopyHtml.addEventListener("click", async () => {
+    const box = document.querySelector('.content-div').innerHTML;
+    const html = `
   <html lang="en" data-theme="light">
     <style>
       html, body {
@@ -216,35 +232,57 @@ btnCopyHtml.addEventListener("click", async () => {
     </body>
   </html>
   `;
-  console.log(html);
-  navigator.clipboard
-    .write([new ClipboardItem({
-      'text/html': new Blob([html], {type: 'text/html'})
-    })])
-    .then(() => divText.innerText = `HTML copied do clipboard.`);
-});
-
-
-btnCopyImage.addEventListener("click", async () => {
-  const canvas = createColorImageCanvas(currentColors);
-  // Copy canvas to blob
-  canvas.toBlob(blob=>{
-    // Create ClipboardItem with blob and it's type, and add to an array
-    const data = [new ClipboardItem({ [blob.type]: blob })];
-
-    // Write the data to the clipboard
+    console.log(html);
     navigator.clipboard
-      .write(data)
-      .then(() => divText.innerText = `Image copied do clipboard.`);
+      .write([new ClipboardItem({
+        'text/html': new Blob([html], {type: 'text/html'})
+      })])
+      .then(() => divText.innerText = `HTML copied do clipboard.`);
   });
-});
 
-checkboxToggleVisible.addEventListener('change', function() {
-  visibleOnly = this.checked;
-  grabColors();
-});
+  btnCopyImage.addEventListener("click", async () => {
+    const canvas = createColorImageCanvas(currentColors);
+    // Copy canvas to blob
+    canvas.toBlob(blob => {
+      // Create ClipboardItem with blob and it's type, and add to an array
+      const data = [new ClipboardItem({[blob.type]: blob})];
+
+      // Write the data to the clipboard
+      navigator.clipboard
+        .write(JSON.stringify(data, null, 0))
+        .then(() => divText.innerText = `Image copied do clipboard.`);
+    });
+  });
+
+  checkboxToggleVisible.addEventListener('change', function () {
+    data.visibleOnly = this.checked;
+    storeData();
+    grabColors();
+  });
+}
 
 
 // Go:
-grabColors();
+try {
+  chrome.storage
+    .sync
+    .get()
+    .then((result) => {
+      if (result) {
+        console.log(result)
+        data = Object.assign(data, result);
+        console.log('data', data)
+      }
+      updateHtmlDataThemeAttribute();
+      checkboxToggleVisible.checked = data.visibleOnly;
+
+      grabColors();
+      initListener();
+    });
+} catch(_e) {
+  grabColors();
+  initListener();
+}
+
+
 
