@@ -62,7 +62,7 @@ svg path {
     border: 1px solid var(--ge-btn-border-hover);
 }
 .hidden {
-    display: none;
+    display: none !important;
 }
 .inline {
     display: inline;
@@ -89,6 +89,7 @@ a {
     height: var(--ge-colored-div-size);
     border: 1px solid var(--ge-colored-div-border);
     border-radius: 2px;
+    cursor: pointer;
 }
 
 

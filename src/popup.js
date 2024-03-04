@@ -6,6 +6,7 @@ const btnCopyHtml = document.querySelector(".copy-html-btn");
 const btnEyeDropper = document.querySelector(".eyedropper-btn");
 const checkboxToggleVisible = document.querySelector(".visible-only-input");
 const divText = document.querySelector(".text-div");
+const divContent = document.querySelector(".content-div");
 const downLoadImgLink = document.querySelector(".download-img-a");
 
 
@@ -194,7 +195,7 @@ const renderColors = (colors) => {
   colors.forEach(color => {
     buf.push(`
         <div>
-          <div class="colored-div" style="background-color: ${color.rgba}"></div>
+          <div onclick="copyColor(this)" class="colored-div" data-color="${color.rgba}" style="background-color: ${color.rgba}"></div>
           <div class="color_box-text hex">${color.hex}</div>
           <div class="color_box-text rgb">${color.rgba}</div>
         </div>
@@ -203,6 +204,18 @@ const renderColors = (colors) => {
   buf.push(`</div>`);
   return buf.join('');
 };
+
+
+/**
+ * Copies the color value from the target element to the clipboard.
+ *
+ * @param {Event} event - The event object containing information about the event.
+ */
+function copyColor(event) {
+  const colorDiv = event.target;
+  const color = colorDiv.getAttribute('data-color');
+  navigator.clipboard.writeText(color).then(() => setLabelText(`${color} copied to clipboard.`));
+}
 
 /**
  * Function to grab colors and update the UI.
@@ -230,7 +243,7 @@ const grabColors = () => {
     ).sort((a, b) => a.sum - b.sum);
 
     currentColors = [...colors];
-    document.querySelector('.content-div').innerHTML = renderColors(colors);
+    divContent.innerHTML = renderColors(colors);
     downLoadImgLink.setAttribute('href', createColorImage(colors));
   });
 }
@@ -350,11 +363,13 @@ function initListener() {
 
 
   btnEyeDropper.addEventListener("click", async () => {
+    divContent.classList.add('hidden');
     const eyeDropper = new EyeDropper();
     eyeDropper
       .open()
       .then((result) => {
-        const color = result.sRGBHex
+        divContent.classList.remove(['hidden']);
+        const color = result.sRGBHex;
         navigator.clipboard
           .writeText(color)
           .then(() => setLabelText(`${color} copied to clipboard.`));
