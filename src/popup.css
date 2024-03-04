@@ -45,6 +45,12 @@ body {
     background-color: var(--ge-body-bg);
     color: var(--ge-body-color);
 }
+svg {
+    color: var(--ge-body-color);
+}
+svg path {
+    fill:  var(--ge-body-color);
+}
 .btn {
     border: 1px solid var(--ge-btn-border);
     border-radius: 6px;
@@ -83,4 +89,9 @@ a {
     height: var(--ge-colored-div-size);
     border: 1px solid var(--ge-colored-div-border);
     border-radius: 2px;
+}
+
+
+.margin-left-auto {
+    margin-left: auto
 }

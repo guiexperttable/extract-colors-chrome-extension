@@ -1,7 +1,7 @@
 html {
     --ge-checkbox-size: 20px;
     --ge-label-gap: 6px;
-    --ge-checkmarl-top: 4px;
+    --ge-checkmarl-top: -2px;
 }
 
 

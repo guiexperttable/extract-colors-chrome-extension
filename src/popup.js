@@ -3,10 +3,10 @@ const btnToggleTheme = document.querySelector(".toggle-theme-btn");
 const btnCopyImage = document.querySelector(".copy-img-btn");
 const btnCopyValues = document.querySelector(".copy-values-btn");
 const btnCopyHtml = document.querySelector(".copy-html-btn");
+const btnEyeDropper = document.querySelector(".eyedropper-btn");
 const checkboxToggleVisible = document.querySelector(".visible-only-input");
 const divText = document.querySelector(".text-div");
 const downLoadImgLink = document.querySelector(".download-img-a");
-
 
 
 let data = {
@@ -55,7 +55,7 @@ function isColorEqual(o1, o2) {
  * Create a color image based on an array of colors.
  *
  * @param {Array<string>} colors - An array of colors in hexadecimal notation.
-*        [
+ *        [
  *         color: {
  *           hex: '#0098db',
  *           rgba: '#0098db',
@@ -129,6 +129,20 @@ function createColorImageCanvas(colors) {
 
 
 
+function setLabelText(s, animation) {
+  divText.innerText = s;
+  if (s) {
+    if (!animation) {
+      animation = 'animate__flash';
+    }
+    divText.className = 'text-div';
+    setTimeout(()=>{
+      divText.classList.add("animate__animated");
+      divText.classList.add(animation);
+    }, 20);
+  }
+}
+
 const getUniqColors = (colors) => {
   const ret = [];
   for (const c of colors) {
@@ -155,33 +169,45 @@ const renderColors = (colors) => {
 };
 
 const grabColors = () => {
-    divText.innerText = 'Analysing...';
+  setLabelText('');
 
-    scrapColors().then(data => {
-      grabbedData = data;
-      divText.innerText = '';
-      const colors = getUniqColors(
-        data
-          .extractedColors
-          .filter(
-            item => !data.visibleOnly || item.visible
-          )
-          .map(item=>item.bgColor)
-          .concat(
-            data.extractedColors
-              .map(item=>item.color)
-          )
-      ).sort((a,b)=> a.sum - b.sum);
+  scrapColors().then(data => {
+    grabbedData = data;
+    const colors = getUniqColors(
+      data
+        .extractedColors
+        .filter(
+          item => !data.visibleOnly || item.visible
+        )
+        .map(item => item.bgColor)
+        .concat(
+          data.extractedColors
+            .map(item => item.color)
+        )
+    ).sort((a, b) => a.sum - b.sum);
 
-      currentColors = [...colors];
-      document.querySelector('.content-div').innerHTML = renderColors(colors);
-      downLoadImgLink.setAttribute('href', createColorImage(colors));
-      // console.log(data);
-    });
+    currentColors = [...colors];
+    document.querySelector('.content-div').innerHTML = renderColors(colors);
+    downLoadImgLink.setAttribute('href', createColorImage(colors));
+  });
 }
 
 
-function updateHtmlDataThemeAttribute() {
+function getSvgDarkMode() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Zm0-80q88 0 158-48.5T740-375q-20 5-40 8t-40 3q-123 0-209.5-86.5T364-660q0-20 3-40t8-40q-78 32-126.5 102T200-480q0 116 82 198t198 82Zm-10-270Z"/></svg>`;
+}
+
+function getSvgLightMode() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-360q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35Zm0 80q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Zm326-268Z"/></svg>`;
+}
+
+
+function updateHtmlDataThemeAttributeAndToggleIcon() {
+  if (data.currentTheme === 'dark') {
+    btnToggleTheme.innerHTML = getSvgDarkMode();
+  } else {
+    btnToggleTheme.innerHTML = getSvgLightMode();
+  }
   document.querySelector('html').setAttribute('data-theme', data.currentTheme);
 }
 
@@ -190,7 +216,7 @@ function initListener() {
 
   btnToggleTheme.addEventListener("click", async () => {
     data.currentTheme = data.currentTheme === 'light' ? 'dark' : 'light';
-    updateHtmlDataThemeAttribute();
+    updateHtmlDataThemeAttributeAndToggleIcon();
     storeData();
   });
 
@@ -201,7 +227,7 @@ function initListener() {
     }
     navigator.clipboard
       .writeText(buf.join('\n'))
-      .then(() => divText.innerText = `Data copied do clipboard.`);
+      .then(() => setLabelText(`Data copied to clipboard.`));
   });
 
   btnCopyHtml.addEventListener("click", async () => {
@@ -237,7 +263,7 @@ function initListener() {
       .write([new ClipboardItem({
         'text/html': new Blob([html], {type: 'text/html'})
       })])
-      .then(() => divText.innerText = `HTML copied do clipboard.`);
+      .then(() => setLabelText(`HTML copied to clipboard.`));
   });
 
   btnCopyImage.addEventListener("click", async () => {
@@ -249,8 +275,8 @@ function initListener() {
 
       // Write the data to the clipboard
       navigator.clipboard
-        .write(JSON.stringify(data, null, 0))
-        .then(() => divText.innerText = `Image copied do clipboard.`);
+        .write(data)
+        .then(() => setLabelText(`Image copied to clipboard.`));
     });
   });
 
@@ -258,6 +284,22 @@ function initListener() {
     data.visibleOnly = this.checked;
     storeData();
     grabColors();
+  });
+
+
+  btnEyeDropper.addEventListener("click", async () => {
+    const eyeDropper = new EyeDropper();
+    eyeDropper
+      .open()
+      .then((result) => {
+        const color = result.sRGBHex
+        navigator.clipboard
+          .writeText(color)
+          .then(() => setLabelText(`${color} copied to clipboard.`));
+      })
+      .catch((e) => {
+        //
+      });
   });
 }
 
@@ -273,13 +315,13 @@ try {
         data = Object.assign(data, result);
         console.log('data', data)
       }
-      updateHtmlDataThemeAttribute();
+      updateHtmlDataThemeAttributeAndToggleIcon();
       checkboxToggleVisible.checked = data.visibleOnly;
 
       grabColors();
       initListener();
     });
-} catch(_e) {
+} catch (_e) {
   grabColors();
   initListener();
 }
