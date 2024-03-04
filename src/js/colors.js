@@ -141,9 +141,9 @@ const getColors = () => {
       .querySelectorAll(element)
       .forEach(el => {
         const style = getComputedStyle(el);
-        const colorRgba = style.backgroundColor;
+        const colorRgba = style.color;
         const colorHex = rgbToHex(colorRgba);
-        const bgColorRgba = style.color;
+        const bgColorRgba = style.backgroundColor;
         const bgColorHex = rgbToHex(bgColorRgba);
         const visible = isVisible(el);
 

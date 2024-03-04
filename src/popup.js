@@ -18,6 +18,13 @@ let grabbedData = {};
 let currentColors = [];
 
 
+/**
+ * Stores data in Chrome Sync Storage.
+ *
+ * @param {any} data - The data to be stored.
+ *
+ * @return {void}
+ */
 function storeData() {
   chrome.storage.sync.set(data);
 }
@@ -68,6 +75,14 @@ function createColorImage(colors) {
   return createColorImageCanvas(colors).toDataURL('image/png');
 }
 
+/**
+ * Creates a color image canvas based on the given colors.
+ *
+ * @param {Array<Object>} colors - An array of color objects.
+ * @property {string} colors[].hex - The hexadecimal representation of the color.
+ * @property {string} colors[].rgba - The RGBA representation of the color.
+ * @return {HTMLCanvasElement} The color image canvas.
+ */
 function createColorImageCanvas(colors) {
   const canvas = document.createElement('canvas');
 
@@ -129,6 +144,13 @@ function createColorImageCanvas(colors) {
 
 
 
+/**
+ * Sets the text of a div element and applies an optional animation.
+ *
+ * @param {string} s - The text to set.
+ * @param {string} [animation] - The animation class to apply (optional).
+ * @return {void} - No return value.
+ */
 function setLabelText(s, animation) {
   divText.innerText = s;
   if (s) {
@@ -143,6 +165,12 @@ function setLabelText(s, animation) {
   }
 }
 
+/**
+ * Returns an array of unique colors from the given array of colors.
+ *
+ * @param {string[]} colors - The array of colors.
+ * @returns {string[]} - An array of unique colors.
+ */
 const getUniqColors = (colors) => {
   const ret = [];
   for (const c of colors) {
@@ -153,6 +181,14 @@ const getUniqColors = (colors) => {
   return ret;
 };
 
+/**
+ * Generates an HTML string to render a list of colors.
+ *
+ * @param {Array} colors - An array of color objects.
+ * @param {string} colors[].hex - The hexadecimal representation of the color.
+ * @param {string} colors[].rgba - The RGBA representation of the color.
+ * @returns {string} - The generated HTML string.
+ */
 const renderColors = (colors) => {
   const buf = [''];
   colors.forEach(color => {
@@ -168,10 +204,17 @@ const renderColors = (colors) => {
   return buf.join('');
 };
 
+/**
+ * Function to grab colors and update the UI.
+ *
+ * @function grabColors
+ * @returns {void}
+ */
 const grabColors = () => {
   setLabelText('');
 
   scrapColors().then(data => {
+    console.log(data);
     grabbedData = data;
     const colors = getUniqColors(
       data
@@ -193,15 +236,30 @@ const grabColors = () => {
 }
 
 
+/**
+ * Returns an SVG string representing a dark mode icon.
+ *
+ * @returns {string} The SVG string.
+ */
 function getSvgDarkMode() {
   return `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Zm0-80q88 0 158-48.5T740-375q-20 5-40 8t-40 3q-123 0-209.5-86.5T364-660q0-20 3-40t8-40q-78 32-126.5 102T200-480q0 116 82 198t198 82Zm-10-270Z"/></svg>`;
 }
 
+/**
+ * Retrieves the SVG representation of the light mode.
+ *
+ * @returns {string} The SVG representation of the light mode.
+ */
 function getSvgLightMode() {
   return `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-360q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35Zm0 80q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Zm326-268Z"/></svg>`;
 }
 
 
+/**
+ * Updates the HTML attribute 'data-theme' based on the current theme and toggles the icon on a button element.
+ *
+ * @return {undefined}
+ */
 function updateHtmlDataThemeAttributeAndToggleIcon() {
   if (data.currentTheme === 'dark') {
     btnToggleTheme.innerHTML = getSvgDarkMode();
@@ -211,6 +269,10 @@ function updateHtmlDataThemeAttributeAndToggleIcon() {
   document.querySelector('html').setAttribute('data-theme', data.currentTheme);
 }
 
+/**
+ * Attaches event listeners to various buttons and checkboxes.
+ * @return {void}
+ */
 function initListener() {
   btnOk.addEventListener("click", grabColors);
 
@@ -258,7 +320,7 @@ function initListener() {
     </body>
   </html>
   `;
-    console.log(html);
+
     navigator.clipboard
       .write([new ClipboardItem({
         'text/html': new Blob([html], {type: 'text/html'})
@@ -304,27 +366,35 @@ function initListener() {
 }
 
 
-// Go:
-try {
-  chrome.storage
-    .sync
-    .get()
-    .then((result) => {
-      if (result) {
-        console.log(result)
-        data = Object.assign(data, result);
-        console.log('data', data)
-      }
-      updateHtmlDataThemeAttributeAndToggleIcon();
-      checkboxToggleVisible.checked = data.visibleOnly;
+/**
+ * Executes the main logic of the application.
+ * Retrieves the data from chrome storage and updates the UI accordingly.
+ * Initializes the event listener and color grabbing functionality.
+ *
+ * @return {void}
+ */
+function go() {
+  try {
+    chrome.storage
+      .sync
+      .get()
+      .then((result) => {
+        if (result) {
+          data = Object.assign(data, result);
+        }
+        updateHtmlDataThemeAttributeAndToggleIcon();
+        checkboxToggleVisible.checked = data.visibleOnly;
 
-      grabColors();
-      initListener();
-    });
-} catch (_e) {
-  grabColors();
-  initListener();
+        grabColors();
+        initListener();
+      });
+  } catch (_e) {
+    grabColors();
+    initListener();
+  }
 }
 
+// Go:
+go();
 
 
