@@ -77,6 +77,27 @@ function createColorImage(colors) {
 }
 
 /**
+ * Draws a color box on a canvas context.
+ *
+ * @param {CanvasRenderingContext2D} imgContext - The canvas rendering context on which to draw the color box.
+ * @param {object} color - The color object that contains the rgba and hex values of the color.
+ * @param {number} x - The x-coordinate of the top-left corner of the color box.
+ * @param {number} y - The y-coordinate of the top-left corner of the color box.
+ * @param {number} color_box_width - The width of the color box.
+ * @param {number} color_box_height - The height of the color box.
+ */
+function drawColorBox(imgContext, color, x, y, color_box_width, color_box_height) {
+  imgContext.shadowBlur = 3;
+  imgContext.shadowColor = 'rgba(0,0,0,0.3)';
+  imgContext.fillStyle = color.rgba;
+  imgContext.fillRect(x, y, color_box_width, color_box_height);
+  imgContext.fillStyle = '#000';
+  imgContext.textAlign = 'center';
+  imgContext.fillText(color.hex, x + (color_box_width / 2), y + color_box_height + 20);
+  imgContext.fillText(color.rgba, x + (color_box_width / 2), y + color_box_height + 50);
+}
+
+/**
  * Creates a color image canvas based on the given colors.
  *
  * @param {Array<Object>} colors - An array of color objects.
@@ -86,60 +107,40 @@ function createColorImage(colors) {
  */
 function createColorImageCanvas(colors) {
   const canvas = document.createElement('canvas');
+  const numberOfColorBoxesPerRow = 4;
+  const boxWidth = 140;
+  const colorBoxHeight = 100;
+  const padding = 20;
+  const totalRows = Math.ceil(colors.length / numberOfColorBoxesPerRow);
+  const imageWidth = ((boxWidth + (padding * 2)) * numberOfColorBoxesPerRow) + (padding * 2);
+  const imageHeight = ((colorBoxHeight + (padding * 2) + 60) * totalRows) + (padding * 2);
 
-  const color_boxes_per_row = 4;
-
-  const color_box_width = 140;
-  const color_box_height = 100;
-  const color_box_padding = 20;
-  const color_rows = Math.ceil(colors.length / color_boxes_per_row);
-
-  const img_width = ((color_box_width + (color_box_padding * 2)) * color_boxes_per_row) + (color_box_padding * 2);
-  const img_height = ((color_box_height + (color_box_padding * 2) + 60) * color_rows) + (color_box_padding * 2);
-
-  canvas.height = img_height;
-  canvas.width = img_width;
-
+  window.devicePixelRatio=2;
+  canvas.height = imageHeight;
+  canvas.width = imageWidth;
   const img = canvas.getContext('2d');
 
   if (img) {
-    const imageData = img.createImageData(img_width, img_height);
-
+    const imageData = img.createImageData(imageWidth, imageHeight);
     img.putImageData(imageData, 0, 0);
-
     img.fillStyle = 'white';
-    img.fillRect(0, 0, img_width, img_height);
-
-    img.font = '14px Quicksand';
+    img.fillRect(0, 0, imageWidth, imageHeight);
+    img.font = 'bold 16pt serif';
 
     let colorCounter = 0;
-    for (let r = 0; r < color_rows; r++) {
-
-      const co_y = color_box_padding * 2 + ((((color_box_padding * 2) + color_box_height) + 60) * r);
-
-      for (let c = 0; c < color_boxes_per_row; c++) {
+    for (let r = 0; r < totalRows; r++) {
+      const co_y = padding * 2 + ((((padding * 2) + colorBoxHeight) + 60) * r);
+      for (let c = 0; c < numberOfColorBoxesPerRow; c++) {
         if (colorCounter === colors.length) {
           break;
         } else {
-          const co_x = color_box_padding * 2 + (((color_box_padding * 2) + color_box_width) * c);
-
-          img.shadowBlur = 3;
-          img.shadowColor = 'rgba(0,0,0,0.3)';
-          const color = colors[colorCounter];
-          img.fillStyle = color.rgba;
-          img.fillRect(co_x, co_y, color_box_width, color_box_height);
-
-          img.fillStyle = '#000';
-          img.textAlign = 'center';
-          img.fillText(color.hex, co_x + (color_box_width / 2), co_y + color_box_height + 20);
-          img.fillText(color.rgba, co_x + (color_box_width / 2), co_y + color_box_height + 50);
-
+          const co_x = padding * 2 + (((padding * 2) + boxWidth) * c);
+          drawColorBox(img, colors[colorCounter], co_x, co_y, boxWidth, colorBoxHeight);
           colorCounter++;
         }
       }
     }
   }
-
   return canvas;
 }
 
