@@ -1,6 +1,7 @@
 const btnOk = document.querySelector(".go-btn");
 const btnToggleTheme = document.querySelector(".toggle-theme-btn");
 const btnToggleDesignMode = document.querySelector(".toggle-designmode-btn");
+const btnCaptureScreen = document.querySelector(".capture-screen-btn");
 const btnCopyImage = document.querySelector(".copy-img-btn");
 const btnCopyValues = document.querySelector(".copy-values-btn");
 const btnCopyHtml = document.querySelector(".copy-html-btn");
@@ -325,6 +326,15 @@ function initListener() {
         btnToggleDesignMode.classList.remove('not-editable');
         btnToggleDesignMode.classList.remove('editable');
         btnToggleDesignMode.classList.add(res === 'on' ? 'editable' : 'not-editable');
+      });
+  });
+
+  btnCaptureScreen.addEventListener("click", async () => {
+    window.close();
+    captureScreen()
+      .then(res => {
+        const s = JSON.stringify(res, null, 0);
+        setLabelText(`Capture: ${s}`);
       });
   });
 
