@@ -1,3 +1,8 @@
+/**
+ * Scrapes the colors from the currently active tab using Chrome extension APIs.
+ *
+ * @returns {Promise<Array>} - A promise that resolves to an array of colors scraped from the tab.
+ */
 async function scrapColors() {
   let [tab] = await chrome.tabs.query({active: true, currentWindow: true});
 
@@ -11,6 +16,11 @@ async function scrapColors() {
 }
 
 
+/**
+ * Retrieves all CSS custom properties that have color values from the loaded style sheets.
+ *
+ * @returns {Array<Object>} An array of objects containing the rule selector, property name, and property value.
+ */
 const getColors = () => {
 
 
@@ -194,8 +204,87 @@ const getColors = () => {
     return arr.some(item => comparator(item, obj));
   }
 
+
+  /**
+   * Regular expression for validating color values.
+   *
+   * The colorRegex variable represents a regular expression that matches various color formats,
+   * including hexadecimal colors (#RRGGBB or #RGB), RGB, HSL, HWB, LAB, LCH, Oklab, Oklch color models,
+   * and their respective alpha channel variants (e.g., rgba(), hsla(), etc.).
+   *
+   * @type {RegExp}
+   * @see {@link https://developer.mozilla.org/en-US/docs/Web/CSS/color_value}
+   */
+  const colorRegex = /^(#([0-9a-fA-F]{3}){1,2}|(rgb|hsl|hwb|lab|lch|oklab|oklch)a?\((-?\d+%?,\s*){2,3}-?\d*%?\))$/;
+
+
+  /**
+   * Checks if the given value is a valid css color.
+   *
+   * @param {string} value - The value to be checked.
+   * @return {boolean} - True if the value is a valid color, false otherwise.
+   */
+  function isColor(value) {
+    return colorRegex.test(value.trim());
+  }
+
+  /**
+   * Retrieves all CSS custom properties that have color values from the loaded style sheets.
+   *
+   * @returns {Array<Object>} An array of objects containing the rule selector, property name, and property value.
+   */
+  function getCSSCustomProperties() {
+    const ret = [];
+    for (const styleSheet of document.styleSheets) {
+      if (styleSheet.href && styleSheet.href.startsWith(window.location.origin)) {
+        for (const rule of styleSheet.cssRules) {
+          if (rule instanceof CSSStyleRule) {
+            const style = rule.style;
+            for (let i = 0; i < style.length; i++) {
+              const propertyName = style[i];
+              if (propertyName.startsWith('--')) {
+                let propertyValue = style.getPropertyValue(propertyName);
+                if (isColor(propertyValue)) {
+                  ret.push({
+                    rule: rule.selectorText,
+                    propertyName,
+                    propertyValue
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return ret;
+  }
+
+  /**
+   * Retrieves all CSS custom properties as a nested map.
+   *
+   * @returns {Object} - Nested map of CSS custom properties.
+   */
+  function getCSSCustomPropertiesAsMap() {
+    const properties = getCSSCustomProperties();
+    const map = {};
+    properties.forEach(property => {
+      const { propertyName, propertyValue, rule } = property;
+      if (!map[rule]) {
+        map[rule] = {};
+      }
+      map[rule][propertyName] = propertyValue;
+    });
+    return map;
+  }
+
   
-  return {
+  const ret = {
+    cssCustomProperties: getCSSCustomPropertiesAsMap(),
     extractedColors: extractColors().sort((a, b) => (a.bgColor.sum > b.bgColor.sum) ? 1 : -1)
   };
+  if (window.location.href.includes('debug=1')) {
+    console.log(ret);
+  }
+  return ret;
 };

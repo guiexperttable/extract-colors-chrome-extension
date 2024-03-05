@@ -3,6 +3,7 @@ const btnToggleTheme = document.querySelector(".toggle-theme-btn");
 const btnCopyImage = document.querySelector(".copy-img-btn");
 const btnCopyValues = document.querySelector(".copy-values-btn");
 const btnCopyHtml = document.querySelector(".copy-html-btn");
+const btnCopyRules = document.querySelector(".copy-rules-btn");
 const btnEyeDropper = document.querySelector(".eyedropper-btn");
 const checkboxToggleVisible = document.querySelector(".visible-only-input");
 const divText = document.querySelector(".text-div");
@@ -289,6 +290,27 @@ function updateHtmlDataThemeAttributeAndToggleIcon() {
 }
 
 /**
+ * Render the CSS custom property map.
+ *
+ * @return {string} The rendered CSS custom property map as a string.
+ */
+function renderCSSCustomPropertyMap(){
+  const buf = [];
+  const map = grabbedData.cssCustomProperties;
+  let keys = Object.keys(map).sort();
+  for (const key of keys) {
+    const rules = map[key];
+    buf.push(`${key} {`);
+    let rulesKeys = Object.keys(rules).sort();
+    for (const rk of rulesKeys) {
+      buf.push('  ' + rk + ': ' + rules[rk] + ';')
+    }
+    buf.push('}');
+  }
+  return buf.join('\n');
+}
+
+/**
  * Attaches event listeners to various buttons and checkboxes.
  * @return {void}
  */
@@ -309,6 +331,12 @@ function initListener() {
     navigator.clipboard
       .writeText(buf.join('\n'))
       .then(() => setLabelText(`Data copied to clipboard.`));
+  });
+
+  btnCopyRules.addEventListener("click", async () => {
+    navigator.clipboard
+      .writeText(renderCSSCustomPropertyMap())
+      .then(() => setLabelText(`CSS color custom properties copied to clipboard.`));
   });
 
   btnCopyHtml.addEventListener("click", async () => {
@@ -336,6 +364,9 @@ function initListener() {
       <div class="content-div">
         ${box}
       </div>   
+      
+      <hr>
+      <pre>${renderCSSCustomPropertyMap()}</pre>
     </body>
   </html>
   `;
