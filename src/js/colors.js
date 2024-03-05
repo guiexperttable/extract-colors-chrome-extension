@@ -24,7 +24,31 @@ async function scrapColors() {
 const getColors = () => {
 
 
-  const elements = ['body', 'p','div','a','button','input','span','h1','h2','h3','li','ul','td'];
+  /**
+   * Represents an array of HTML elements.
+   * @type {Array<string>}
+   */
+  const elements = ['html', 'body', 'p','div','a','button','input','span','h1','h2','h3','li','ul','table','th','tr','td'];
+
+  /**
+   * Regular expression for validating color values.
+   *
+   * The colorRegex variable represents a regular expression that matches various color formats,
+   * including hexadecimal colors (#RRGGBB or #RGB), RGB, HSL, HWB, LAB, LCH, Oklab, Oklch color models,
+   * and their respective alpha channel variants (e.g., rgba(), hsla(), etc.).
+   *
+   * @type {RegExp}
+   * @see {@link https://developer.mozilla.org/en-US/docs/Web/CSS/color_value}
+   */
+  const colorRegex = /^(#([0-9a-fA-F]{3}){1,2}|(rgb|hsl|hwb|lab|lch|oklab|oklch)a?\((-?\d+%?,\s*){2,3}-?\d*%?\))$/;
+
+  /**
+   * An array containing keywords for various colors.
+   *
+   * @type {string[]}
+   */
+  const colorKeywords = ["aliceblue", "antiquewhite", "aqua", "aquamarine", "azure", "beige", "bisque", "black", "blanchedalmond", "blue", "blueviolet", "brown", "burlywood", "cadetblue", "chartreuse", "chocolate", "coral", "cornflowerblue", "cornsilk", "crimson", "cyan", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkgrey", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred", "darksalmon", "darkseagreen", "darkslateblue", "darkslategray", "darkslategrey", "darkturquoise", "darkviolet", "deeppink", "deepskyblue", "dimgray", "dimgrey", "dodgerblue", "firebrick", "floralwhite", "forestgreen", "fuchsia", "gainsboro", "ghostwhite", "gold", "goldenrod", "gray", "green", "greenyellow", "grey", "honeydew", "hotpink", "indianred", "indigo", "ivory", "khaki", "lavender", "lavenderblush", "lawngreen", "lemonchiffon", "lightblue", "lightcoral", "lightcyan", "lightgoldenrodyellow", "lightgray", "lightgreen", "lightgrey", "lightpink", "lightsalmon", "lightseagreen", "lightskyblue", "lightslategray", "lightslategrey", "lightsteelblue", "lightyellow", "lime", "limegreen", "linen", "magenta", "maroon", "mediumaquamarine", "mediumblue", "mediumorchid", "mediumpurple", "mediumseagreen", "mediumslateblue", "mediumspringgreen", "mediumturquoise", "mediumvioletred", "midnightblue", "mintcream", "mistyrose", "moccasin", "navajowhite", "navy", "oldlace", "olive", "olivedrab", "orange", "orangered", "orchid", "palegoldenrod", "palegreen", "paleturquoise", "palevioletred", "papayawhip", "peachpuff", "peru", "pink", "plum", "powderblue", "purple", "rebeccapurple", "red", "rosybrown", "royalblue", "saddlebrown", "salmon", "sandybrown", "seagreen", "seashell", "sienna", "silver", "skyblue", "slateblue", "slategray", "slategrey", "snow", "springgreen", "steelblue", "tan", "teal", "thistle", "tomato", "turquoise", "violet", "wheat", "white", "whitesmoke", "yellow", "yellowgreen"];
+
 
   /**
    * Converts a component to its hexadecimal representation.
@@ -205,18 +229,6 @@ const getColors = () => {
   }
 
 
-  /**
-   * Regular expression for validating color values.
-   *
-   * The colorRegex variable represents a regular expression that matches various color formats,
-   * including hexadecimal colors (#RRGGBB or #RGB), RGB, HSL, HWB, LAB, LCH, Oklab, Oklch color models,
-   * and their respective alpha channel variants (e.g., rgba(), hsla(), etc.).
-   *
-   * @type {RegExp}
-   * @see {@link https://developer.mozilla.org/en-US/docs/Web/CSS/color_value}
-   */
-  const colorRegex = /^(#([0-9a-fA-F]{3}){1,2}|(rgb|hsl|hwb|lab|lch|oklab|oklch)a?\((-?\d+%?,\s*){2,3}-?\d*%?\))$/;
-
 
   /**
    * Checks if the given value is a valid css color.
@@ -225,6 +237,7 @@ const getColors = () => {
    * @return {boolean} - True if the value is a valid color, false otherwise.
    */
   function isColor(value) {
+    if (colorKeywords.includes(value)) return true;
     return colorRegex.test(value.trim());
   }
 
