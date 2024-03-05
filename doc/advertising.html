@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Advertising Banner</title>
+  <style>
+    html {
+      --col-01: #ecf2f6;
+      --col-02: #0497dc;
+      --col-03: #012244;
+      --col-04: #99989a;
+      --col-05: #e00233;
+      --col-06: #ffa202;
+      --col-07: #7bb801;
+      --col-08: #56068c;
+      --col-09: #3c5997;
+    }
+    :root {
+      --color1: #ff0000; /* Red */
+      --color2: #ff4000; /* Vermilion */
+      --color3: #ff8000; /* Persimmon */
+      --color4: #ffbf00; /* Orange */
+      --color5: #ffdf00; /* Amber */
+      --color6: #ffff00; /* Yellow */
+      --color7: #bfff00; /* Lime */
+      --color8: #80ff00; /* Chartreuse */
+      --color9: #40ff00; /* Harlequin */
+      --color10: #00ff00; /* Green */
+      --color11: #00ff40; /* Emerald */
+      --color12: #00ff80; /* Spring Green */
+      --color13: #00ffbf; /* Aquamarine */
+      --color14: #00ffdf; /* Cyan */
+      --color15: #00ffff; /* Azure */
+      --color16: #00bfff; /* Cerulean */
+      --color17: #0080ff; /* Blue */
+      --color18: #0040ff; /* Sapphire */
+      --color19: #0000ff; /* Azure */
+      --color20: #4000ff; /* Blue Violet */
+      --color21: #8000ff; /* Violet */
+      --color22: #bf00ff; /* Purple */
+      --color23: #df00ff; /* Fuchsia */
+      --color24: #ff00ff; /* Magenta */
+      --color25: #ff00bf; /* Rose */
+      --color26: #ff0080; /* Cerise */
+      --color27: #ff0040; /* Persimmon */
+      --color28: #ff0000; /* Red */
+      --color29: #ff4000; /* Vermilion */
+      --color30: #ff8000; /* Persimmon */
+      --color31: #ffbf00; /* Orange */
+      --color32: #ffdf00; /* Amber */
+      --color33: #ffff00; /* Yellow */
+      --color34: #bfff00; /* Lime */
+      --color35: #80ff00; /* Chartreuse */
+      --color36: #40ff00; /* Harlequin */
+      --color37: #00ff00; /* Green */
+      --color38: #00ff40; /* Emerald */
+      --color39: #00ff80; /* Spring Green */
+      --color40: #00ffbf; /* Aquamarine */
+      --color41: #00ffdf; /* Cyan */
+      --color42: #00ffff; /* Azure */
+      --color43: #00bfff; /* Cerulean */
+      --color44: #0080ff; /* Blue */
+      --color45: #0040ff; /* Sapphire */
+      --color46: #0000ff; /* Azure */
+      --color47: #4000ff; /* Blue Violet */
+      --color48: #8000ff; /* Violet */
+      --color49: #bf00ff; /* Purple */
+      --color50: #df00ff; /* Fuchsia */
+      --color51: #ff00ff; /* Magenta */
+      --color52: #ff00bf; /* Rose */
+      --color53: #ff0080; /* Cerise */
+      --color54: #ff0040; /* Persimmon */
+      --color55: #ff0000; /* Red */
+      --color56: #ff4000; /* Vermilion */
+      --color57: #ff8000; /* Persimmon */
+      --color58: #ffbf00; /* Orange */
+      --color59: #ffdf00; /* Amber */
+      --color60: #ffff00; /* Yellow */
+      --color61: #bfff00; /* Lime */
+      --color62: #80ff00; /* Chartreuse */
+      --color63: #40ff00; /* Harlequin */
+      --color64: #00ff00; /* Green */
+      --color65: #00ff40; /* Emerald */
+      --color66: #00ff80; /* Spring Green */
+      --color67: #00ffbf; /* Aquamarine */
+      --color68: #00ffdf; /* Cyan */
+      --color69: #00ffff; /* Azure */
+      --color70: #00bfff; /* Cerulean */
+      --color71: #0080ff; /* Blue */
+      --color72: #0040ff; /* Sapphire */
+      --color73: #0000ff; /* Azure */
+      --color74: #4000ff; /* Blue Violet */
+      --color75: #8000ff; /* Violet */
+      --color76: #bf00ff; /* Purple */
+      --color77: #df00ff; /* Fuchsia */
+    }
+/*
+    :root {
+      --color1: #FF3E4D;
+      --color2: #FFC847;
+      --color3: #3CC8C7;
+      --color4: #FF847C;
+      --color5: #65CCF3;
+      --color6: #FFD647;
+      --color7: #61CC89;
+      --color8: #FFA07C;
+      --color9: #C1A1FF;
+      --color10: #83E4FF;
+      --color11: #FF7D9F;
+      --color12: #A7FFC7;
+      --color13: #F5A623;
+      --color14: #4A90E2;
+      --color15: #9B59B6;
+      --color16: #2ECC71;
+      --color17: #3498DB;
+      --color18: #E74C3C;
+      --color19: #2C3E50;
+      --color20: #1ABC9C;
+      --color21: #F1C40F;
+      --color22: #34495E;
+      --color23: #D35400;
+      --color24: #27AE60;
+      --color25: #F39C12;
+      --color26: #8E44AD;
+      --color27: #16A085;
+      --color28: #E67E22;
+      --color29: #2980B9;
+      --color30: #C0392B;
+      --color31: #7F8C8D;
+      --color32: #FF7F0E;
+      --color33: #ECF0F1;
+      --color34: #FF5733;
+      --color35: #3D9970;
+      --color36: #8D44AD;
+      --color37: #3498DB;
+      --color38: #9B59B6;
+      --color39: #27AE60;
+      --color40: #F1C40F;
+      --color41: #E74C3C;
+      --color42: #1ABC9C;
+      --color43: #E67E22;
+      --color44: #2980B9;
+      --color45: #E74C3C;
+      --color46: #3498DB;
+      --color47: #8E44AD;
+      --color48: #27AE60;
+      --color49: #F1C40F;
+      --color50: #D35400;
+      --color51: #1ABC9C;
+      --color52: #7F8C8D;
+      --color53: #F39C12;
+      --color54: #C0392B;
+      --color55: #2980B9;
+      --color56: #7F8C8D;
+      --color57: #F39C12;
+      --color58: #C0392B;
+      --color59: #2980B9;
+      --color60: #E67E22;
+      --color61: #3498DB;
+      --color62: #8E44AD;
+      --color63: #27AE60;
+      --color64: #F1C40F;
+      --color65: #D35400;
+      --color66: #1ABC9C;
+      --color67: #7F8C8D;
+      --color68: #F39C12;
+      --color69: #C0392B;
+      --color70: #2980B9;
+      --color71: #7F8C8D;
+      --color72: #F39C12;
+      --color73: #C0392B;
+      --color74: #2980B9;
+      --color75: #7F8C8D;
+      --color76: #F39C12;
+      --color77: #C0392B;
+    }
+*/
+    body {
+      padding: 50px;
+      display: grid;
+      grid-template-rows: auto;
+      gap: 50px;
+      background: #fff;
+    }
+    .box {
+      background: aliceblue;
+    }
+    .symbol {
+      width: 128px;
+      height: 128px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      grid-auto-flow: column;
+    }
+    .symbol div {
+      vertical-align: middle;
+      overflow: clip;
+      padding-top: 5px;
+      font-family: sans-serif;
+      font-size: 30px;
+      text-align: center;
+    }
+    .symbol >div:nth-child(0) { background: var(--col-01)}
+    .symbol >div:nth-child(1) { background: var(--col-02); color:#fff;}
+    .symbol >div:nth-child(2) { background: var(--col-03); color:#fff;}
+    .symbol >div:nth-child(3) { background: var(--col-04); color:#fff;}
+    .symbol >div:nth-child(4) { background: var(--col-05); color:#fff;}
+    .symbol >div:nth-child(5) { background: var(--col-06)}
+    .symbol >div:nth-child(6) { background: var(--col-07); color:#fff;}
+    .symbol >div:nth-child(7) { background: var(--col-08); color:#fff;}
+    .symbol >div:nth-child(8) { background: var(--col-09); color:#fff;}
+    .symbol svg {width: 90%; }
+
+    .bannerSmall {
+      width: 440px;
+      height: 280px;
+      display: grid;
+      grid-template-columns: repeat(11, 1fr);
+      grid-template-rows: repeat(7, 1fr);
+      grid-auto-flow: column;
+    }
+    .bannerSmall div {
+      text-align: center;
+      vertical-align: middle;
+      overflow: clip;
+      padding-top: 5px;
+      font-family: sans-serif;
+      font-size: 30px;
+      color: rgba(0,0,0, 0.5);
+    }
+
+    .banner {
+      width: 1400px;
+      height: 560px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="box symbol">
+  <div>C</div>
+  <div>O</div>
+  <div>L</div>
+  <div>O</div>
+  <div>R</div>
+  <div>S</div>
+  <div>L</div>
+  <div>S</div>
+  <div>
+    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M120-120v-190l358-358-58-56 58-56 76 76 124-124q5-5 12.5-8t15.5-3q8 0 15 3t13 8l94 94q5 6 8 13t3 15q0 8-3 15.5t-8 12.5L705-555l76 78-57 57-56-58-358 358H120Zm80-80h78l332-334-76-76-334 332v78Zm447-410 96-96-37-37-96 96 37 37Zm0 0-37-37 37 37Z"/></svg>
+  </div>
+</div>
+
+
+<div class="box bannerSmall">
+  <div>C</div>
+  <div>O</div>
+  <div>L</div>
+  <div>O</div>
+  <div>R</div>
+  <div>C</div>
+  <div>O</div>
+  <div>L</div>
+  <div>O</div>
+  <div>R</div>
+
+  <div>C</div>
+  <div>O</div>
+  <div>L</div>
+  <div>O</div>
+  <div>R</div>
+  <div>C</div>
+  <div>O</div>
+  <div>L</div>
+  <div>O</div>
+  <div>R</div>
+
+  <div>C</div>
+  <div>O</div>
+  <div>L</div>
+  <div>O</div>
+  <div>R</div>
+  <div>C</div>
+  <div>O</div>
+  <div>L</div>
+  <div>O</div>
+  <div>R</div>
+
+  <div>C</div>
+  <div>O</div>
+  <div>L</div>
+  <div>O</div>
+  <div>R</div>
+  <div>C</div>
+  <div>O</div>
+  <div>L</div>
+  <div>O</div>
+  <div>R</div>
+
+  <div>C</div>
+  <div>O</div>
+  <div>L</div>
+  <div>O</div>
+  <div>R</div>
+  <div>C</div>
+  <div>O</div>
+  <div>L</div>
+  <div>O</div>
+  <div>R</div>
+
+  <div>C</div>
+  <div>O</div>
+  <div>L</div>
+  <div>O</div>
+  <div>R</div>
+  <div>C</div>
+  <div>O</div>
+  <div>L</div>
+  <div>O</div>
+  <div>R</div>
+
+  <div>C</div>
+  <div>O</div>
+  <div>L</div>
+  <div>O</div>
+  <div>R</div>
+  <div>C</div>
+  <div>O</div>
+  <div>L</div>
+  <div>O</div>
+  <div>R</div>
+
+  <div>C</div>
+  <div>O</div>
+  <div>L</div>
+  <div>O</div>
+  <div>R</div>
+  <div>C</div>
+  <div>O</div>
+
+</div>
+<div class="box banner"></div>
+
+<script>
+  const container = document.querySelector('.bannerSmall');
+  const children = container.children;
+
+  for (let i = 0; i < children.length; i++) {
+    children[i].style.backgroundColor = `var(--color${i})`;
+  }
+</script>
+</body>
+</html>
