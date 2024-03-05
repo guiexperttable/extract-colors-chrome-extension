@@ -14,7 +14,7 @@ async function scrapColors() {
 const getColors = () => {
 
 
-  const elements = ['p','div','a','button','input','span','h1','h2','h3','li','ul','td'];
+  const elements = ['body', 'p','div','a','button','input','span','h1','h2','h3','li','ul','td'];
 
   /**
    * Converts a component to its hexadecimal representation.
@@ -178,7 +178,8 @@ const getColors = () => {
   function isEqual(o1, o2) {
     return o1.element === o2.element
       && o1.visible === o2.visible
-      && o1.color.rgba === o2.color.rgba;
+      && o1.color.rgba === o2.color.rgba
+      && o1.bgColor.rgba === o2.bgColor.rgba;
   }
 
   /**

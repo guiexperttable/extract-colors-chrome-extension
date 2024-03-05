@@ -218,7 +218,6 @@ const grabColors = () => {
   setLabelText('');
 
   scrapColors().then(data => {
-    console.log(data);
     grabbedData = data;
     const colors = getUniqColors(
       data

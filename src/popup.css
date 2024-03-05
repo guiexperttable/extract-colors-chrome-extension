@@ -21,7 +21,7 @@ html[data-theme="light"] {
     --ge-btn-border: #00b7ff;
     --ge-btn-border-hover: #00e7e7;
     --ge-colored-div-border: #000c;
-    --ge-message-color: #0098db;
+    --ge-message-color: #ec7c00;
 
     --ge-checkbox-bg : var(--ge-body-bg);
     --ge-checkbox-checked-bg : var(--ge-btn-border);
