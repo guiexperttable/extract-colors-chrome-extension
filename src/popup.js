@@ -1,5 +1,6 @@
 const btnOk = document.querySelector(".go-btn");
 const btnToggleTheme = document.querySelector(".toggle-theme-btn");
+const btnToggleDesignMode = document.querySelector(".toggle-designmode-btn");
 const btnCopyImage = document.querySelector(".copy-img-btn");
 const btnCopyValues = document.querySelector(".copy-values-btn");
 const btnCopyHtml = document.querySelector(".copy-html-btn");
@@ -196,10 +197,10 @@ const renderColors = (colors) => {
   const buf = [''];
   colors.forEach(color => {
     buf.push(`
-        <div>
+        <div class="chip">
           <div class="colored-div" data-color="${color.rgba}" style="background-color: ${color.rgba}"></div>
-          <div class="color_box-text hex">${color.hex}</div>
-          <div class="color_box-text rgb">${color.rgba}</div>
+          <div class="color-box-text hex">${color.hex}</div>
+          <div class="color-box-text rgb">${color.rgba}</div>
         </div>
       `);
   });
@@ -316,6 +317,17 @@ function renderCSSCustomPropertyMap(){
  */
 function initListener() {
   btnOk.addEventListener("click", grabColors);
+
+  btnToggleDesignMode.addEventListener("click", async () => {
+    toggleDesignMode()
+      .then(res => {
+        setLabelText(`Design mode is ${res}`);
+        btnToggleDesignMode.classList.remove('not-editable');
+        btnToggleDesignMode.classList.remove('editable');
+        btnToggleDesignMode.classList.add(res === 'on' ? 'editable' : 'not-editable');
+      });
+  });
+
 
   btnToggleTheme.addEventListener("click", async () => {
     data.currentTheme = data.currentTheme === 'light' ? 'dark' : 'light';
