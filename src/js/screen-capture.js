@@ -1,6 +1,6 @@
 async function captureScreen() {
-  const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
   try {
+    const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
     return chrome.scripting.executeScript({
       target: {tabId: tab.id},
       func: capture
@@ -22,11 +22,15 @@ async function captureScreen() {
 }
 
 const capture = async () => {
-  const pauseAfterScrolling = 1500;
+
+  const pauseAfterScrolling = 500;
   const canvasWidth = document.body.clientWidth;
   const viewportHeight = window.innerHeight;
   const canvasHeight = document.body.scrollHeight;
+
   const htmlEle = document.documentElement;
+  const scrollBehavior = htmlEle.style.scrollBehavior;
+  const overflow = htmlEle.style.overflow;
 
   function injectCursorNoneStyle() {
     const poopClowns = ":not(#💩🤡)".repeat(20);
@@ -43,7 +47,16 @@ const capture = async () => {
       .forEach(ele=>ele.remove());
   }
 
-  // let [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+  function tweakScrollStyle() {
+    htmlEle.style.scrollBehavior = 'auto'; // Quick, not smooth
+    htmlEle.style.overflow = 'hidden'; // Disable all scrollbars
+  }
+
+  function restoreScrollStyle() {
+    htmlEle.style.overflow = overflow;
+    htmlEle.style.scrollBehavior = scrollBehavior;
+  }
+
   function scroll(y) {
     return new Promise((resolve, _reject) => {
       window.scrollTo(0, y);
@@ -53,30 +66,27 @@ const capture = async () => {
     });
   }
 
-  // Tweak style for capturing:
-  injectCursorNoneStyle();
-  const scrollBehavior = htmlEle.style.scrollBehavior;
-  const overflow = htmlEle.style.overflow;
-  htmlEle.style.scrollBehavior = 'auto'; // Quick, not smooth
-  htmlEle.style.overflow = 'hidden'; // Disable all scrollbars
+  async function go() {
+    // Tweak style for capturing:
+    injectCursorNoneStyle();
+    tweakScrollStyle();
 
-  let y = 0;
-  window.scrollTo(0, 0);
-  while (y < canvasHeight) {
-    y += viewportHeight;
-    console.log('y', y)
-    await scroll(y);
+    let y = 0;
+    window.scrollTo(0, 0);
+    while (y < canvasHeight) {
+      y += viewportHeight;
+      console.log('y', y)
+      await scroll(y);
+    }
+    window.scrollTo(0, 0);
+
+    // Restore style:
+    restoreScrollStyle();
+    removeCursorNoneStyle();
   }
 
 
-  window.scrollTo(0, 0);
-
-  // Restore style:
-  htmlEle.style.overflow = overflow;
-  htmlEle.style.scrollBehavior = scrollBehavior;
-  removeCursorNoneStyle();
-
-
+  await go();
   let ret = {
     canvasWidth, viewportHeight, canvasHeight
   };
