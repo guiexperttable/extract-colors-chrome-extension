@@ -329,8 +329,22 @@ function initListener() {
       });
   });
 
+
+  async function captureVisibleTab() {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" });
+    return dataUrl;
+  }
+
   btnCaptureScreen.addEventListener("click", async () => {
     // TODO window.close(); // close popup
+    console.log('go go go...')
+    let c = await captureVisibleTab();
+    console.log(c);
+
+    let antw = await chrome.runtime.sendMessage({ message: 'Hallo vom Popup!' });
+    console.log(antw)
+
     captureScreen()
       .then(res => {
         const s = JSON.stringify(res, null, 0);
