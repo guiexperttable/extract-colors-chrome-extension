@@ -31,6 +31,7 @@ const capture = async () => {
   const htmlEle = document.documentElement;
   const scrollBehavior = htmlEle.style.scrollBehavior;
   const overflow = htmlEle.style.overflow;
+  const canvasArr = [];
 
   function injectCursorNoneStyle() {
     const poopClowns = ":not(#💩🤡)".repeat(20);
@@ -66,14 +67,84 @@ const capture = async () => {
     });
   }
 
+  function getCanvas(){
+    return canvasArr[canvasArr.length - 1];
+  }
+
+  async function captureView(/*data, canvas, ctx*/) {
+    const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+    console.log('tab', tab);
+    onsole.log('chrome.tabs: ', chrome.tabs);
+    return new Promise((resolve, reject) => {
+      try {
+        console.log('capture....', chrome.tabs); // TODO del
+        chrome.tabs.captureVisibleTab(
+          tab.windowId,
+          {format: 'png'},
+          (dataURI) => {
+            console.log('done....', dataURI); // TODO del
+            if (dataURI) {
+              resolve({
+                //data, canvas, ctx,
+                dataURI
+              });
+              // const image = new Image();
+              // image.onload =  () => {
+              //   data.image = {width: image.width, height: image.height};
+              //   ctx.drawImage(
+              //     image, 0, 0
+              //     // data.x - screenshot.left,
+              //     // data.y - screenshot.top
+              //   );
+              //
+              //   // given device mode emulation or zooming, we may end up with
+              //   // a different sized image than expected, so let's adjust to
+              //   // match it!
+              //   // if (data.windowWidth !== image.width) {
+              //   //   const scale = image.width / data.windowWidth;
+              //   //   data.x *= scale;
+              //   //   data.y *= scale;
+              //   //   data.totalWidth *= scale;
+              //   //   data.totalHeight *= scale;
+              //   // }
+              //
+              //   resolve({
+              //     data, canvas, ctx, dataURI
+              //   });
+              // }; // onload
+              // image.src = dataURI;
+
+            } else {
+              reject();
+            }
+          });
+      } catch (err) {
+        console.error(err);
+        reject(err);
+      }
+    });
+  }
+
   async function go() {
+    const dd = [];
+
     // Tweak style for capturing:
     injectCursorNoneStyle();
     tweakScrollStyle();
 
     let y = 0;
     window.scrollTo(0, 0);
+
     while (y < canvasHeight) {
+      // const canvas = document.createElement('canvas');
+      // canvasArr.push(canvas);
+      // canvas.width = canvasWidth;
+      // canvas.height = canvasHeight;
+      // const ctx = canvas.getContext("2d");
+      // let data = {};
+      // const d = await captureView(data, canvas, ctx);
+      // const d = await captureView();
+      // dd.push(d);
       y += viewportHeight;
       console.log('y', y)
       await scroll(y);
@@ -83,12 +154,13 @@ const capture = async () => {
     // Restore style:
     restoreScrollStyle();
     removeCursorNoneStyle();
+    return dd;
   }
 
 
-  await go();
+  const dd = await go();
   let ret = {
-    canvasWidth, viewportHeight, canvasHeight
+    canvasWidth, viewportHeight, canvasHeight, dataURI: dd.dataURI
   };
   console.log(ret);
   return ret;
