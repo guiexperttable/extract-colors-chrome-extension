@@ -330,7 +330,7 @@ function initListener() {
   });
 
   btnCaptureScreen.addEventListener("click", async () => {
-    window.close();
+    window.close(); // close popup
     captureScreen()
       .then(res => {
         const s = JSON.stringify(res, null, 0);
