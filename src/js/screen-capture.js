@@ -1,3 +1,103 @@
+
+
+async function executeScript(func, ...args) {
+  try {
+    const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+    return chrome.scripting.executeScript({
+      target: {tabId: tab.id},
+      func: func,
+      args: [...args]
+    })
+      .then((res) => {
+        if (res) {
+          return res[0].result;
+        }
+        return 'Error';
+      })
+  } catch (err) {
+    console.error(`Failed to execute script: ${err}`);
+  }
+}
+
+async function getScreenDimensions() {
+  return executeScript(() => {
+    const canvasWidth = document.body.clientWidth;
+    const viewportHeight = window.innerHeight;
+    const canvasHeight = document.body.scrollHeight;
+    return {
+      canvasWidth, canvasHeight, viewportHeight
+    };
+  });
+}
+
+async function tweakScrollStyle() {
+  return executeScript(() => {
+    // inject 'cursor:none' style:
+    const poopClowns = ":not(#💩🤡)".repeat(20);
+    const cssRules = `${poopClowns} {cursor: none !important}`;
+    const styleElement = document.createElement('style');
+    styleElement.setAttribute('data-todo', 'remove');
+    styleElement.appendChild(document.createTextNode(cssRules));
+    document.head.appendChild(styleElement);
+
+    // tweak scroll style:
+    const htmlEle = document.documentElement;
+    const scrollBehavior = htmlEle.style.scrollBehavior;
+    const overflow = htmlEle.style.overflow;
+    htmlEle.style.scrollBehavior = 'auto'; // Quick, not smooth
+    htmlEle.style.overflow = 'hidden'; // Disable all scrollbars
+    return {
+      scrollBehavior,
+      overflow
+    };
+  });
+}
+
+async function restoreScrollStyle(style) {
+  return executeScript((style) => {
+    const htmlEle = document.documentElement;
+    for (const styleKey in style) {
+      htmlEle.style[styleKey] = style[styleKey];
+    }
+  });
+}
+
+/*
+async function getScreenDimensions2() {
+  try {
+    const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+    return chrome.scripting.executeScript({
+      target: {tabId: tab.id},
+      func: () => {
+        const canvasWidth = document.body.clientWidth;
+        const viewportHeight = window.innerHeight;
+        const canvasHeight = document.body.scrollHeight;
+        return {
+          canvasWidth,
+          canvasHeight,
+          viewportHeight
+        };
+      }
+    })
+      .then((res) => {
+        if (res) {
+          return res[0].result;
+        }
+        return 'Error';
+      })
+  } catch (err) {
+    console.error(`failed to execute script: ${err}`);
+  }
+}
+*/
+async function scrollToYPos(yPos) {
+  return executeScript((yPos) => {
+    window.scrollTo(0, yPos);
+  }, yPos);
+}
+
+
+/*
 async function captureScreen() {
   try {
     const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
@@ -8,10 +108,6 @@ async function captureScreen() {
     })
       .then((res) => {
         if (res) {
-          if (res.error) {
-            console.error(res.error);
-            return res.error;
-          }
           return res[0].result;
         }
         return 'Error';
@@ -20,6 +116,8 @@ async function captureScreen() {
     console.error(`failed to execute script: ${err}`);
   }
 }
+*/
+
 
 const capture = async () => {
 
@@ -67,9 +165,9 @@ const capture = async () => {
     });
   }
 
-  function getCanvas(){
-    return canvasArr[canvasArr.length - 1];
-  }
+  // function getCanvas(){
+  //   return canvasArr[canvasArr.length - 1];
+  // }
 
 
   async function go() {
@@ -95,12 +193,12 @@ const capture = async () => {
   }
 
 
-  const dd = await go();
-  let ret = {
-    canvasWidth, viewportHeight, canvasHeight, dataURI: dd.dataURI
-  };
-  console.log(ret);
-  return ret;
+  // const dd = await go();
+  // let ret = {
+  //   canvasWidth, viewportHeight, canvasHeight, dataURI: dd.dataURI
+  // };
+  // console.log(ret);
+  // return ret;
 };
 
 

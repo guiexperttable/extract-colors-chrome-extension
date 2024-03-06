@@ -336,20 +336,48 @@ function initListener() {
     return dataUrl;
   }
 
+  async function wait(ms){
+    return new Promise((resolve, _reject)=> setTimeout(resolve, ms));
+  }
+
   btnCaptureScreen.addEventListener("click", async () => {
-    // TODO window.close(); // close popup
+    // window.close(); // close popup
+    // chrome.windows.getCurrent (currentWindow => {
+    //   chrome.windows.update(currentWindow.id, {  width: 25, height: 25  });
+    // });
+    //
     console.log('go go go...')
     let c = await captureVisibleTab();
     console.log(c);
 
-    let antw = await chrome.runtime.sendMessage({ message: 'Hallo vom Popup!' });
-    console.log(antw)
+    // window.close();
+    // setTimeout(async () => {
+    //   const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+    //   const a = await chrome.runtime.sendMessage({action: 'GET_DIM', tabId: tab.id});
+    //   console.log('popup ', a);
+    // }, 400);
 
-    captureScreen()
-      .then(res => {
-        const s = JSON.stringify(res, null, 0);
-        setLabelText(`Capture: ${s}`);
-      });
+
+    const { canvasWidth, canvasHeight, viewportHeight } = await getScreenDimensions();
+    console.log('popup dim:', { canvasWidth, canvasHeight, viewportHeight });
+
+    const oldStyles = await tweakScrollStyle();
+    let y = 0;
+    await scrollToYPos(0);
+    while (y < canvasHeight) {
+      y += viewportHeight;
+      console.log('scrolled. Now:  y', y);
+      await wait(500);
+      await scrollToYPos(y);
+    }
+    await scrollToYPos(0);
+    await restoreScrollStyle(oldStyles);
+
+    // captureScreen()
+    //   .then(res => {
+    //     const s = JSON.stringify(res, null, 0);
+    //     setLabelText(`Capture: ${s}`);
+    //   });
   });
 
 
