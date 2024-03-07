@@ -118,7 +118,7 @@ function createColorImageCanvas(colors) {
   const imageWidth = ((boxWidth + (padding * 2)) * numberOfColorBoxesPerRow) + (padding * 2);
   const imageHeight = ((colorBoxHeight + (padding * 2) + 60) * totalRows) + (padding * 2);
 
-  window.devicePixelRatio=2;
+  window.devicePixelRatio = 2;
   canvas.height = imageHeight;
   canvas.width = imageWidth;
   const img = canvas.getContext('2d');
@@ -148,7 +148,6 @@ function createColorImageCanvas(colors) {
 }
 
 
-
 /**
  * Sets the text of a div element and applies an optional animation.
  *
@@ -163,7 +162,7 @@ function setLabelText(s, animation) {
       animation = 'animate__flash';
     }
     divText.className = 'text-div';
-    setTimeout(()=>{
+    setTimeout(() => {
       divText.classList.add("animate__animated");
       divText.classList.add(animation);
     }, 20);
@@ -210,7 +209,6 @@ const renderColors = (colors) => {
 };
 
 
-
 /**
  * Function to grab colors and update the UI.
  *
@@ -239,8 +237,8 @@ const grabColors = () => {
     divContent.innerHTML = renderColors(colors);
     divContent
       .querySelectorAll('div[data-color]')
-      .forEach(ele=>
-        ele.addEventListener('click', ()=> copyColor(ele))
+      .forEach(ele =>
+        ele.addEventListener('click', () => copyColor(ele))
       );
     downLoadImgLink.setAttribute('href', createColorImage(colors));
   });
@@ -258,7 +256,6 @@ function copyColor(colorDiv) {
 }
 
 
-
 /**
  * Updates the HTML attribute 'data-theme' based on the current theme and toggles the icon on a button element.
  *
@@ -267,7 +264,7 @@ function copyColor(colorDiv) {
 function updateHtmlDataThemeAttributeAndToggleIcon() {
   btnToggleTheme.classList.remove('if');
   btnToggleTheme.classList.remove('else');
-  btnToggleTheme.classList.add((data.currentTheme === 'dark')?'if': 'else');
+  btnToggleTheme.classList.add((data.currentTheme === 'dark') ? 'if' : 'else');
 
   document.querySelector('html').setAttribute('data-theme', data.currentTheme);
 }
@@ -277,7 +274,7 @@ function updateHtmlDataThemeAttributeAndToggleIcon() {
  *
  * @return {string} The rendered CSS custom property map as a string.
  */
-function renderCSSCustomPropertyMap(){
+function renderCSSCustomPropertyMap() {
   const buf = [];
   const map = grabbedData.cssCustomProperties;
   let keys = Object.keys(map).sort();
@@ -313,60 +310,64 @@ function initListener() {
 
 
   async function captureVisibleTab() {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" });
-    return dataUrl;
+    const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+    return await chrome.tabs.captureVisibleTab(tab.windowId, {format: "png"});
   }
 
-  async function wait(ms){
-    return new Promise((resolve, _reject)=> setTimeout(resolve, ms));
+  async function wait(ms) {
+    return new Promise((resolve, _reject) => setTimeout(resolve, ms));
   }
 
 
   btnCaptureScreen.addEventListener("click", async () => {
-    const ret = [];
-    // window.close(); // close popup
-    // chrome.windows.getCurrent (currentWindow => {
-    //   chrome.windows.update(currentWindow.id, {  width: 25, height: 25  });
-    // });
-    //
-    console.log('go go go...')
 
+    function loadImageAsync(url) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = url;
+      });
+    }
 
-    // window.close();
-    // setTimeout(async () => {
-    //   const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
-    //   const a = await chrome.runtime.sendMessage({action: 'GET_DIM', tabId: tab.id});
-    //   console.log('popup ', a);
-    // }, 400);
-
-
-    const { canvasWidth, canvasHeight, viewportHeight } = await getScreenDimensions();
-    console.log('popup dim:', { canvasWidth, canvasHeight, viewportHeight });
-
+    divContent.innerHTML = 'Capturing...';
+    const imgUris = [];
+    const {canvasWidth, canvasHeight, viewportHeight} = await getScreenDimensions();
     const oldStyles = await tweakScrollStyle();
+
     let y = 0;
     await scrollToYPos(0);
+    let i = 0;
+    const captureCountMax = Math.floor(canvasHeight / viewportHeight + 0.9999);
     while (y < canvasHeight) {
-      let c = await captureVisibleTab();
-      ret.push({
-        imgUrl: c
-      });
-      console.log(c);
+      let imgURI = await captureVisibleTab();
+      divContent.innerHTML = `Capturing...${++i}/${captureCountMax}`;
+      imgUris.push(imgURI);
       y += viewportHeight;
-      console.log('scrolled. Now:  y', y);
-      await wait(500);
+      await wait(500); // because of MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND quota
       await scrollToYPos(y);
     }
     await scrollToYPos(0);
     await restoreScrollStyle(oldStyles);
 
-    // captureScreen()
-    //   .then(res => {
-    //     const s = JSON.stringify(res, null, 0);
-    //     setLabelText(`Capture: ${s}`);
-    //   });
-    return ret;
+    const canvas = document.createElement("canvas");
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    const ctx = canvas.getContext("2d");
+    divContent.innerHTML = '';
+
+    for (let i = 0; i < imgUris.length; i++) {
+      const img = await loadImageAsync(imgUris[i]);
+      let dy = i * viewportHeight;
+      if (i === imgUris.length - 1) {
+        dy = canvasHeight - viewportHeight;
+      }
+      ctx.drawImage(img, 0, dy, img.width, img.height);
+      ctx.save();
+    }
+    const dataUrl = canvas.toDataURL();
+    chrome.tabs.create({ url: dataUrl, active:true, selected: true});
+    return dataUrl;
   });
 
 

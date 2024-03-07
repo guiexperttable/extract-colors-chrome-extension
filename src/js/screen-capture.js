@@ -53,13 +53,13 @@ async function tweakScrollStyle() {
   });
 }
 
-async function restoreScrollStyle(style) {
-  return executeScript((style) => {
-    const htmlEle = document.documentElement;
-    for (const styleKey in style) {
-      htmlEle.style[styleKey] = style[styleKey];
-    }
-  });
+async function restoreScrollStyle(oldStyles) {
+  for (const styleKey in oldStyles) {
+    await executeScript((k,s) => {
+      const htmlEle = document.documentElement;
+      htmlEle.style[k] = s;
+    }, styleKey, oldStyles[styleKey]);
+  }
 }
 
 /*
@@ -181,7 +181,6 @@ const capture = async () => {
     window.scrollTo(0, 0);
     while (y < canvasHeight) {
       y += viewportHeight;
-      console.log('y', y)
       await scroll(y);
     }
     window.scrollTo(0, 0);
@@ -191,14 +190,6 @@ const capture = async () => {
     removeCursorNoneStyle();
     return dd;
   }
-
-
-  // const dd = await go();
-  // let ret = {
-  //   canvasWidth, viewportHeight, canvasHeight, dataURI: dd.dataURI
-  // };
-  // console.log(ret);
-  // return ret;
 };
 
 
