@@ -162,7 +162,7 @@ a {
 }
 
 
-[popover].popover-open {
+*:hover > [popover] {
     display: block;
 }
 

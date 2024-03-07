@@ -298,26 +298,6 @@ function renderCSSCustomPropertyMap(){
  * @return {void}
  */
 function initListener() {
-  document
-    .querySelectorAll('[popovertarget]')
-    .forEach(ele => ele
-      .addEventListener('mouseover', ()=> {
-        const popovertarget = ele.getAttribute('popovertarget');
-        console.log('mouseover', popovertarget)
-        if (popovertarget) {
-          document.getElementById(popovertarget).classList.add('popover-open');
-        }
-      }));
-  document
-    .querySelectorAll('[popovertarget]')
-    .forEach(ele => ele
-      .addEventListener('mouseout', ()=> {
-        const popovertarget = ele.getAttribute('popovertarget');
-        if (popovertarget) {
-          document.getElementById(popovertarget).classList.remove('popover-open');
-
-        }
-      }));
 
   btnOk.addEventListener("click", grabColors);
 
