@@ -74,6 +74,7 @@ svg path {
     align-items: center;
     justify-content: flex-start;
     gap: 16px;
+    position: relative;
 }
 a {
     color: var(--ge-btn-border);
@@ -120,3 +121,32 @@ a {
 .not-editable .not-hidden-when-editable {display: none;}
 .editable .hidden-when-editable {display: none;}
 .editable .not-hidden-when-editable {display: block;}
+
+.if .display-when-if {display: block;}
+.if .display-when-else {display: none;}
+.else .display-when-if {display: none;}
+.else .display-when-else {display: block;}
+
+
+
+button {
+    cursor: pointer;
+}
+
+[popover] {
+    display: none;
+    position: absolute;
+    background-color: rgba(0,0,0, 0.5);
+    color: #fff;
+    border: 1px solid #000;
+    border-radius: 4px;
+    padding: 10px;
+    z-index: 9999;
+    top: 35px;
+}
+
+
+[popover].popover-open {
+    display: block;
+}
+
