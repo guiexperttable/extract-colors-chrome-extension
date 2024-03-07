@@ -4,6 +4,7 @@ html[data-theme="dark"] {
     --ge-body-bg: #000;
     --ge-body-color: #fff;
     --ge-btn-border: #00b7ff;
+    --ge-btn-border-secondary: #e00034;
     --ge-btn-border-hover: cyan;
     --ge-colored-div-border: #fffc;
     --ge-message-color: #00e004;
@@ -19,6 +20,7 @@ html[data-theme="light"] {
     --ge-body-bg: #fff;
     --ge-body-color: #000;
     --ge-btn-border: #00b7ff;
+    --ge-btn-border-secondary: #ff7b7b;
     --ge-btn-border-hover: #00e7e7;
     --ge-colored-div-border: #000c;
     --ge-message-color: #ec7c00;
@@ -59,6 +61,16 @@ svg path {
     display: grid;
     align-content: center;
     padding: 4px 8px;
+    cursor: pointer;
+}
+.color-label,
+.tools-label{
+    position: absolute;
+    top: -10px;
+    z-index: 9999;
+}
+.btn.secondary {
+    border: 1px solid var(--ge-btn-border-secondary);
 }
 .btn:hover {
     border: 1px solid var(--ge-btn-border-hover);
@@ -70,11 +82,18 @@ svg path {
     display: inline;
 }
 .actions-div {
+    padding-top: 16px;
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 16px;
+    gap: 10px;
     position: relative;
+}
+.tools-label {
+    color: var(--ge-btn-border);
+}
+.color-label {
+    color: var(--ge-btn-border-secondary);
 }
 a {
     color: var(--ge-btn-border);
@@ -129,9 +148,6 @@ a {
 
 
 
-button {
-    cursor: pointer;
-}
 
 [popover] {
     display: none;
