@@ -14,6 +14,11 @@ html[data-theme="dark"] {
     --ge-checkbox-hover-bg : var(--ge-btn-border-hover);
     --ge-checkbox-border : var(--ge-btn-border);
     --ge-checkbox-marker : var(--ge-body-color);
+
+
+    --popover-bg: transparent;
+    --popover-color: #fff;
+    --popover-border: transparent;
 }
 
 html[data-theme="light"] {
@@ -30,6 +35,10 @@ html[data-theme="light"] {
     --ge-checkbox-hover-bg : var(--ge-btn-border-hover);
     --ge-checkbox-border : var(--ge-btn-border);
     --ge-checkbox-marker : var(--ge-body-color);
+
+    --popover-bg: rgba(0,0,0, 0.5);
+    --popover-color: #fff;
+    --popover-border: #000;
 }
 
 html {
@@ -152,9 +161,9 @@ a {
 [popover] {
     display: none;
     position: absolute;
-    background-color: rgba(0,0,0, 0.5);
-    color: #fff;
-    border: 1px solid #000;
+    background-color: var(--popover-bg);
+    color: var(--popover-color);
+    border: 1px solid var(--popover-border);
     border-radius: 4px;
     padding: 10px;
     z-index: 9999;
