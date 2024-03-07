@@ -336,19 +336,22 @@ function initListener() {
     const oldStyles = await tweakScrollStyle();
 
     let y = 0;
-    await scrollToYPos(0);
+    const scrollEle = await scrollToYPos(0);
+
     let i = 0;
     const captureCountMax = Math.floor(canvasHeight / viewportHeight + 0.9999);
     while (y < canvasHeight) {
+      await wait(500); // because of MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND quota
       let imgURI = await captureVisibleTab();
       divContent.innerHTML = `Capturing...${++i}/${captureCountMax}`;
       imgUris.push(imgURI);
       y += viewportHeight;
-      await wait(500); // because of MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND quota
+      // await wait(1500); // because of MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND quota
       await scrollToYPos(y);
     }
     await scrollToYPos(0);
     await restoreScrollStyle(oldStyles);
+    await wait(500); // because of MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND quota
 
     const canvas = document.createElement("canvas");
     canvas.width = canvasWidth;
@@ -358,6 +361,7 @@ function initListener() {
 
     for (let i = 0; i < imgUris.length; i++) {
       const img = await loadImageAsync(imgUris[i]);
+      // await chrome.tabs.create({ url: imgUris[i], active:false, selected: false});
       let dy = i * viewportHeight;
       if (i === imgUris.length - 1) {
         dy = canvasHeight - viewportHeight;
@@ -366,8 +370,11 @@ function initListener() {
       ctx.save();
     }
     const dataUrl = canvas.toDataURL();
-    chrome.tabs.create({ url: dataUrl, active:true, selected: true});
-    return dataUrl;
+    await chrome.tabs.create({ url: dataUrl, active:true, selected: true});
+    console.log({
+      dataUrl,
+      imgUris
+    });
   });
 
 
