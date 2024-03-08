@@ -1,5 +1,5 @@
 const CaptureUtil = (() => {
-
+  const CAPTURE_MSG_KEY = 'capture';
   const CAPTURE_STEP_DELAY = 200;
   const MAXIMUM_HEIGHT = 15000 * 2;
   const MAXIMUM_WIDTH = 4000 * 2;
@@ -164,7 +164,7 @@ const CaptureUtil = (() => {
   async function writeToFile(fileEntry, blob, onError) {
     try {
       const fileWriter = await new Promise((resolve, reject) => fileEntry.createWriter(resolve, reject));
-      fileWriter.onwriteend = () => console.log('File write completed');
+      fileWriter.onwriteend = () => {};
       fileWriter.write(blob);
     } catch (err) {
       onError(`Error occurred while writing to file. ${err}`)
@@ -240,7 +240,7 @@ const CaptureUtil = (() => {
     }
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-      if (request.msg === 'capture') {
+      if (request.msg === CAPTURE_MSG_KEY) {
         progress(request.complete);
         capture(request, screenshots, sendResponse, splitnotifier);
         return true;
