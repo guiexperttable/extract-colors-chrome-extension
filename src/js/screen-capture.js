@@ -282,26 +282,19 @@ const CaptureUtil = (() => {
   }
 
 
+  async function saveBlobs(blobs, filename) {
+    const filenames = [];
+    for (const [index, blob] of blobs.entries()) {
+      const fn = await saveBlob(blob, filename, index);
+      filenames.push(fn);
+    }
+    return filenames;
+  }
+
   function captureToFiles(tab, filename, onCompleted, onError, onProgress, omSplitting) {
-    captureToBlobs(tab, blobs => {
-      let i = 0;
-      const len = blobs.length, filenames = [];
-
-      (async function doNext() {
-        const fn = await saveBlob(blobs[i], filename, i)
-        i++;
-        filenames.push(fn);
-        i >= len ? onCompleted(filenames) : await doNext();
-        //   .then(
-        //   filename => {
-        //     i++;
-        //     filenames.push(filename);
-        //     i >= len ? onCompleted(filenames) : doNext();
-        //   },
-        //   onError
-        // );
-      })();
-
+    captureToBlobs(tab, async blobs => {
+      const filenames = await saveBlobs(blobs, filename);
+      onCompleted(filenames);
     }, onError, onProgress, omSplitting);
   }
 
