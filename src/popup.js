@@ -365,7 +365,7 @@ let resultWindowId ;
     const errorHandler = console.error;
     const progress = console.log;
     const splitnotifier = console.warn;
-    CaptureAPI.captureToFiles(tab, 'test-capture', displayCaptures, errorHandler, progress, splitnotifier);
+    CaptureUtil.captureToFiles(tab, 'test-capture', displayCaptures, errorHandler, progress, splitnotifier);
   });
 
 
