@@ -17,7 +17,7 @@ const progressNumberFormat = new Intl.NumberFormat('en-EN', { maximumSignificant
 
 
 let data = {
-  currentTheme: 'dark',
+  currentTheme: 'light',
   visibleOnly: true
 };
 
