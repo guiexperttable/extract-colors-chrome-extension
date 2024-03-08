@@ -137,25 +137,27 @@ const CaptureUtil = (() => {
   }
 
 
+  function createByteBufferFromDataURI(dataURI) {
+    const byteString = atob(dataURI.split(',')[1]);
+    const byteBuffer = new ArrayBuffer(byteString.length);
+    const intArray = new Uint8Array(byteBuffer);
+    for (let i = 0; i < byteString.length; i++) {
+      intArray[i] = byteString.charCodeAt(i);
+    }
+
+    return byteBuffer;
+  }
+
+  function getMimeType(dataURI) {
+    return dataURI.split(',')[0].split(':')[1].split(';')[0];
+  }
+
   function getBlobs(screenshots) {
     return screenshots.map(screenshot => {
       const dataURI = screenshot.canvas.toDataURL();
-
-      // convert base64 to raw binary data held in a string doesn't handle URLEncoded DataURIs
-      const byteString = atob(dataURI.split(',')[1]);
-
-      // separate out the mime component
-      const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-
-      // write the bytes of the string to an ArrayBuffer
-      const ab = new ArrayBuffer(byteString.length);
-      const ia = new Uint8Array(ab);
-      for (let i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-      }
-
-      // create a blob for writing to a file
-      return new Blob([ab], {type: mimeString});
+      const byteBuffer = createByteBufferFromDataURI(dataURI);
+      const mimeString = getMimeType(dataURI);
+      return new Blob([byteBuffer], {type: mimeString});
     });
   }
 
@@ -164,19 +166,30 @@ const CaptureUtil = (() => {
   const reqFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
 
 // Extracted functions
-  function writeToFile(fileEntry, blob, onwriteend, errback) {
-    fileEntry.createWriter(fileWriter => {
-      fileWriter.onwriteend = onwriteend;
+//   function writeToFile(fileEntry, blob, onwriteend, errback) {
+//     fileEntry.createWriter(fileWriter => {
+//       fileWriter.onwriteend = onwriteend;
+//       fileWriter.write(blob);
+//     }, errback);
+//   }
+  async function writeToFile(fileEntry, blob, onError) {
+    try {
+      const fileWriter = await new Promise((resolve, reject) => fileEntry.createWriter(resolve, reject));
+      fileWriter.onwriteend = () => console.log('File write completed');
       fileWriter.write(blob);
-    }, errback);
+    } catch(err) {
+      onError(`Error occurred while writing to file. ${err}`)
+      console.error("Error occurred while writing to file: ", err);
+    }
   }
 
-  function requestFileSystemAndWrite(blob, filename, size, onwriteend, errback) {
+  function requestFileSystemAndWrite(blob, filename, size, onwriteend, onError) {
     reqFileSystem(window.TEMPORARY, size, fs => {
-      fs.root.getFile(filename, {create: true}, fileEntry => {
-        writeToFile(fileEntry, blob, onwriteend, errback);
-      }, errback);
-    }, errback);
+      fs.root.getFile(filename, {create: true}, async fileEntry => {
+        await writeToFile(fileEntry, blob, onError);
+        onwriteend();
+      }, onError);
+    }, onError);
   }
 
   // Updated `saveBlob` function
