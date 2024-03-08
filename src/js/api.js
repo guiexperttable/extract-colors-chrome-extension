@@ -4,9 +4,8 @@ const CaptureUtil = (() => {
   const MAXIMUM_HEIGHT = 15000 * 2;
   const MAXIMUM_WIDTH = 4000 * 2;
   const MAXIMUM_AREA = MAXIMUM_HEIGHT * MAXIMUM_WIDTH;
-  const URL_PATTERNS = ['http://*/*', 'https://*/*', 'ftp://*/*', 'file://*/*'];
+  const ALLOWED_URL_PATTERNS = ['http://*/*', 'https://*/*', 'ftp://*/*', 'file://*/*'];
   const DISALLOWED_URL_REGEX = [/^https?:\/\/chrome.google.com\/.*$/];
-
 
 
   function isURLAllowed(url) {
@@ -16,8 +15,8 @@ const CaptureUtil = (() => {
         return false;
       }
     }
-    for (index = URL_PATTERNS.length - 1; index >= 0; index--) {
-      regExp = new RegExp('^' + URL_PATTERNS[index].replace(/\*/g, '.*') + '$');
+    for (index = ALLOWED_URL_PATTERNS.length - 1; index >= 0; index--) {
+      regExp = new RegExp('^' + ALLOWED_URL_PATTERNS[index].replace(/\*/g, '.*') + '$');
       if (regExp.test(url)) {
         return true;
       }
@@ -35,78 +34,76 @@ const CaptureUtil = (() => {
     return new Promise((resolve, _reject) => setTimeout(resolve, ms));
   }
 
+  function adjustToScale(data, image) {
+    const scale = image.width / data.windowWidth;
+    data.x *= scale;
+    data.y *= scale;
+    data.totalWidth *= scale;
+    data.totalHeight *= scale;
+  }
+
+  function initializeScreenshots(data, screenshots, splitnotifier) {
+    Array.prototype.push.apply(screenshots, initScreenshots(data.totalWidth, data.totalHeight));
+    if (screenshots.length > 1 && splitnotifier) {
+      splitnotifier();
+      console.log('screen count:', screenshots.length);
+    }
+  }
+
+  function processImage(data, image, screenshots, splitnotifier, sendResponse) {
+    data.image = {width: image.width, height: image.height};
+
+    if (data.windowWidth !== image.width) {
+      adjustToScale(data, image);
+    }
+
+    if (!screenshots.length) {
+      initializeScreenshots(data, screenshots, splitnotifier);
+    }
+
+    filterScreenshots(data.x, data.y, image.width, image.height, screenshots).forEach(screenshot => {
+      screenshot.ctx.drawImage(image, data.x - screenshot.left, data.y - screenshot.top);
+    });
+
+    sendResponse(JSON.stringify(data, null, 4) || true);
+  }
+
   async function capture(data, screenshots, sendResponse, splitnotifier) {
     await wait(CAPTURE_STEP_DELAY);
-    chrome.tabs.captureVisibleTab(null, {format: 'png'}, dataURI => {
-      if (dataURI) {
-        const image = new Image();
-        image.onload = () => {
-          data.image = {width: image.width, height: image.height};
 
-          // given device mode emulation or zooming, we may end up with
-          // a different sized image than expected, so let's adjust to
-          // match it!
-          if (data.windowWidth !== image.width) {
-            const scale = image.width / data.windowWidth;
-            data.x *= scale;
-            data.y *= scale;
-            data.totalWidth *= scale;
-            data.totalHeight *= scale;
-          }
-
-          // lazy initialization of screenshot canvases (since we need to wait
-          // for actual image size)
-          if (!screenshots.length) {
-            Array.prototype.push.apply(screenshots, _initScreenshots(data.totalWidth, data.totalHeight));
-            if (screenshots.length > 1) {
-              if (splitnotifier) {
-                splitnotifier();
-              }
-              // TODO $('screenshot-count').innerText = screenshots.length;
-              console.log('screen count:', screenshots.length);
-            }
-          }
-
-          // draw it on matching screenshot canvases
-          _filterScreenshots(data.x, data.y, image.width, image.height, screenshots).forEach(screenshot => {
-            screenshot.ctx.drawImage(image, data.x - screenshot.left, data.y - screenshot.top);
-          });
-
-          // send back log data for debugging (but keep it truthy to
-          // indicate success)
-          sendResponse(JSON.stringify(data, null, 4) || true);
-        };
-        image.src = dataURI;
-      }
-    });
+    const dataURI = await chrome.tabs.captureVisibleTab(null, {format: 'png'});
+    if (dataURI) {
+      const image = new Image();
+      image.onload = () => processImage(data, image, screenshots, splitnotifier, sendResponse);
+      image.src = dataURI;
+    }
   }
 
 
-  function _initScreenshots(totalWidth, totalHeight) {
-    // Create and return an array of screenshot objects based
-    // on the `totalWidth` and `totalHeight` of the final image.
-    // We have to account for multiple canvases if too large,
-    // because Chrome won't generate an image otherwise.
-    //
-    const badSize = (totalHeight > MAXIMUM_HEIGHT || totalWidth > MAXIMUM_HEIGHT || totalHeight * totalWidth > MAXIMUM_AREA),
-      biggerWidth = totalWidth > totalHeight,
-      maxWidth = (!badSize ? totalWidth : (biggerWidth ? MAXIMUM_HEIGHT : MAXIMUM_WIDTH)),
-      maxHeight = (!badSize ? totalHeight : (biggerWidth ? MAXIMUM_WIDTH : MAXIMUM_HEIGHT)),
-      numCols = Math.ceil(totalWidth / maxWidth), numRows = Math.ceil(totalHeight / maxHeight);
-    let row, col, canvas, left, top;
+  function initScreenshots(totalWidth, totalHeight) {
+    const badSize = (totalHeight > MAXIMUM_HEIGHT || totalWidth > MAXIMUM_HEIGHT || totalHeight * totalWidth > MAXIMUM_AREA);
+    const biggerWidth = totalWidth > totalHeight;
 
-    let canvasIndex = 0;
+    const maxWidth = (!badSize ? totalWidth : (biggerWidth ? MAXIMUM_HEIGHT : MAXIMUM_WIDTH));
+    const maxHeight = (!badSize ? totalHeight : (biggerWidth ? MAXIMUM_WIDTH : MAXIMUM_HEIGHT));
+
+    const numCols = Math.ceil(totalWidth / maxWidth);
+    const numRows = Math.ceil(totalHeight / maxHeight);
+
+    return createSplitCanvases(numRows, numCols, maxWidth, maxHeight, totalWidth, totalHeight);
+  }
+
+  function createSplitCanvases(numRows, numCols, maxWidth, maxHeight, totalWidth, totalHeight) {
     const result = [];
+    let canvasIndex = 0;
 
-    for (row = 0; row < numRows; row++) {
-      for (col = 0; col < numCols; col++) {
-        canvas = document.createElement('canvas');
-        canvas.width = (col == numCols - 1 ? totalWidth % maxWidth || maxWidth : maxWidth);
-        canvas.height = (row == numRows - 1 ? totalHeight % maxHeight || maxHeight : maxHeight);
-
-        left = col * maxWidth;
-        top = row * maxHeight;
-
+    for (let row = 0; row < numRows; row++) {
+      for (let col = 0; col < numCols; col++) {
+        const canvas = document.createElement('canvas');
+        canvas.width = (col === numCols - 1 ? totalWidth % maxWidth || maxWidth : maxWidth);
+        canvas.height = (row === numRows - 1 ? totalHeight % maxHeight || maxHeight : maxHeight);
+        const left = col * maxWidth;
+        const top = row * maxHeight;
         result.push({
           canvas: canvas,
           ctx: canvas.getContext('2d'),
@@ -116,19 +113,14 @@ const CaptureUtil = (() => {
           top: top,
           bottom: top + canvas.height
         });
-
         canvasIndex++;
       }
     }
-
     return result;
   }
 
 
-  function _filterScreenshots(imgLeft, imgTop, imgWidth, imgHeight, screenshots) {
-    // Filter down the screenshots to ones that match the location
-    // of the given image.
-    //
+  function filterScreenshots(imgLeft, imgTop, imgWidth, imgHeight, screenshots) {
     const imgRight = imgLeft + imgWidth, imgBottom = imgTop + imgHeight;
     return screenshots.filter(screenshot => (imgLeft < screenshot.right && imgRight > screenshot.left && imgTop < screenshot.bottom && imgBottom > screenshot.top));
   }
@@ -138,8 +130,7 @@ const CaptureUtil = (() => {
     return screenshots.map(screenshot => {
       const dataURI = screenshot.canvas.toDataURL();
 
-      // convert base64 to raw binary data held in a string
-      // doesn't handle URLEncoded DataURIs
+      // convert base64 to raw binary data held in a string doesn't handle URLEncoded DataURIs
       const byteString = atob(dataURI.split(',')[1]);
 
       // separate out the mime component
@@ -153,21 +144,22 @@ const CaptureUtil = (() => {
       }
 
       // create a blob for writing to a file
-      const blob = new Blob([ab], {type: mimeString});
-      return blob;
+      return new Blob([ab], {type: mimeString});
     });
   }
 
 
   function saveBlob(blob, filename, index, callback, errback) {
-    filename = _addFilenameSuffix(filename, index);
+    filename = addFilenameSuffix(filename, index);
 
     function onwriteend() {
-      // open the file that now contains the blob - calling
-      // `openPage` again if we had to split up the image
-      const urlName = ('filesystem:chrome-extension://' + chrome.i18n.getMessage('@@extension_id') + '/temporary/' + filename);
-
+      const urlName = generateURL(filename);
       callback(urlName);
+    }
+
+    function generateURL(filename) {
+      const extensionId = chrome.i18n.getMessage('@@extension_id');
+      return `filesystem:chrome-extension://${extensionId}/temporary/${filename}`;
     }
 
     // come up with file-system size with a little buffer
@@ -180,13 +172,13 @@ const CaptureUtil = (() => {
         fileEntry.createWriter(fileWriter => {
           fileWriter.onwriteend = onwriteend;
           fileWriter.write(blob);
-        }, errback); // TODO - standardize error callbacks?
+        }, errback);
       }, errback);
     }, errback);
   }
 
 
-  function _addFilenameSuffix(filename, index) {
+  function addFilenameSuffix(filename, index) {
     if (!index) {
       return filename;
     }
