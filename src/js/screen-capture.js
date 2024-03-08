@@ -1,6 +1,6 @@
 const CaptureUtil = (() => {
 
-  const CAPTURE_STEP_DELAY = 300;
+  const CAPTURE_STEP_DELAY = 200;
   const MAXIMUM_HEIGHT = 15000 * 2;
   const MAXIMUM_WIDTH = 4000 * 2;
   const MAXIMUM_AREA = MAXIMUM_HEIGHT * MAXIMUM_WIDTH;
@@ -68,14 +68,25 @@ const CaptureUtil = (() => {
     sendResponse(JSON.stringify(data, null, 4) || true);
   }
 
+  async function loadImage(url) {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = reject;
+      image.src = url;
+    });
+  }
+
   async function capture(data, screenshots, sendResponse, splitnotifier) {
     await wait(CAPTURE_STEP_DELAY);
-
     const dataURI = await chrome.tabs.captureVisibleTab(null, {format: 'png'});
+
     if (dataURI) {
-      const image = new Image();
-      image.onload = () => processImage(data, image, screenshots, splitnotifier, sendResponse);
-      image.src = dataURI;
+      const image = await loadImage(dataURI);
+
+      if (image){
+        processImage(data, image, screenshots, splitnotifier, sendResponse)
+      }
     }
   }
 
@@ -201,7 +212,8 @@ const CaptureUtil = (() => {
 
   function captureToBlobs(tab, callback, errback, progress, splitnotifier) {
     let loaded = false;
-    const screenshots = [], timeout = 3000;
+    const screenshots = [];
+    const SINGLE_CAPTURE_TIMEOUT = 3000;
     let timedOut = false;
     const noop = () => {
     };
@@ -214,17 +226,10 @@ const CaptureUtil = (() => {
       errback('invalid url'); // TODO errors
     }
 
-    // TODO will this stack up if run multiple times? (I think it will get cleared?)
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (request.msg === 'capture') {
         progress(request.complete);
         capture(request, screenshots, sendResponse, splitnotifier);
-
-        // https://developer.chrome.com/extensions/messaging#simple
-        //
-        // If you want to asynchronously use sendResponse, add return true;
-        // to the onMessage event handler.
-        //
         return true;
       } else {
         console.error('Unknown message received from content script: ' + request.msg);
@@ -235,11 +240,12 @@ const CaptureUtil = (() => {
 
 
     try {
+      const now = Date.now();
       return chrome.scripting.executeScript({
         target: {tabId: tab.id}, files: ['js/page.js']
       })
         .then((res) => {
-          if (timedOut) {
+          if (!loaded && Date.now() - now > SINGLE_CAPTURE_TIMEOUT) {
             console.error('Timed out too early while waiting for ' + 'chrome.tabs.executeScript. Try increasing the timeout.');
           } else {
             loaded = true;
@@ -253,14 +259,6 @@ const CaptureUtil = (() => {
     } catch (err) {
       console.error(`Failed to execute script: ${err}`);
     }
-
-
-    window.setTimeout(() => {
-      if (!loaded) {
-        timedOut = true;
-        errback('execute timeout');
-      }
-    }, timeout);
   }
 
 
