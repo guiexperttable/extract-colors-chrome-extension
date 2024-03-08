@@ -5,7 +5,7 @@ html[data-theme="dark"] {
     --ge-body-color: #fff;
     --ge-body-error-color: #e00034;
     --ge-btn-border: #00b7ff;
-    --ge-btn-border-secondary: #e00034;
+    --ge-btn-border-secondary: #cc0c39;
     --ge-btn-border-hover: cyan;
     --ge-colored-div-border: #fffc;
     --ge-message-color: #00e004;
@@ -55,14 +55,12 @@ body {
     width: calc(var(--ge-box-div-width) * var(--column-count) + var(--ge-content-div-gap) * calc(var(--column-count) - 1) + 2 * var(--ge-padding));
     min-height: 120px;
     display: grid;
-    grid-template-rows: 30px 48px 0 1fr;
+    grid-template-rows: 46px 16px 32px 1fr;
     padding: 16px;
     background-color: var(--ge-body-bg);
     color: var(--ge-body-color);
 }
-body.progressbar {
-    grid-template-rows: 30px 48px 20px 1fr;
-}
+
 .progress-bar-div {
     overflow: clip;
 }
@@ -70,8 +68,8 @@ progress {
     appearance: auto;
     box-sizing: border-box;
     display: inline-block;
-    block-size: 1em;
-    inline-size: 10em;
+    block-size: 0.5em;
+    inline-size: 5em;
     vertical-align: -0.2em;
     width: 100%;
 }
@@ -150,8 +148,9 @@ a {
     color: var(--ge-btn-border);
 }
 .text-div {
-    padding: 16px 0;
+    padding: 8px 0 16px 0;
     color: var(--ge-message-color);
+    font-size: 16px;
 }
 .content-div {
     display: grid;

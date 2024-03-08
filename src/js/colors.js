@@ -9,9 +9,8 @@
  */
 async function scrapColors() {
   try {
-    let [tab] = await chrome.tabs.query({active: true, currentWindow: true});
     return chrome.scripting.executeScript({
-      target: {tabId: tab.id},
+      target: {tabId: currentTab.id},
       func: getColors
 
     }).then((res) => {

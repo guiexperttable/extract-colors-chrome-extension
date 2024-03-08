@@ -426,7 +426,7 @@ const CaptureUtil = (() => {
     try {
       const now = Date.now();
       return chrome.scripting.executeScript({
-        target: {tabId: tab.id}, files: ['js/page.js']
+        target: {tabId: tab.id}, files: ['js/screen-capture-page.js']
       })
         .then((res) => {
           if (!loaded && Date.now() - now > SINGLE_CAPTURE_TIMEOUT) {
@@ -471,15 +471,15 @@ const CaptureUtil = (() => {
    * @param {function} onCompleted - A callback function to be called when the capture and saving process is completed.
    * @param {function} onError - A callback function to be called if an error occurs during the capture or saving process.
    * @param {function} onProgress - A callback function to be called periodically to report the progress of the capture and saving process.
-   * @param {boolean} omSplitting - Indicates whether to use OM splitting during the capture process.
+   * @param {boolean} onSplitting - Indicates whether to use OM splitting during the capture process.
    *
    * @return {void}
    */
-  function captureToFiles(tab, filename, onCompleted, onError, onProgress, omSplitting) {
+  function captureToFiles(tab, filename, onCompleted, onError, onProgress, onSplitting) {
     captureToBlobs(tab, async blobs => {
       const filenames = await saveBlobs(blobs, filename);
       onCompleted(filenames);
-    }, onError, onProgress, omSplitting);
+    }, onError, onProgress, onSplitting);
   }
 
 

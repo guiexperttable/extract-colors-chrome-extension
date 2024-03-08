@@ -16,14 +16,16 @@ const downLoadImgLink = document.querySelector(".download-img-a");
 const progressNumberFormat = new Intl.NumberFormat('en-EN', { maximumSignificantDigits: 1 });
 
 
+
 let data = {
   currentTheme: 'light',
   visibleOnly: true
 };
 
+let currentTab;
 let grabbedData = {};
 let currentColors = [];
-
+let resultWindowId;
 
 /**
  * Stores data in Chrome Sync Storage.
@@ -312,16 +314,15 @@ function initListener() {
   });
 
 
-  async function captureVisibleTab() {
-    const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
-    return await chrome.tabs.captureVisibleTab(tab.windowId, {format: "png"});
-  }
+  // async function captureVisibleTab() {
+  //   return await chrome.tabs.captureVisibleTab(currentTab.windowId, {format: "png"});
+  // }
+  //
+  // async function wait(ms) {
+  //   return new Promise((resolve, _reject) => setTimeout(resolve, ms));
+  // }
 
-  async function wait(ms) {
-    return new Promise((resolve, _reject) => setTimeout(resolve, ms));
-  }
-
-  function displayCaptures(filenames, index) {
+  function onCompleted(filenames, index) {
     setProgressbarVisible(false);
     if (!filenames.length) {
       console.error('Error: no screen captured!');
@@ -329,17 +330,13 @@ function initListener() {
     }
     index = index || 0;
 
-    const filename = filenames[index];
+    const url = filenames[index];
     const last = index === filenames.length - 1;
 
     if (currentTab.incognito && index === 0) {
-      // cannot access file system in incognito, so open in non-incognito
-      // window and add any additional tabs to that window.
-      //
-      // we have to be careful with focused too, because that will close
-      // the popup.
+      // incognito -> non incognito
       chrome.windows.create({
-        url: filename,
+        url: url,
         incognito: false,
         focused: last
       }, win => {
@@ -347,7 +344,7 @@ function initListener() {
       });
     } else {
       chrome.tabs.create({
-        url: filename,
+        url: url,
         active: last,
         windowId: resultWindowId,
         openerTabId: currentTab.id,
@@ -356,31 +353,28 @@ function initListener() {
     }
 
     if (!last) {
-      displayCaptures(filenames, index + 1);
+      onCompleted(filenames, index + 1);
     }
   }
 
 
-  let currentTab;
-  let resultWindowId;
+
   btnCaptureScreen.addEventListener("click", async () => {
-    const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
-    currentTab = tab;
-    const splitnotifier = console.warn;
+    const onSplitting = console.warn;
     setProgressbarVisible(true);
-    CaptureUtil.captureToFiles(tab, 'test-capture', displayCaptures, errorHandler, progress, splitnotifier);
+    CaptureUtil.captureToFiles(currentTab, 'test-capture', onCompleted, onError, onProgress, onSplitting);
   });
 
   function setProgressbarVisible(b){
     progressbar.value = 0;
     if (b) {
-      document.body.classList.add('progressbar');
+      progressbar.classList.remove('hidden');
     } else {
-      document.body.classList.remove('progressbar');
+      progressbar.classList.add('hidden');
     }
   }
 
-  function progress(f) {
+  function onProgress(f) {
     if (f >= 1) {
       divText.innerText = `Capturing... done`;
     } else {
@@ -390,7 +384,7 @@ function initListener() {
     }
   }
 
-  function errorHandler(err) {
+  function onError(err) {
     divContent.innerHTML = `<span class="ge-error-color">${err}</span>`;
     console.error(err);
   }
@@ -504,8 +498,10 @@ function initListener() {
  *
  * @return {void}
  */
-function go() {
+async function go() {
   try {
+    const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+    currentTab = tab;
     chrome.storage
       .sync
       .get()

@@ -5,10 +5,8 @@
  */
 async function toggleDesignMode(){
   try {
-    const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
-
     return chrome.scripting.executeScript({
-      target: {tabId: tab.id},
+      target: {tabId: currentTab.id},
       func: ()=> {
         const value = document.designMode === 'on' ? 'off': 'on';
         document.designMode = value;
