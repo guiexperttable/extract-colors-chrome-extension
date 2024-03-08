@@ -3,6 +3,7 @@
 html[data-theme="dark"] {
     --ge-body-bg: #000;
     --ge-body-color: #fff;
+    --ge-body-error-color: #e00034;
     --ge-btn-border: #00b7ff;
     --ge-btn-border-secondary: #e00034;
     --ge-btn-border-hover: cyan;
@@ -24,6 +25,7 @@ html[data-theme="dark"] {
 html[data-theme="light"] {
     --ge-body-bg: #fff;
     --ge-body-color: #000;
+    --ge-body-error-color: #f00;
     --ge-btn-border: #00b7ff;
     --ge-btn-border-secondary: #ff7b7b;
     --ge-btn-border-hover: #00e7e7;
@@ -115,6 +117,9 @@ a {
     display: grid;
     grid-gap: var(--ge-content-div-gap);
     grid-template-columns: repeat(auto-fit, var(--ge-box-div-width));
+}
+.ge-error-color {
+    color: var(--ge-body-error-color);
 }
 
 .chip {
