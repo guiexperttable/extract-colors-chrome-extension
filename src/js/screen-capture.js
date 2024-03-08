@@ -8,6 +8,7 @@ const CaptureUtil = (() => {
   const DISALLOWED_URL_REGEX = [/^https?:\/\/chrome.google.com\/.*$/];
 
 
+
   function isURLAllowed(url) {
     let regExp, index;
     for (index = DISALLOWED_URL_REGEX.length - 1; index >= 0; index--) {
@@ -162,16 +163,10 @@ const CaptureUtil = (() => {
   }
 
 
-// Extracted constant
-  const reqFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
 
-// Extracted functions
-//   function writeToFile(fileEntry, blob, onwriteend, errback) {
-//     fileEntry.createWriter(fileWriter => {
-//       fileWriter.onwriteend = onwriteend;
-//       fileWriter.write(blob);
-//     }, errback);
-//   }
+  
+
+
   async function writeToFile(fileEntry, blob, onError) {
     try {
       const fileWriter = await new Promise((resolve, reject) => fileEntry.createWriter(resolve, reject));
@@ -183,33 +178,45 @@ const CaptureUtil = (() => {
     }
   }
 
-  function requestFileSystemAndWrite(blob, filename, size, onwriteend, onError) {
-    reqFileSystem(window.TEMPORARY, size, fs => {
-      fs.root.getFile(filename, {create: true}, async fileEntry => {
-        await writeToFile(fileEntry, blob, onError);
-        onwriteend();
-      }, onError);
-    }, onError);
+  function generateURL(filename) {
+    const extensionId = chrome.i18n.getMessage('@@extension_id');
+    return `filesystem:chrome-extension://${extensionId}/temporary/${filename}`;
   }
 
+  async function requestFileSystemAndWrite(blob, filename) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const bufferSize = blob.size + (1024 / 2);
+        const fs = await requestFileSystem(window.TEMPORARY, bufferSize);
+        const fileEntry = await getRootFile(fs.root, filename, {create: true})
+        await writeToFile(fileEntry, blob);
+        resolve(generateURL(filename));
+
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  function requestFileSystem(type, size) {
+    return new Promise((resolve, reject) => {
+      const fn = window.requestFileSystem || window.webkitRequestFileSystem;
+      fn(type, size, resolve, reject);
+    });
+  }
+
+  function getRootFile(root, filename, options) {
+    return new Promise((resolve, reject) => {
+      root.getFile(filename, options, resolve, reject);
+    });
+  }
+
+
   // Updated `saveBlob` function
-  function saveBlob(blob, filename, index, callback, errback) {
+  function saveBlob(blob, filename, index) {
     filename = addFilenameSuffix(filename, index);
 
-    function onwriteend() {
-      const urlName = generateURL(filename);
-      callback(urlName);
-    }
-
-    function generateURL(filename) {
-      const extensionId = chrome.i18n.getMessage('@@extension_id');
-      return `filesystem:chrome-extension://${extensionId}/temporary/${filename}`;
-    }
-
-    // buffer for file-system size
-    const size = blob.size + (1024 / 2);
-
-    requestFileSystemAndWrite(blob, filename, size, onwriteend, errback);
+    return requestFileSystemAndWrite(blob, filename);
   }
 
 
@@ -275,19 +282,27 @@ const CaptureUtil = (() => {
   }
 
 
-  function captureToFiles(tab, filename, callback, errback, progress, splitnotifier) {
+  function captureToFiles(tab, filename, onCompleted, onError, onProgress, omSplitting) {
     captureToBlobs(tab, blobs => {
       let i = 0;
       const len = blobs.length, filenames = [];
 
-      (function doNext() {
-        saveBlob(blobs[i], filename, i, filename => {
-          i++;
-          filenames.push(filename);
-          i >= len ? callback(filenames) : doNext();
-        }, errback);
+      (async function doNext() {
+        const fn = await saveBlob(blobs[i], filename, i)
+        i++;
+        filenames.push(fn);
+        i >= len ? onCompleted(filenames) : await doNext();
+        //   .then(
+        //   filename => {
+        //     i++;
+        //     filenames.push(filename);
+        //     i >= len ? onCompleted(filenames) : doNext();
+        //   },
+        //   onError
+        // );
       })();
-    }, errback, progress, splitnotifier);
+
+    }, onError, onProgress, omSplitting);
   }
 
 
