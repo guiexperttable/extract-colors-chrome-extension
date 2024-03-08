@@ -2,6 +2,16 @@ const CAPTURE_DELAY = 150;
 const TIMEOUT = 2000;
 const CAPTURE_MSG_KEY = 'capture';
 
+/**
+ * @function onMessage
+ * @description Handles incoming messages
+ *
+ * @param {Object} data - The message data
+ * @param {Object} sender - The sender of the message
+ * @param {Function} callback - The callback function to be called after processing the message
+ *
+ * @return {boolean} - Returns true if the message is known and processed successfully, false otherwise
+ */
 function onMessage(data, sender, callback) {
   if (data.msg === 'scrollPage') {
     getPositions(callback);
@@ -12,11 +22,29 @@ function onMessage(data, sender, callback) {
 }
 
 
+/**
+ * Calculates the maximum value from a given array of non-empty numbers.
+ *
+ * @param {number[]} nums - An array containing non-empty numbers.
+ * @return {number} - The maximum value from the given array.
+ */
 function getMaxNonEmpty(nums) {
   return Math.max(...nums.filter(Boolean));
 }
 
 
+/**
+ * Returns an array of dimensions based on the given dimension parameter.
+ *
+ * @param {string} dimension - The dimension ("Width" or "Height") to retrieve the dimensions for.
+ *
+ * @return {array} - An array containing the following dimensions in order:
+ * - The client dimension of the document element (document.documentElement).
+ * - The scroll dimension of the body element (document.body) or 0 if body is null.
+ * - The scroll dimension of the document element (document.documentElement).
+ * - The offset dimension of the body element (document.body) or 0 if body is null.
+ * - The offset dimension of the document element (document.documentElement).
+ */
 function getDimensions(dimension) {
   const body = document.body;
   return [
@@ -29,6 +57,11 @@ function getDimensions(dimension) {
 }
 
 
+/**
+ * Retrieves the positions of elements on the page in a specific arrangement.
+ * @param {function} callback - Optional callback function to execute after capturing positions.
+ * @returns {void}
+ */
 function getPositions(callback) {
 
   const body = document.body;
