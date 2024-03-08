@@ -19,11 +19,17 @@ async function executeScript(func, ...args) {
 
 async function getScreenDimensions() {
   return executeScript(() => {
-    const canvasWidth = document.body.clientWidth;
+    const zoomFactor = window.devicePixelRatio;
     const viewportHeight = window.innerHeight;
-    const canvasHeight = document.body.scrollHeight;
+    const scrollHeight = document.body.scrollHeight;
+    const clientWidth = document.body.clientWidth;
+    const canvasWidth = clientWidth * zoomFactor;
+    const canvasHeight = scrollHeight * zoomFactor;
+    console.log({
+      canvasWidth, canvasHeight, viewportHeight, clientWidth, scrollHeight, zoomFactor
+    }); // TODO del
     return {
-      canvasWidth, canvasHeight, viewportHeight
+      canvasWidth, canvasHeight, viewportHeight, clientWidth, scrollHeight, zoomFactor
     };
   });
 }

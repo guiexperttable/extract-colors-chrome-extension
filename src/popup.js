@@ -318,7 +318,58 @@ function initListener() {
     return new Promise((resolve, _reject) => setTimeout(resolve, ms));
   }
 
+  function displayCaptures(filenames, index) {
+    if (!filenames.length){
+      console.error('Error: no screen captured!');
+      return;
+    }
+    index = index || 0;
 
+    const filename = filenames[index];
+    const last = index === filenames.length - 1;
+
+    if (currentTab.incognito && index === 0) {
+      // cannot access file system in incognito, so open in non-incognito
+      // window and add any additional tabs to that window.
+      //
+      // we have to be careful with focused too, because that will close
+      // the popup.
+      chrome.windows.create({
+        url: filename,
+        incognito: false,
+        focused: last
+      }, win => {
+        resultWindowId = win.id;
+      });
+    } else {
+      chrome.tabs.create({
+        url: filename,
+        active: last,
+        windowId: resultWindowId,
+        openerTabId: currentTab.id,
+        index: (currentTab.incognito ? 0 : currentTab.index) + 1 + index
+      });
+    }
+
+    if (!last) {
+      displayCaptures(filenames, index + 1);
+    }
+  }
+
+let currentTab ;
+let resultWindowId ;
+  btnCaptureScreen.addEventListener("click", async () => {
+    const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+    currentTab = tab;
+    //const displayCaptures = console.log;
+    const errorHandler = console.error;
+    const progress = console.log;
+    const splitnotifier = console.warn;
+    CaptureAPI.captureToFiles(tab, 'test-capture', displayCaptures, errorHandler, progress, splitnotifier);
+  });
+
+
+  /*
   btnCaptureScreen.addEventListener("click", async () => {
 
     function loadImageAsync(url) {
@@ -330,54 +381,101 @@ function initListener() {
       });
     }
 
+    function mergeImages(images) {
+      var canvas = document.createElement('canvas');
+      var ctx = canvas.getContext('2d');
+
+      // Berechnen Sie die Gesamthöhe des zusammengefügten Bildes
+      var totalHeight = images.reduce((acc, img) => acc + img.height, 0);
+
+      // Festlegen der Canvas-Abmessungen
+      canvas.width = Math.max(...images.map(img => img.width));
+      canvas.height = totalHeight;
+
+      // Zeichnen der Bilder auf die Canvas
+      var offsetY = 0;
+      images.forEach(img => {
+        ctx.drawImage(img, 0, offsetY);
+        offsetY += img.height;
+      });
+
+      // Rückgabe der URL des zusammengefügten Bildes
+      return canvas.toDataURL();
+    }
+
     divContent.innerHTML = 'Capturing...';
     const imgUris = [];
-    const {canvasWidth, canvasHeight, viewportHeight} = await getScreenDimensions();
+
+      // canvasHeight: 9330
+      // canvasWidth: 1920
+      // clientWidth: 960
+      // scrollHeight: 4665
+      // viewportHeight: 923
+      // zoomFactor: 2
+
+    const {canvasWidth, canvasHeight, viewportHeight, clientWidth, scrollHeight, zoomFactor} = await getScreenDimensions();
     const oldStyles = await tweakScrollStyle();
 
     let y = 0;
     const scrollEle = await scrollToYPos(0);
 
     let i = 0;
-    const captureCountMax = Math.floor(canvasHeight / viewportHeight + 0.9999);
-    while (y < canvasHeight) {
-      await wait(500); // because of MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND quota
+    const captureCountMax = Math.floor(scrollHeight / viewportHeight + 0.9999);
+    while (y < scrollHeight) {
+      await wait(900); // because of MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND quota
       let imgURI = await captureVisibleTab();
       divContent.innerHTML = `Capturing...${++i}/${captureCountMax}`;
       imgUris.push(imgURI);
-      y += viewportHeight;
-      // await wait(1500); // because of MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND quota
+
+      const img = await loadImageAsync(imgURI);
+      y += img.height / zoomFactor; // img.height === viewportHeight
+      // await chrome.tabs.create({ url: imgURI, active:false, selected: false});
+
+      // y += viewportHeight;
       await scrollToYPos(y);
     }
     await scrollToYPos(0);
     await restoreScrollStyle(oldStyles);
     await wait(500); // because of MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND quota
 
-    const canvas = document.createElement("canvas");
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-    const ctx = canvas.getContext("2d");
+    // const canvas = document.createElement("canvas");
+    // canvas.width = canvasWidth;
+    // canvas.height = canvasHeight;
+    // const ctx = canvas.getContext("2d");
     divContent.innerHTML = '';
 
+
+    // for (let i = 0; i < imgUris.length; i++) {
+    //   const img = await loadImageAsync(imgUris[i]);
+    //   // await chrome.tabs.create({ url: imgUris[i], active:false, selected: false});
+    //   let dy = i * viewportHeight*zoomFactor;
+    //   if (i === imgUris.length - 1) {
+    //     dy = canvasHeight - viewportHeight*zoomFactor;
+    //   }
+    //   console.log(dy)
+    //   ctx.drawImage(img, 0, dy); //, img.width, img.height);
+    //   ctx.save();
+    //   await wait(500); // because of MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND quota
+    // }
+
+    const images = []; // imgUris.map(uri=> loadImageAsync(uri))
     for (let i = 0; i < imgUris.length; i++) {
       const img = await loadImageAsync(imgUris[i]);
-      // await chrome.tabs.create({ url: imgUris[i], active:false, selected: false});
-      let dy = i * viewportHeight;
-      if (i === imgUris.length - 1) {
-        dy = canvasHeight - viewportHeight;
-      }
-      ctx.drawImage(img, 0, dy, img.width, img.height);
-      ctx.save();
+      images.push(img);
     }
-    const dataUrl = canvas.toDataURL();
-    await chrome.tabs.create({ url: dataUrl, active:true, selected: true});
+    const dataUrl = mergeImages(images);
+
+    // const dataUrl =  canvas.toDataURL();
+    console.log(dataUrl)
+    // await chrome.tabs.create({ url: dataUrl, active:false, selected: false});
+    console.log('ende')
     console.log({
       dataUrl,
       imgUris
     });
   });
 
-
+*/
   btnToggleTheme.addEventListener("click", async () => {
     data.currentTheme = data.currentTheme === 'light' ? 'dark' : 'light';
     updateHtmlDataThemeAttributeAndToggleIcon();
