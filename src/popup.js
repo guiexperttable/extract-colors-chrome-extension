@@ -490,6 +490,32 @@ function initListener() {
   });
 }
 
+const ALLOWED_URL_PATTERNS = ['http://*/*', 'https://*/*', 'ftp://*/*', 'file://*/*'];
+const DISALLOWED_URL_REGEX = [/^https?:\/\/chrome.google.com\/.*$/];
+
+
+/**
+ * Checks if a given URL is allowed based on a set of patterns.
+ *
+ * @param {string} url - The URL to be checked.
+ *
+ * @return {boolean} - Returns true if the URL is allowed, otherwise false.
+ */
+function isUrlAllowed(url) {
+  let regExp, index;
+  for (index = DISALLOWED_URL_REGEX.length - 1; index >= 0; index--) {
+    if (DISALLOWED_URL_REGEX[index].test(url)) {
+      return false;
+    }
+  }
+  for (index = ALLOWED_URL_PATTERNS.length - 1; index >= 0; index--) {
+    regExp = new RegExp('^' + ALLOWED_URL_PATTERNS[index].replace(/\*/g, '.*') + '$');
+    if (regExp.test(url)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 /**
  * Executes the main logic of the application.
@@ -499,9 +525,15 @@ function initListener() {
  * @return {void}
  */
 async function go() {
+
   try {
     const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
     currentTab = tab;
+
+    if (!isUrlAllowed(tab.url)) {
+      divContent.innerHTML = `<span class="ge-error-color">Oops! It seems that this page is not allowed to be analyzed.</span>`;
+      return;
+    }
     chrome.storage
       .sync
       .get()
@@ -516,8 +548,7 @@ async function go() {
         initListener();
       });
   } catch (_e) {
-    grabColors();
-    initListener();
+    divContent.innerHTML = `<span class="ge-error-color">Error! This page cannot be scripted.</span>`;
   }
 }
 

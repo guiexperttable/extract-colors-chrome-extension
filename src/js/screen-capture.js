@@ -407,7 +407,7 @@ const CaptureUtil = (() => {
     progress = progress || noop;
 
     if (!isUrlAllowed(tab.url)) {
-      errback('invalid url'); // TODO errors
+      errback('Oops! It seems that this page is not allowed to be analyzed.');
     }
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
