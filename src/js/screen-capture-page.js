@@ -1,4 +1,4 @@
-const CAPTURE_DELAY = 400;
+const CAPTURE_DELAY = 500;
 const TIMEOUT = 2000;
 const CAPTURE_MSG_KEY = 'capture';
 
