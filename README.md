@@ -3,7 +3,7 @@
 
 
 
-<img src="https://github.com/guiexperttable/extract-colors-chrome-extension/blob/main/doc/screenshot_01.png?raw=true">
+<img style="width: 640px" src="https://github.com/guiexperttable/extract-colors-chrome-extension/blob/main/doc/screenshot_01.png?raw=true">
 
 
 **Extract Colors DevTool** is a powerful developer tool designed to simplify the process of extracting color palettes from
