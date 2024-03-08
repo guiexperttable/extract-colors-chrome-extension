@@ -1,80 +1,66 @@
 const CAPTURE_DELAY = 150;
+const TIMEOUT = 2000;
 
 function onMessage(data, sender, callback) {
   if (data.msg === 'scrollPage') {
     getPositions(callback);
     return true;
-  } else if (data.msg === 'logMessage') {
-    console.log('[POPUP LOG]', data.data);
-  } else {
-    console.error('Unknown message received from background: ' + data.msg);
   }
+  console.error('Unknown message received from background: ' + data.msg);
+  return false;
 }
 
-if (!window.hasScreenCapturePage) {
-  window.hasScreenCapturePage = true;
-  chrome.runtime.onMessage.addListener(onMessage);
+
+function getMaxNonEmpty(nums) {
+  return Math.max(...nums.filter(Boolean));
 }
 
-function max(nums) {
-  return Math.max.apply(Math, nums.filter(function (x) {
-    return x;
-  }));
+
+function getDimensions(dimension) {
+  const body = document.body;
+  return [
+    document.documentElement['client' + dimension],
+    body ? body['scroll' + dimension] : 0,
+    document.documentElement['scroll' + dimension],
+    body ? body['offset' + dimension] : 0,
+    document.documentElement['offset' + dimension]
+  ];
 }
+
 
 function getPositions(callback) {
 
-  const body = document.body,
-    originalBodyOverflowYStyle = body ? body.style.overflowY : '',
-    originalX = window.scrollX,
-    originalY = window.scrollY,
-    originalOverflowStyle = document.documentElement.style.overflow;
+  const body = document.body;
+  const originalBodyOverflowYStyle = body ? body.style.overflowY : '';
+  const originalX = window.scrollX;
+  const originalY = window.scrollY;
+  const originalOverflowStyle = document.documentElement.style.overflow;
 
-  // try to make pages with bad scrolling work, e.g., ones with
-  // `body { overflow-y: scroll; }` can break `window.scrollTo`
   if (body) {
     body.style.overflowY = 'visible';
   }
 
-  const widths = [
-      document.documentElement.clientWidth,
-      body ? body.scrollWidth : 0,
-      document.documentElement.scrollWidth,
-      body ? body.offsetWidth : 0,
-      document.documentElement.offsetWidth
-    ],
-    heights = [
-      document.documentElement.clientHeight,
-      body ? body.scrollHeight : 0,
-      document.documentElement.scrollHeight,
-      body ? body.offsetHeight : 0,
-      document.documentElement.offsetHeight
-      // (Array.prototype.slice.call(document.getElementsByTagName('*'), 0)
-      //  .reduce(function(val, elt) {
-      //      var h = elt.offsetHeight; return h > val ? h : val;
-      //  }, 0))
-    ];
-  let fullWidth = max(widths);
-  const fullHeight = max(heights),
-    windowWidth = window.innerWidth,
-    windowHeight = window.innerHeight,
-    arrangements = [],
-    // pad the vertical scrolling to try to deal with
-    // sticky headers, 250 is an arbitrary size
-    scrollPad = 200,
-    yDelta = windowHeight - (windowHeight > scrollPad ? scrollPad : 0),
-    xDelta = windowWidth;
-  let yPos = fullHeight - windowHeight,
-    xPos,
-    numArrangements;
+  const widths = getDimensions('Width');
+  const heights = getDimensions('Height');
 
-  // During zooming, there can be weird off-by-1 types of things...
+  let fullWidth = getMaxNonEmpty(widths);
+  const fullHeight = getMaxNonEmpty(heights);
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+  const arrangements = [];
+
+  const scrollPad = 200;
+  const yDelta = windowHeight - (windowHeight > scrollPad ? scrollPad : 0);
+  const xDelta = windowWidth;
+
+  let yPos = fullHeight - windowHeight;
+  let xPos;
+  let numArrangements;
+
   if (fullWidth <= xDelta + 1) {
     fullWidth = xDelta;
   }
 
-  // Disable all scrollbars. We'll restore the scrollbar state when we're done
-  // taking the screenshots.
   document.documentElement.style.overflow = 'hidden';
 
   while (yPos > -yDelta) {
@@ -86,16 +72,6 @@ function getPositions(callback) {
     yPos -= yDelta;
   }
 
-  /** */
-  console.log('fullHeight', fullHeight, 'fullWidth', fullWidth);
-  console.log('windowWidth', windowWidth, 'windowHeight', windowHeight);
-  console.log('xDelta', xDelta, 'yDelta', yDelta);
-  const arText = [];
-  arrangements.forEach(function (x) {
-    arText.push('[' + x.join(',') + ']');
-  });
-  console.log('arrangements', arText.join(', '));
-  /**/
 
   numArrangements = arrangements.length;
 
@@ -137,7 +113,7 @@ function getPositions(callback) {
     // Need to wait for things to settle
     window.setTimeout(function () {
       // In case the below callback never returns, cleanup
-      const cleanUpTimeout = window.setTimeout(cleanUp, 1250);
+      const cleanUpTimeout = window.setTimeout(cleanUp, TIMEOUT);
 
       chrome.runtime.sendMessage(data, function (captured) {
         window.clearTimeout(cleanUpTimeout);
@@ -154,4 +130,11 @@ function getPositions(callback) {
 
     }, CAPTURE_DELAY);
   })();
+}
+
+
+// init:
+if (!window.hasScreenCapturePage) {
+  window.hasScreenCapturePage = true;
+  chrome.runtime.onMessage.addListener(onMessage);
 }
