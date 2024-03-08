@@ -1,7 +1,7 @@
 const CaptureUtil = (() => {
 
   const CAPTURE_MSG_KEY = 'capture';
-  const CAPTURE_STEP_DELAY = 200;
+  const CAPTURE_STEP_DELAY = 250;
   const MAXIMUM_HEIGHT = 15000 * 2;
   const MAXIMUM_WIDTH = 4000 * 2;
   const MAXIMUM_AREA = MAXIMUM_HEIGHT * MAXIMUM_WIDTH;

@@ -10,7 +10,10 @@ const btnEyeDropper = document.querySelector(".eyedropper-btn");
 const checkboxToggleVisible = document.querySelector(".visible-only-input");
 const divText = document.querySelector(".text-div");
 const divContent = document.querySelector(".content-div");
+const progressbar = document.querySelector("progress");
 const downLoadImgLink = document.querySelector(".download-img-a");
+
+const progressNumberFormat = new Intl.NumberFormat('en-EN', { maximumSignificantDigits: 1 });
 
 
 let data = {
@@ -319,6 +322,7 @@ function initListener() {
   }
 
   function displayCaptures(filenames, index) {
+    setProgressbarVisible(false);
     if (!filenames.length) {
       console.error('Error: no screen captured!');
       return;
@@ -356,20 +360,33 @@ function initListener() {
     }
   }
 
+
   let currentTab;
   let resultWindowId;
   btnCaptureScreen.addEventListener("click", async () => {
     const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
     currentTab = tab;
     const splitnotifier = console.warn;
+    setProgressbarVisible(true);
     CaptureUtil.captureToFiles(tab, 'test-capture', displayCaptures, errorHandler, progress, splitnotifier);
   });
+
+  function setProgressbarVisible(b){
+    progressbar.value = 0;
+    if (b) {
+      document.body.classList.add('progressbar');
+    } else {
+      document.body.classList.remove('progressbar');
+    }
+  }
 
   function progress(f) {
     if (f >= 1) {
       divText.innerText = `Capturing... done`;
     } else {
-      divText.innerText = `Capturing... ${f * 100}% `;
+      progressbar.value = f * 100;
+      const n = progressNumberFormat.format(f * 100 );
+      divText.innerText = `Capturing... ${n}% `;
     }
   }
 
