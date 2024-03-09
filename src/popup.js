@@ -331,12 +331,25 @@ function isUrlAllowed(url) {
   return false;
 }
 
+/**
+ * Show a specific div by removing the 'hidden' class and hiding all other divs.
+ *
+ * @param {HTMLElement} div - The div element to be shown.
+ *
+ * @return {void}
+ */
 function showDiv(div) {
   mainDivs.forEach(d => d.classList.add('hidden'));
   div.classList.remove('hidden');
 }
 
 
+/**
+ * Sets the visibility of the progress bar.
+ *
+ * @param {boolean} b - Specifies whether the progress bar should be visible or not.
+ * @return {undefined}
+ */
 function setProgressbarVisible(b) {
   progressbar.value = 0;
   if (b) {
@@ -346,6 +359,13 @@ function setProgressbarVisible(b) {
   }
 }
 
+/**
+ * Updates the progress of capturing
+ *
+ * @param {number} f - The progress of capturing, between 0 and 1
+ *
+ * @return {void}
+ */
 function onProgress(f) {
   if (f >= 1) {
     divText.innerText = `Capturing... done`;
@@ -356,10 +376,22 @@ function onProgress(f) {
   }
 }
 
+/**
+ * Sets the error message in the palette element.
+ *
+ * @param {string} err - The error message to display.
+ */
 function onError(err) {
   divPalette.innerHTML = `<span class="ge-error-color">${err}</span>`;
 }
 
+/**
+ * Function to handle the completion of the screen capture task.
+ *
+ * @param {Array} filenames - Array of filenames representing the captured screens.
+ * @param {number} index - Index indicating the current position in the filenames array. Defaults to 0.
+ * @returns {void}
+ */
 function onCompleted(filenames, index) {
   setProgressbarVisible(false);
   if (!filenames.length) {
@@ -394,6 +426,39 @@ function onCompleted(filenames, index) {
     onCompleted(filenames, index + 1);
   }
 }
+
+
+
+/**
+ * Convert a hexadecimal color code to RGB/RGBA format.
+ *
+ * @param {string} hex - The hexadecimal color code to convert.
+ * @return {string} The RGB or RGBA value converted from the hexadecimal color code.
+ */
+function hexToRgb(hex)  {
+  if (!hex.includes('#')) {
+    return hex;
+  }
+  hex = hex.replace(/^#/, '');
+  const length = hex.length;
+  const hasAlpha = (length === 8 || length === 4);
+
+  let [r, g, b, a] = hasAlpha ? [
+    hex.substr(0, 2),
+    hex.substr(2, 2),
+    hex.substr(4, 2),
+    hex.substr(6, 2)
+  ] : [
+    hex.substr(0, 2),
+    hex.substr(2, 2),
+    hex.substr(4, 2),
+    'FF'
+  ];
+  [r, g, b, a] = [r, g, b, a].map(val => parseInt(val, 16));
+
+  return  hasAlpha ? `rgba(${r}, ${g}, ${b}, ${a / 255})` : `rgb(${r}, ${g}, ${b})`;
+}
+
 
 
 /**
@@ -517,32 +582,6 @@ function initListener() {
   });
 
 
-
-  function hexToRgb(hex)  {
-    if (!hex.includes('#')) {
-      return hex;
-    }
-    hex = hex.replace(/^#/, '');
-    const length = hex.length;
-    const hasAlpha = (length === 8 || length === 4);
-
-    let [r, g, b, a] = hasAlpha ? [
-      hex.substr(0, 2),
-      hex.substr(2, 2),
-      hex.substr(4, 2),
-      hex.substr(6, 2)
-    ] : [
-      hex.substr(0, 2),
-      hex.substr(2, 2),
-      hex.substr(4, 2),
-      'FF'
-    ];
-    [r, g, b, a] = [r, g, b, a].map(val => parseInt(val, 16));
-
-    return  hasAlpha ? `rgba(${r}, ${g}, ${b}, ${a / 255})` : `rgb(${r}, ${g}, ${b})`;
-  }
-
-
   btnEyeDropper.addEventListener("click", async () => {
     divPalette.classList.add('hidden');
     const eyeDropper = new EyeDropper();
@@ -613,6 +652,15 @@ function initDivResizer() {
 }
 
 
+/**
+ * Initializes the div cleaner component on the page.
+ *
+ * This method generates and inserts HTML elements into the divCleaner element,
+ * including a heading, a checkbox, and a button. It also adds a click event listener
+ * to the button to invoke the cleanPage() method when clicked.
+ *
+ * @returns {void} This method does not return anything.
+ */
 function initDivCleaner() {
   /*
   const buf = [];
