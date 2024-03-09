@@ -16,7 +16,10 @@
     <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-260q75 0 127.5-52.5T660-440q0-75-52.5-127.5T480-620q-75 0-127.5 52.5T300-440q0 75 52.5 127.5T480-260Zm0-80q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29ZM160-120q-33 0-56.5-23.5T80-200v-480q0-33 23.5-56.5T160-760h126l74-80h240l74 80h126q33 0 56.5 23.5T880-680v480q0 33-23.5 56.5T800-120H160Zm0-80h640v-480H638l-73-80H395l-73 80H160v480Zm320-240Z"/></svg>
     <span popover>Capture full screen</span>
   </button>
-
+  <button class="btn cleaner-btn hidden">
+    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-520h80v-280q0-17-11.5-28.5T480-840q-17 0-28.5 11.5T440-800v280ZM200-360h560v-80H200v80Zm-58 240h98v-80q0-17 11.5-28.5T280-240q17 0 28.5 11.5T320-200v80h120v-80q0-17 11.5-28.5T480-240q17 0 28.5 11.5T520-200v80h120v-80q0-17 11.5-28.5T680-240q17 0 28.5 11.5T720-200v80h98l-40-160H182l-40 160Zm676 80H142q-39 0-63-31t-14-69l55-220v-80q0-33 23.5-56.5T200-520h160v-280q0-50 35-85t85-35q50 0 85 35t35 85v280h160q33 0 56.5 23.5T840-440v80l55 220q13 38-11.5 69T818-40Zm-58-400H200h560Zm-240-80h-80 80Z"/></svg>
+    <span popover>Show page cleaner</span>
+  </button>
   
   <button class="btn eyedropper-btn">
     <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M120-120v-190l358-358-58-56 58-56 76 76 124-124q5-5 12.5-8t15.5-3q8 0 15 3t13 8l94 94q5 6 8 13t3 15q0 8-3 15.5t-8 12.5L705-555l76 78-57 57-56-58-358 358H120Zm80-80h78l332-334-76-76-334 332v78Zm447-410 96-96-37-37-96 96 37 37Zm0 0-37-37 37 37Z"/></svg>
@@ -40,12 +43,6 @@
     Generate color report
     <span popover>Generate color report</span>
   </button>
-
-  <label class="container hidden">Visible only
-    <input type="checkbox" checked="checked" class="visible-only-input">
-    <span class="checkmark"></span>
-  </label>
-
 
 
   <button class="btn secondary copy-values-btn">
@@ -91,13 +88,14 @@
 
 <div class="text-div"></div>
 
-<div class="content-div animate__animated animate__bounce"></div>
-
+<div class="palette-div animate__animated animate__bounce"></div>
 <div class="resizer-div hidden"></div>
+<div class="cleaner-div hidden"></div>
 
 
 
 
+<script src="js/cleaner.js"></script>
 <script src="js/resizer.js"></script>
 <script src="js/screen-capture.js"></script>
 <script src="js/design-mode.js"></script>

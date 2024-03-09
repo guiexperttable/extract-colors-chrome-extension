@@ -1,24 +1,28 @@
-const btnOk = document.querySelector(".go-btn");
+
+
+const btnCaptureScreen = document.querySelector(".capture-screen-btn");
+const btnCleaner = document.querySelector(".cleaner-btn");
 const btnToggleTheme = document.querySelector(".toggle-theme-btn");
 const btnToggleDesignMode = document.querySelector(".toggle-designmode-btn");
-const btnCaptureScreen = document.querySelector(".capture-screen-btn");
+
 const btnResizer = document.querySelector(".resizer-btn");
 const btnCopyImage = document.querySelector(".copy-img-btn");
 const btnCopyValues = document.querySelector(".copy-values-btn");
 const btnCopyHtml = document.querySelector(".copy-html-btn");
 const btnCopyRules = document.querySelector(".copy-rules-btn");
 const btnEyeDropper = document.querySelector(".eyedropper-btn");
-const checkboxToggleVisible = document.querySelector(".visible-only-input");
 const divText = document.querySelector(".text-div");
 
-const divContent = document.querySelector(".content-div");
+const divPalette = document.querySelector(".palette-div");
 const divResizer = document.querySelector(".resizer-div");
-const mainDivs = [divContent, divResizer];
+const divCleaner = document.querySelector(".cleaner-div");
+const mainDivs = [divPalette, divResizer, divCleaner];
 
 const progressbar = document.querySelector("progress");
 const downLoadImgLink = document.querySelector(".download-img-a");
 
 const progressNumberFormat = new Intl.NumberFormat('en-EN', { maximumSignificantDigits: 1 });
+const screenshotFileName = 'page-screenshot';
 
 
 
@@ -246,8 +250,8 @@ const grabColors = () => {
     ).sort((a, b) => a.sum - b.sum);
 
     currentColors = [...colors];
-    divContent.innerHTML = renderColors(colors);
-    divContent
+    divPalette.innerHTML = renderColors(colors);
+    divPalette
       .querySelectorAll('div[data-color]')
       .forEach(ele =>
         ele.addEventListener('click', () => copyColor(ele))
@@ -354,7 +358,7 @@ function onProgress(f) {
 }
 
 function onError(err) {
-  divContent.innerHTML = `<span class="ge-error-color">${err}</span>`;
+  divPalette.innerHTML = `<span class="ge-error-color">${err}</span>`;
   console.error(err);
 }
 
@@ -401,7 +405,7 @@ function onCompleted(filenames, index) {
  */
 function initListener() {
 
-  btnOk.addEventListener("click", grabColors);
+  // btnOk.addEventListener("click", grabColors);
 
   btnToggleDesignMode.addEventListener("click", async () => {
     toggleDesignMode()
@@ -415,18 +419,17 @@ function initListener() {
 
   btnResizer.addEventListener("click", async () => {
     showDiv(divResizer);
-    // await updateWindow(windowId, {
-    //   width: 1024,
-    //   height: 768
-    // });
-    // window.close();
+  });
+
+  btnCleaner.addEventListener("click", async () => {
+    showDiv(divCleaner);
   });
 
   btnCaptureScreen.addEventListener("click", async () => {
-    showDiv(divContent);
+    showDiv(divPalette);
     const onSplitting = console.warn;
     setProgressbarVisible(true);
-    CaptureUtil.captureToFiles(currentTab, 'test-capture', onCompleted, onError, onProgress, onSplitting);
+    CaptureUtil.captureToFiles(currentTab, screenshotFileName, onCompleted, onError, onProgress, onSplitting);
   });
 
   btnToggleTheme.addEventListener("click", async () => {
@@ -436,7 +439,7 @@ function initListener() {
   });
 
   btnCopyValues.addEventListener("click", async () => {
-    showDiv(divContent);
+    showDiv(divPalette);
     const buf = [];
     for (const color of currentColors) {
       buf.push(`${color.rgba}`);
@@ -447,22 +450,28 @@ function initListener() {
   });
 
   btnCopyRules.addEventListener("click", async () => {
-    showDiv(divContent);
-    navigator.clipboard
-      .writeText(renderCSSCustomPropertyMap())
-      .then(() => setLabelText(`CSS color custom properties copied to clipboard.`));
+    showDiv(divPalette);
+    const s = renderCSSCustomPropertyMap();
+    if (s) {
+      navigator.clipboard
+        .writeText()
+        .then(() => setLabelText(`CSS color custom properties copied to clipboard.`));
+    } else {
+      setLabelText(`No CSS color custom properties found.`)
+    }
+
   });
 
   btnCopyHtml.addEventListener("click", async () => {
-    showDiv(divContent);
-    const box = document.querySelector('.content-div').innerHTML;
+    showDiv(divPalette);
+    const box = document.querySelector('.palette-div').innerHTML;
     const html = `
   <html lang="en" data-theme="light">
     <style>
       html, body {
           width: 600px;
       }
-      .content-div {
+      .palette-div {
           width: 600px;
           display: grid;
           grid-gap: 16px;
@@ -476,7 +485,7 @@ function initListener() {
       }
     </style>
     <body>
-      <div class="content-div">
+      <div class="palette-div">
         ${box}
       </div>   
       
@@ -494,7 +503,7 @@ function initListener() {
   });
 
   btnCopyImage.addEventListener("click", async () => {
-    showDiv(divContent);
+    showDiv(divPalette);
     const canvas = createColorImageCanvas(currentColors);
     // Copy canvas to blob
     canvas.toBlob(blob => {
@@ -508,20 +517,15 @@ function initListener() {
     });
   });
 
-  checkboxToggleVisible.addEventListener('change', function () {
-    showDiv(divContent);
-    data.visibleOnly = this.checked;
-    storeData();
-    grabColors();
-  });
+
 
   btnEyeDropper.addEventListener("click", async () => {
-    divContent.classList.add('hidden');
+    divPalette.classList.add('hidden');
     const eyeDropper = new EyeDropper();
     eyeDropper
       .open()
       .then((result) => {
-        divContent.classList.remove(['hidden']);
+        divPalette.classList.remove(['hidden']);
         const color = result.sRGBHex;
         navigator.clipboard
           .writeText(color)
@@ -572,6 +576,38 @@ function initDivResizer(){
 }
 
 
+function initDivCleaner(){
+  const buf = [];
+    buf.push(`
+  <h2>Page Cleaner</h2>
+  
+  <label class="container">
+    <input type="checkbox" checked="checked">
+    <span class="checkmark"></span> Images
+  </label>
+  
+  <button class="btn cleaner-ok-btn">
+     Clean
+    <span popover>Start cleaning</span>
+  </button>
+    `);
+
+  divCleaner.innerHTML = buf.join('');
+  divCleaner
+    .querySelectorAll('.cleaner-ok-btn')
+    .forEach(ele =>
+      ele.addEventListener('click', () => cleanPage({para:'test'}))
+    );
+
+  // checkboxToggleVisible.addEventListener('change', function () {
+  //   showDiv(divPalette);
+  //   data.visibleOnly = this.checked;
+  //   storeData();
+  //   grabColors();
+  // });
+}
+
+
 
 /**
  * Executes the main logic of the application.
@@ -590,7 +626,7 @@ async function go() {
     windowId = currentWindow.id;
 
     if (!isUrlAllowed(tab.url)) {
-      divContent.innerHTML = `<span class="ge-error-color">Oops! It seems that this page is not allowed to be analyzed.</span>`;
+      divPalette.innerHTML = `<span class="ge-error-color">Oops! It seems that this page is not allowed to be analyzed.</span>`;
       return;
     }
     chrome.storage
@@ -601,16 +637,16 @@ async function go() {
           data = Object.assign(data, result);
         }
         updateHtmlDataThemeAttributeAndToggleIcon();
-        checkboxToggleVisible.checked = data.visibleOnly;
 
         grabColors();
         initListener();
       });
 
     initDivResizer();
+    initDivCleaner();
 
   } catch (_e) {
-    divContent.innerHTML = `<span class="ge-error-color">Error! This page cannot be scripted.</span>`;
+    divPalette.innerHTML = `<span class="ge-error-color">Error! This page cannot be scripted.</span>`;
   }
 }
 

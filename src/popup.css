@@ -47,12 +47,12 @@ html {
     --ge-colored-div-size: 100px;
     --ge-box-div-width: var(--ge-colored-div-size);
     --ge-padding: 16px;
-    --ge-content-div-gap: var(--ge-padding);
+    --ge-palette-div-gap: var(--ge-padding);
     --column-count: 5;
 }
 
 body {
-    width: calc(var(--ge-box-div-width) * var(--column-count) + var(--ge-content-div-gap) * calc(var(--column-count) - 1) + 2 * var(--ge-padding));
+    width: calc(var(--ge-box-div-width) * var(--column-count) + var(--ge-palette-div-gap) * calc(var(--column-count) - 1) + 2 * var(--ge-padding));
     min-height: 120px;
     display: grid;
     grid-template-rows: 46px 16px 32px 1fr;
@@ -152,15 +152,15 @@ a {
     color: var(--ge-message-color);
     font-size: 16px;
 }
-.content-div {
+.palette-div {
     display: grid;
-    grid-gap: var(--ge-content-div-gap);
+    grid-gap: var(--ge-palette-div-gap);
     grid-template-columns: repeat(auto-fit, var(--ge-box-div-width));
 }
 
 .resizer-div {
     display: grid;
-    grid-gap: var(--ge-content-div-gap);
+    grid-gap: var(--ge-palette-div-gap);
     grid-template-columns: repeat(auto-fit, 128px);
 }
 .resolution-div {

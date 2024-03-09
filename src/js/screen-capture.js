@@ -92,12 +92,12 @@ const CaptureUtil = (() => {
    * @param {object} data - The data object to be processed.
    * @param {object} image - The image object.
    * @param {array} screenshots - The array of screenshots.
-   * @param {object} splitnotifier - The splitnotifier object.
+   * @param {object} onSplitting - The splitnotifier object.
    * @param {function} sendResponse - The function used to send the response.
    *
    * @return {void}
    */
-  function processImage(data, image, screenshots, splitnotifier, sendResponse) {
+  function processImage(data, image, screenshots, onSplitting, sendResponse) {
     data.image = {width: image.width, height: image.height};
 
     if (data.windowWidth !== image.width) {
@@ -105,10 +105,11 @@ const CaptureUtil = (() => {
     }
 
     if (!screenshots.length) {
-      initializeScreenshots(data, screenshots, splitnotifier);
+      initializeScreenshots(data, screenshots, onSplitting);
     }
 
-    filterScreenshots(data.x, data.y, image.width, image.height, screenshots).forEach(screenshot => {
+    filterScreenshots(data.x, data.y, image.width, image.height, screenshots)
+      .forEach(screenshot => {
       screenshot.ctx.drawImage(image, data.x - screenshot.left, data.y - screenshot.top);
     });
 
@@ -144,10 +145,11 @@ const CaptureUtil = (() => {
     const dataURI = await chrome.tabs.captureVisibleTab(null, {format: 'png'});
 
     if (dataURI) {
-      const image = await loadImage(dataURI);
+      let image = await loadImage(dataURI);
 
       if (image) {
-        processImage(data, image, screenshots, splitnotifier, sendResponse)
+        processImage(data, image, screenshots, splitnotifier, sendResponse);
+        image = null;
       }
     }
   }
