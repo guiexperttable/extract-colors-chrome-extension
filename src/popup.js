@@ -2,6 +2,7 @@ const btnOk = document.querySelector(".go-btn");
 const btnToggleTheme = document.querySelector(".toggle-theme-btn");
 const btnToggleDesignMode = document.querySelector(".toggle-designmode-btn");
 const btnCaptureScreen = document.querySelector(".capture-screen-btn");
+const btnResizer = document.querySelector(".resizer-btn");
 const btnCopyImage = document.querySelector(".copy-img-btn");
 const btnCopyValues = document.querySelector(".copy-values-btn");
 const btnCopyHtml = document.querySelector(".copy-html-btn");
@@ -9,7 +10,11 @@ const btnCopyRules = document.querySelector(".copy-rules-btn");
 const btnEyeDropper = document.querySelector(".eyedropper-btn");
 const checkboxToggleVisible = document.querySelector(".visible-only-input");
 const divText = document.querySelector(".text-div");
+
 const divContent = document.querySelector(".content-div");
+const divResizer = document.querySelector(".resizer-div");
+const mainDivs = [divContent, divResizer];
+
 const progressbar = document.querySelector("progress");
 const downLoadImgLink = document.querySelector(".download-img-a");
 
@@ -22,6 +27,8 @@ let data = {
   visibleOnly: true
 };
 
+let currentWindow;
+let windowId;
 let currentTab;
 let grabbedData = {};
 let currentColors = [];
@@ -295,6 +302,99 @@ function renderCSSCustomPropertyMap() {
   return buf.join('\n');
 }
 
+const ALLOWED_URL_PATTERNS = ['http://*/*', 'https://*/*', 'ftp://*/*', 'file://*/*'];
+const DISALLOWED_URL_REGEX = [/^https?:\/\/chrome.google.com\/.*$/];
+
+/**
+ * Checks if a given URL is allowed based on a set of patterns.
+ *
+ * @param {string} url - The URL to be checked.
+ *
+ * @return {boolean} - Returns true if the URL is allowed, otherwise false.
+ */
+function isUrlAllowed(url) {
+  let regExp, index;
+  for (index = DISALLOWED_URL_REGEX.length - 1; index >= 0; index--) {
+    if (DISALLOWED_URL_REGEX[index].test(url)) {
+      return false;
+    }
+  }
+  for (index = ALLOWED_URL_PATTERNS.length - 1; index >= 0; index--) {
+    regExp = new RegExp('^' + ALLOWED_URL_PATTERNS[index].replace(/\*/g, '.*') + '$');
+    if (regExp.test(url)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function showDiv(div) {
+  mainDivs.forEach(d => d.classList.add('hidden'));
+  div.classList.remove('hidden');
+}
+
+
+function setProgressbarVisible(b){
+  progressbar.value = 0;
+  if (b) {
+    progressbar.classList.remove('hidden');
+  } else {
+    progressbar.classList.add('hidden');
+  }
+}
+
+function onProgress(f) {
+  if (f >= 1) {
+    divText.innerText = `Capturing... done`;
+  } else {
+    progressbar.value = f * 100;
+    const n = progressNumberFormat.format(f * 100 );
+    divText.innerText = `Capturing... ${n}% `;
+  }
+}
+
+function onError(err) {
+  divContent.innerHTML = `<span class="ge-error-color">${err}</span>`;
+  console.error(err);
+}
+
+function onCompleted(filenames, index) {
+  setProgressbarVisible(false);
+  if (!filenames.length) {
+    console.error('Error: no screen captured!');
+    return;
+  }
+  index = index || 0;
+
+  const url = filenames[index];
+  const last = index === filenames.length - 1;
+
+  if (currentTab.incognito && index === 0) {
+    // incognito -> non incognito
+    chrome.windows.create({
+      url: url,
+      incognito: false,
+      focused: last
+    }, win => {
+      resultWindowId = win.id;
+    });
+  } else {
+    chrome.tabs.create({
+      url: url,
+      active: last,
+      windowId: resultWindowId,
+      openerTabId: currentTab.id,
+      index: (currentTab.incognito ? 0 : currentTab.index) + 1 + index
+    });
+  }
+
+  if (!last) {
+    onCompleted(filenames, index + 1);
+  }
+}
+
+
+
 /**
  * Attaches event listeners to various buttons and checkboxes.
  * @return {void}
@@ -313,82 +413,21 @@ function initListener() {
       });
   });
 
-
-  // async function captureVisibleTab() {
-  //   return await chrome.tabs.captureVisibleTab(currentTab.windowId, {format: "png"});
-  // }
-  //
-  // async function wait(ms) {
-  //   return new Promise((resolve, _reject) => setTimeout(resolve, ms));
-  // }
-
-  function onCompleted(filenames, index) {
-    setProgressbarVisible(false);
-    if (!filenames.length) {
-      console.error('Error: no screen captured!');
-      return;
-    }
-    index = index || 0;
-
-    const url = filenames[index];
-    const last = index === filenames.length - 1;
-
-    if (currentTab.incognito && index === 0) {
-      // incognito -> non incognito
-      chrome.windows.create({
-        url: url,
-        incognito: false,
-        focused: last
-      }, win => {
-        resultWindowId = win.id;
-      });
-    } else {
-      chrome.tabs.create({
-        url: url,
-        active: last,
-        windowId: resultWindowId,
-        openerTabId: currentTab.id,
-        index: (currentTab.incognito ? 0 : currentTab.index) + 1 + index
-      });
-    }
-
-    if (!last) {
-      onCompleted(filenames, index + 1);
-    }
-  }
-
-
+  btnResizer.addEventListener("click", async () => {
+    showDiv(divResizer);
+    // await updateWindow(windowId, {
+    //   width: 1024,
+    //   height: 768
+    // });
+    // window.close();
+  });
 
   btnCaptureScreen.addEventListener("click", async () => {
+    showDiv(divContent);
     const onSplitting = console.warn;
     setProgressbarVisible(true);
     CaptureUtil.captureToFiles(currentTab, 'test-capture', onCompleted, onError, onProgress, onSplitting);
   });
-
-  function setProgressbarVisible(b){
-    progressbar.value = 0;
-    if (b) {
-      progressbar.classList.remove('hidden');
-    } else {
-      progressbar.classList.add('hidden');
-    }
-  }
-
-  function onProgress(f) {
-    if (f >= 1) {
-      divText.innerText = `Capturing... done`;
-    } else {
-      progressbar.value = f * 100;
-      const n = progressNumberFormat.format(f * 100 );
-      divText.innerText = `Capturing... ${n}% `;
-    }
-  }
-
-  function onError(err) {
-    divContent.innerHTML = `<span class="ge-error-color">${err}</span>`;
-    console.error(err);
-  }
-
 
   btnToggleTheme.addEventListener("click", async () => {
     data.currentTheme = data.currentTheme === 'light' ? 'dark' : 'light';
@@ -397,6 +436,7 @@ function initListener() {
   });
 
   btnCopyValues.addEventListener("click", async () => {
+    showDiv(divContent);
     const buf = [];
     for (const color of currentColors) {
       buf.push(`${color.rgba}`);
@@ -407,12 +447,14 @@ function initListener() {
   });
 
   btnCopyRules.addEventListener("click", async () => {
+    showDiv(divContent);
     navigator.clipboard
       .writeText(renderCSSCustomPropertyMap())
       .then(() => setLabelText(`CSS color custom properties copied to clipboard.`));
   });
 
   btnCopyHtml.addEventListener("click", async () => {
+    showDiv(divContent);
     const box = document.querySelector('.content-div').innerHTML;
     const html = `
   <html lang="en" data-theme="light">
@@ -452,6 +494,7 @@ function initListener() {
   });
 
   btnCopyImage.addEventListener("click", async () => {
+    showDiv(divContent);
     const canvas = createColorImageCanvas(currentColors);
     // Copy canvas to blob
     canvas.toBlob(blob => {
@@ -466,11 +509,11 @@ function initListener() {
   });
 
   checkboxToggleVisible.addEventListener('change', function () {
+    showDiv(divContent);
     data.visibleOnly = this.checked;
     storeData();
     grabColors();
   });
-
 
   btnEyeDropper.addEventListener("click", async () => {
     divContent.classList.add('hidden');
@@ -490,32 +533,45 @@ function initListener() {
   });
 }
 
-const ALLOWED_URL_PATTERNS = ['http://*/*', 'https://*/*', 'ftp://*/*', 'file://*/*'];
-const DISALLOWED_URL_REGEX = [/^https?:\/\/chrome.google.com\/.*$/];
-
+/**
+ * Resizes the window based on the given element's data-width and data-height attributes.
+ *
+ * @param {Element} ele - The element containing the data-width and data-height attributes.
+ * @returns {void}
+ */
+function resizeWindow(ele) {
+  const width = parseInt(ele.getAttribute('data-width'));
+  const height = parseInt(ele.getAttribute('data-height'));
+  updateWindow(windowId, {width, height});
+}
 
 /**
- * Checks if a given URL is allowed based on a set of patterns.
- *
- * @param {string} url - The URL to be checked.
- *
- * @return {boolean} - Returns true if the URL is allowed, otherwise false.
+ * Initializes the div resizer by generating the necessary HTML elements
+ * and attaching event listeners for resizing the window.
  */
-function isUrlAllowed(url) {
-  let regExp, index;
-  for (index = DISALLOWED_URL_REGEX.length - 1; index >= 0; index--) {
-    if (DISALLOWED_URL_REGEX[index].test(url)) {
-      return false;
-    }
+function initDivResizer(){
+  const buf = [];
+  for (const ws of windowSizes) {
+    buf.push(`
+    <div class="resolution-div" data-width="${ws.width}" data-height="${ws.height}">
+        <div class="resolution">${ws.width} × ${ws.height}</div>
+        <div class="label">${ws.label}</div>
+    </div>
+    `);
   }
-  for (index = ALLOWED_URL_PATTERNS.length - 1; index >= 0; index--) {
-    regExp = new RegExp('^' + ALLOWED_URL_PATTERNS[index].replace(/\*/g, '.*') + '$');
-    if (regExp.test(url)) {
-      return true;
-    }
-  }
-  return false;
+  divResizer.innerHTML = buf.join('');
+  divResizer
+    .querySelectorAll('.resolution-div')
+    .forEach(ele =>
+      ele.addEventListener('click', () => resizeWindow(ele))
+    );
+
+  chrome.windows.onBoundsChanged.addListener((win) => {
+      setLabelText(`Current size: ${win.width} × ${win.height}`, 'none');
+  });
 }
+
+
 
 /**
  * Executes the main logic of the application.
@@ -529,6 +585,9 @@ async function go() {
   try {
     const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
     currentTab = tab;
+
+    currentWindow = await chrome.windows.getCurrent();
+    windowId = currentWindow.id;
 
     if (!isUrlAllowed(tab.url)) {
       divContent.innerHTML = `<span class="ge-error-color">Oops! It seems that this page is not allowed to be analyzed.</span>`;
@@ -547,6 +606,9 @@ async function go() {
         grabColors();
         initListener();
       });
+
+    initDivResizer();
+
   } catch (_e) {
     divContent.innerHTML = `<span class="ge-error-color">Error! This page cannot be scripted.</span>`;
   }

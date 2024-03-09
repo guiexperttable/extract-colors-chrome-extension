@@ -157,6 +157,26 @@ a {
     grid-gap: var(--ge-content-div-gap);
     grid-template-columns: repeat(auto-fit, var(--ge-box-div-width));
 }
+
+.resizer-div {
+    display: grid;
+    grid-gap: var(--ge-content-div-gap);
+    grid-template-columns: repeat(auto-fit, 128px);
+}
+.resolution-div {
+    display: grid;
+    grid-template-rows: auto auto;
+    align-content: center;
+    cursor: pointer;
+}
+.resolution-div .resolution {
+    font-size: 20px;
+    font-weight: bold;
+}
+.resolution-div .label {
+    font-size: 16px;
+}
+
 .ge-error-color {
     color: var(--ge-body-error-color);
 }
