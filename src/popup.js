@@ -3,6 +3,7 @@ const btnCleaner = document.querySelector(".cleaner-btn");
 const btnToggleTheme = document.querySelector(".toggle-theme-btn");
 const btnToggleDesignMode = document.querySelector(".toggle-designmode-btn");
 
+const btnRescan = document.querySelector(".rescan-btn");
 const btnResizer = document.querySelector(".resizer-btn");
 const btnCopyImage = document.querySelector(".copy-img-btn");
 const btnCopyValues = document.querySelector(".copy-values-btn");
@@ -232,7 +233,7 @@ const renderColors = (colors) => {
  */
 const grabColors = () => {
   setLabelText('');
-
+  showDiv(divPalette);
   scrapColors().then(data => {
     grabbedData = data;
     const colors = getUniqColors(
@@ -467,7 +468,7 @@ function hexToRgb(hex)  {
  */
 function initListener() {
 
-  // btnOk.addEventListener("click", grabColors);
+  btnRescan.addEventListener("click", grabColors);
 
   btnToggleDesignMode.addEventListener("click", async () => {
     toggleDesignMode()
@@ -518,7 +519,7 @@ function initListener() {
     const s = renderCSSCustomPropertyMap();
     if (s) {
       navigator.clipboard
-        .writeText()
+        .writeText(s)
         .then(() => setLabelText(`CSS color custom properties copied to clipboard.`));
     } else {
       setLabelText(`No CSS color custom properties found.`)

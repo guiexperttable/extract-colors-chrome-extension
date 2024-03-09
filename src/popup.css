@@ -48,7 +48,7 @@ html {
     --ge-box-div-width: var(--ge-colored-div-size);
     --ge-padding: 16px;
     --ge-palette-div-gap: var(--ge-padding);
-    --column-count: 5;
+    --column-count: 6;
 }
 
 body {
