@@ -422,7 +422,9 @@ function initListener() {
   });
 
   btnCleaner.addEventListener("click", async () => {
-    showDiv(divCleaner);
+    const count = await cleanPage();
+    setLabelText(`Items removed: ${count}`);
+    // showDiv(divCleaner);
   });
 
   btnCaptureScreen.addEventListener("click", async () => {
@@ -525,6 +527,7 @@ function initListener() {
     eyeDropper
       .open()
       .then((result) => {
+        console.log(result)
         divPalette.classList.remove(['hidden']);
         const color = result.sRGBHex;
         navigator.clipboard
@@ -577,6 +580,7 @@ function initDivResizer(){
 
 
 function initDivCleaner(){
+  /*
   const buf = [];
     buf.push(`
   <h2>Page Cleaner</h2>
@@ -599,13 +603,10 @@ function initDivCleaner(){
       ele.addEventListener('click', () => cleanPage({para:'test'}))
     );
 
-  // checkboxToggleVisible.addEventListener('change', function () {
-  //   showDiv(divPalette);
-  //   data.visibleOnly = this.checked;
-  //   storeData();
-  //   grabColors();
-  // });
+   */
 }
+
+
 
 
 
