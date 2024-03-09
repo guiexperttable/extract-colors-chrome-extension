@@ -152,7 +152,8 @@ a {
     color: var(--ge-message-color);
     font-size: 16px;
 }
-.palette-div {
+.palette-div,
+.picker-div {
     display: grid;
     grid-gap: var(--ge-palette-div-gap);
     grid-template-columns: repeat(auto-fit, var(--ge-box-div-width));

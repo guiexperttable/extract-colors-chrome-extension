@@ -7,7 +7,6 @@ function cleanPage() {
       func: fnClean
     })
     .then((res) => {
-      console.log(res)
       return res[0].result;
     });
 
@@ -45,6 +44,5 @@ const fnClean = async () => {
         count++;
       });
   }
-  console.log('count', count)
   return count;
 };

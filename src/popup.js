@@ -1,5 +1,3 @@
-
-
 const btnCaptureScreen = document.querySelector(".capture-screen-btn");
 const btnCleaner = document.querySelector(".cleaner-btn");
 const btnToggleTheme = document.querySelector(".toggle-theme-btn");
@@ -15,21 +13,22 @@ const divText = document.querySelector(".text-div");
 
 const divPalette = document.querySelector(".palette-div");
 const divResizer = document.querySelector(".resizer-div");
-const divCleaner = document.querySelector(".cleaner-div");
-const mainDivs = [divPalette, divResizer, divCleaner];
+const divPickerHistory = document.querySelector(".picker-div");
+const mainDivs = [divPalette, divResizer, divPickerHistory];
 
 const progressbar = document.querySelector("progress");
 const downLoadImgLink = document.querySelector(".download-img-a");
 
-const progressNumberFormat = new Intl.NumberFormat('en-EN', { maximumSignificantDigits: 1 });
+const progressNumberFormat = new Intl.NumberFormat('en-EN', {maximumSignificantDigits: 1});
 const screenshotFileName = 'page-screenshot';
-
 
 
 let data = {
   currentTheme: 'light',
   visibleOnly: true
 };
+
+const pickerHistory = [];
 
 let currentWindow;
 let windowId;
@@ -338,7 +337,7 @@ function showDiv(div) {
 }
 
 
-function setProgressbarVisible(b){
+function setProgressbarVisible(b) {
   progressbar.value = 0;
   if (b) {
     progressbar.classList.remove('hidden');
@@ -352,14 +351,13 @@ function onProgress(f) {
     divText.innerText = `Capturing... done`;
   } else {
     progressbar.value = f * 100;
-    const n = progressNumberFormat.format(f * 100 );
+    const n = progressNumberFormat.format(f * 100);
     divText.innerText = `Capturing... ${n}% `;
   }
 }
 
 function onError(err) {
   divPalette.innerHTML = `<span class="ge-error-color">${err}</span>`;
-  console.error(err);
 }
 
 function onCompleted(filenames, index) {
@@ -396,7 +394,6 @@ function onCompleted(filenames, index) {
     onCompleted(filenames, index + 1);
   }
 }
-
 
 
 /**
@@ -521,21 +518,58 @@ function initListener() {
 
 
 
+  function hexToRgb(hex)  {
+    if (!hex.includes('#')) {
+      return hex;
+    }
+    hex = hex.replace(/^#/, '');
+    const length = hex.length;
+    const hasAlpha = (length === 8 || length === 4);
+
+    let [r, g, b, a] = hasAlpha ? [
+      hex.substr(0, 2),
+      hex.substr(2, 2),
+      hex.substr(4, 2),
+      hex.substr(6, 2)
+    ] : [
+      hex.substr(0, 2),
+      hex.substr(2, 2),
+      hex.substr(4, 2),
+      'FF'
+    ];
+    [r, g, b, a] = [r, g, b, a].map(val => parseInt(val, 16));
+
+    return  hasAlpha ? `rgba(${r}, ${g}, ${b}, ${a / 255})` : `rgb(${r}, ${g}, ${b})`;
+  }
+
+
   btnEyeDropper.addEventListener("click", async () => {
     divPalette.classList.add('hidden');
     const eyeDropper = new EyeDropper();
     eyeDropper
       .open()
       .then((result) => {
-        console.log(result)
-        divPalette.classList.remove(['hidden']);
+        showDiv(divPickerHistory);
         const color = result.sRGBHex;
+        if (!pickerHistory.includes(color)) {
+          pickerHistory.push(color);
+        }
         navigator.clipboard
           .writeText(color)
           .then(() => setLabelText(`${color} copied to clipboard.`));
+
+        const colors = pickerHistory.map(c => {
+          return {rgba: hexToRgb(c), hex: c};
+        });
+        divPickerHistory.innerHTML = renderColors(colors);
+        divPickerHistory
+          .querySelectorAll('div[data-color]')
+          .forEach(ele =>
+            ele.addEventListener('click', () => copyColor(ele))
+          );
       })
       .catch((e) => {
-        //
+        console.error(e);
       });
   });
 }
@@ -556,7 +590,7 @@ function resizeWindow(ele) {
  * Initializes the div resizer by generating the necessary HTML elements
  * and attaching event listeners for resizing the window.
  */
-function initDivResizer(){
+function initDivResizer() {
   const buf = [];
   for (const ws of windowSizes) {
     buf.push(`
@@ -574,12 +608,12 @@ function initDivResizer(){
     );
 
   chrome.windows.onBoundsChanged.addListener((win) => {
-      setLabelText(`Current size: ${win.width} × ${win.height}`, 'none');
+    setLabelText(`Current size: ${win.width} × ${win.height}`, 'none');
   });
 }
 
 
-function initDivCleaner(){
+function initDivCleaner() {
   /*
   const buf = [];
     buf.push(`
@@ -605,9 +639,6 @@ function initDivCleaner(){
 
    */
 }
-
-
-
 
 
 /**
