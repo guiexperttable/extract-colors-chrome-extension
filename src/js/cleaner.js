@@ -27,8 +27,9 @@ function cleanPage() {
  */
 const fnClean = async () => {
   const advertisingClasses = [
-    'iframe, [class^="ad-"], [class^="-ad"], [class*="-ad-"], [class*="advertisement"], [class^="promo-"]',
-    '#ad', '.ad', '.sponsor', '.sponsored', '.promo', '.promoted', '.promotion', '.banner',  '.supplementary'
+    '[class^="ad-"], [class^="-ad"], [class*="-ad-"], [class*="advertisement"], [class^="promo-"], [class*="StickyFooter"]',
+    '#ad', '.ad', '.sponsor', '.sponsored', '.promo', '.promoted', '.promotion', '.banner',  '.supplementary',
+    'video, iframe'
   ];
 
   async function wait(ms) {
