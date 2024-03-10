@@ -494,7 +494,7 @@ function initListener() {
     showDiv(divPalette);
     const onSplitting = console.warn;
     setProgressbarVisible(true);
-    CaptureUtil.captureToFiles(currentTab, screenshotFileName, onCompleted, onError, onProgress, onSplitting);
+    CaptureUtil.captureToFiles(currentTab, screenshotFileName, {onCompleted, onError, onProgress, onSplitting});
   });
 
   btnToggleTheme.addEventListener("click", async () => {

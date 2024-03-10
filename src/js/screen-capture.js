@@ -390,36 +390,26 @@ const CaptureUtil = (() => {
    * Captures screenshots of a given tab and returns them as blobs.
    *
    * @param {Object} tab - The tab object to capture screenshots from.
-   * @param {Function} callback - The callback function to be executed when the screenshots are captured successfully. It receives an array of blobs as a parameter.
-   * @param {Function} errback - The callback function to be executed if an error occurs during the capture process.
-   * @param {Function} progress - The progress callback function.
-   * @param {Function} splitnotifier - The split notification callback function.
    * @return {Promise} A promise that resolves when the capture process is complete.
    */
-  function captureToBlobs(tab, callback, errback, progress, splitnotifier) {
+  function captureToBlobs(tab, listener) {
+    const {onCompleted, onError, onProgress, onSplitting} = listener;
     let loaded = false;
     const screenshots = [];
     const SINGLE_CAPTURE_TIMEOUT = 3000;
-    let timedOut = false;
-    const noop = () => {
-    };
-
-    callback = callback || noop;
-    errback = errback || noop;
-    progress = progress || noop;
 
     if (!isUrlAllowed(tab.url)) {
-      errback('Oops! It seems that this page is not allowed to be analyzed.');
+      onError('Oops! It seems that this page is not allowed to be analyzed.');
     }
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (request.msg === CAPTURE_MSG_KEY) {
-        progress(request.complete);
-        capture(request, screenshots, sendResponse, splitnotifier);
+        onProgress(request.complete);
+        capture(request, screenshots, sendResponse, onSplitting);
         return true;
       } else {
         console.error('Unknown message received from content script: ' + request.msg);
-        errback('internal error');
+        onError('internal error');
         return false;
       }
     });
@@ -435,10 +425,10 @@ const CaptureUtil = (() => {
             console.error('Timed out too early while waiting for ' + 'chrome.tabs.executeScript. Try increasing the timeout.');
           } else {
             loaded = true;
-            progress(0);
+            onProgress(0);
 
             startCapture(tab, () => {
-              callback(getBlobsFromScreenshots(screenshots));
+              onCompleted(getBlobsFromScreenshots(screenshots));
             });
           }
         })
@@ -465,23 +455,28 @@ const CaptureUtil = (() => {
     return filenames;
   }
 
+
+
   /**
-   * Captures the contents of a tab and saves it to files.
+   * Captures the contents of a tab and saves them to files.
    *
-   * @param {Tab} tab - The tab to capture.
-   * @param {string} filename - The name of the output file.
-   * @param {function} onCompleted - A callback function to be called when the capture and saving process is completed.
-   * @param {function} onError - A callback function to be called if an error occurs during the capture or saving process.
-   * @param {function} onProgress - A callback function to be called periodically to report the progress of the capture and saving process.
-   * @param {boolean} onSplitting - Indicates whether to use OM splitting during the capture process.
+   * @param {object} tab - The tab object to capture.
+   * @param {string} filename - The filename for the saved files.
+   * @param {object} listener - The listener object for capturing events.
+   * @param {function} listener.onCompleted - The callback function to be called when capturing completes.
    *
    * @return {void}
    */
-  function captureToFiles(tab, filename, onCompleted, onError, onProgress, onSplitting) {
-    captureToBlobs(tab, async blobs => {
-      const filenames = await saveBlobs(blobs, filename);
-      onCompleted(filenames);
-    }, onError, onProgress, onSplitting);
+  function captureToFiles(tab, filename, listener) {
+    const {onCompleted} = listener;
+
+    captureToBlobs(tab, {
+      ...listener,
+      onCompleted: async blobs => {
+        const filenames = await saveBlobs(blobs, filename);
+        onCompleted(filenames);
+      }
+    });
   }
 
 
