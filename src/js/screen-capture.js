@@ -2,8 +2,8 @@ const CaptureUtil = (() => {
 
   const CAPTURE_MSG_KEY = 'capture';
   const CAPTURE_STEP_DELAY = 500;
-  const MAXIMUM_HEIGHT = 15000 * 2;
-  const MAXIMUM_WIDTH = 4000 * 2;
+  const MAXIMUM_HEIGHT = 2 * 10240;
+  const MAXIMUM_WIDTH = 4320;
   const MAXIMUM_AREA = MAXIMUM_HEIGHT * MAXIMUM_WIDTH;
   const ALLOWED_URL_PATTERNS = ['http://*/*', 'https://*/*', 'ftp://*/*', 'file://*/*'];
   const DISALLOWED_URL_REGEX = [/^https?:\/\/chrome.google.com\/.*$/];
