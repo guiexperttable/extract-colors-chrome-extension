@@ -212,11 +212,22 @@ const getUniqColors = (colors) => {
 const renderColors = (colors) => {
   const buf = [''];
   colors.forEach(color => {
+    const tw = hexToTailwind(color.hex);
     buf.push(`
         <div class="chip">
-          <div class="colored-div" data-color="${color.rgba}" style="background-color: ${color.rgba}"></div>
+          <div 
+              title="rgb: click, hex: shift+click, tailwind: alt+click"
+              class="colored-div" 
+              data-color-1="${color.rgba}" 
+              data-color-2="${color.hex}" 
+              data-color-3="${tw}" 
+              style="background-color: ${color.rgba}"></div>
           <div class="color-box-text hex">${color.hex}</div>
-          <div class="color-box-text rgb">${color.rgba}</div>
+          <div class="color-box-text rgb">${color.rgba}</div>`);
+    if (tw) {
+      buf.push(`<div class="color-box-text tailwind">${tw}</div>`);
+    }
+    buf.push(`
         </div>
       `);
   });
@@ -252,9 +263,9 @@ const grabColors = () => {
     currentColors = [...colors];
     divPalette.innerHTML = renderColors(colors);
     divPalette
-      .querySelectorAll('div[data-color]')
+      .querySelectorAll('div[data-color-1]')
       .forEach(ele =>
-        ele.addEventListener('click', () => copyColor(ele))
+        ele.addEventListener('click', (evt) => copyColor(ele, evt))
       );
     downLoadImgLink.setAttribute('href', createColorImage(colors));
   });
@@ -266,9 +277,10 @@ const grabColors = () => {
  *
  * @param {HTMLDivElement} colorDiv - The target of the click.
  */
-function copyColor(colorDiv) {
-  const color = colorDiv.getAttribute('data-color');
-  navigator.clipboard.writeText(color).then(() => setLabelText(`${color} copied to clipboard.`));
+function copyColor(colorDiv, evt) {
+  const key = evt.shiftKey ? '2' : evt.altKey ? '3': '1';
+  const color = colorDiv.getAttribute('data-color-' + key);
+  navigator.clipboard.writeText(color).then(() => setLabelText(`"${color}" copied to clipboard.`));
 }
 
 
