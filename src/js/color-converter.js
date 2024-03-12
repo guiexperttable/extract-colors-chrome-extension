@@ -1,3 +1,10 @@
+/**
+ * Converts RGB or RGBA string to number array.
+ *
+ * @param {string} rgbString - The RGB or RGBA string to be converted.
+ * @returns {number[]} - The converted number array.
+ * @throws {Error} - If the RGB or RGBA format is invalid.
+ */
 const rgbStringToNumberArray = (rgbString) => {
   const rgbaRegex = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(\.\d+)?))?\)/;
   const matches = rgbString.match(rgbaRegex);
@@ -15,16 +22,33 @@ const rgbStringToNumberArray = (rgbString) => {
 };
 
 
-function rgb2oklch (r, g, b, alpha) {
+/**
+ * Convert RGB color values to OKLCH color space.
+ *
+ * @param {number} r - The red color channel value (0-255).
+ * @param {number} g - The green color channel value (0-255).
+ * @param {number} b - The blue color channel value (0-255).
+ * @param {number} alpha - The alpha/opacity value (0-1).
+ * @return {Array} The OKLCH color values [L, C, H, alpha].
+ */
+function rgb2oklch(r, g, b, alpha) {
   const [l, a, b_, _alpha] = rgb2oklab(r, g, b, alpha);
   return lab2lch(l, a, b_, _alpha);
 }
 
-function oklchToString(l, c, h, alpha){
-  const f = (n, d)=> n.toFixed(d)
+/**
+ * Converts OKLCH color values to a string representation.
+ * @param {number} l - The lightness value (0-1).
+ * @param {number} c - The chroma value (0-1).
+ * @param {number} h - The hue value (0-1).
+ * @param {number} [alpha] - The alpha value (0-1).
+ * @returns {string} - The string representation of the OKLCH color values.
+ */
+function oklchToString(l, c, h, alpha) {
+  const f = (n, d) => n.toFixed(d)
     .replace(/\.000/g, '')
     .replace(/\.00/g, '');
-  let per= (n) => (n *100).toFixed(2).replace(/\.00/g, '');
+  let per = (n) => (n * 100).toFixed(2).replace(/\.00/g, '');
 
   let ls = per(l);
   let cs = f(c, 3);
@@ -32,15 +56,31 @@ function oklchToString(l, c, h, alpha){
     cs = cs.replace(/0$/g, '');
   }
   let hs = f(h, 2);
-  if (alpha!==undefined) {
+  if (alpha !== undefined) {
     return `oklch(${ls}% ${cs} ${hs} / ${per(alpha)}%)`;
   }
   return `oklch(${ls}% ${cs} ${hs})`;
 }
 
 
-function rgb2oklab  (r,g,b, alpha) {
-  const { cbrt } = Math;
+/**
+ * Converts RGB color values to OKLab color space.
+ *
+ * @param {number} r - The red component value, ranging from 0 to 255.
+ * @param {number} g - The green component value, ranging from 0 to 255.
+ * @param {number} b - The blue component value, ranging from 0 to 255.
+ * @param {number} [alpha] - The alpha component value, ranging from 0 to 1. Optional.
+ *
+ * @return {Array} An array containing OKLab color values.
+ *                  - The first element is the lightness value.
+ *                  - The second element is the chroma value.
+ *                  - The third element is the hue value.
+ *                  - The fourth element (optional) is the alpha value.
+ *
+ * @see {@link https://bottosson.github.io/posts/oklab/} for more information on OKLab color space.
+ */
+function rgb2oklab(r, g, b, alpha) {
+  const {cbrt} = Math;
   // OKLab color space implementation taken from https://bottosson.github.io/posts/oklab/
   const [lr, lg, lb] = [rgb2lrgb(r / 255), rgb2lrgb(g / 255), rgb2lrgb(b / 255)];
   const l = cbrt(0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb);
@@ -53,7 +93,7 @@ function rgb2oklab  (r,g,b, alpha) {
   }
   let lightness = 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s;
   let chroma = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
-  if (alpha!==undefined){
+  if (alpha !== undefined) {
     return [
       lightness,
       chroma,
@@ -68,27 +108,41 @@ function rgb2oklab  (r,g,b, alpha) {
   ];
 }
 
-function lab2lch (l,a,b, alpha)  {
-  const {sqrt,atan2,round} = Math;
+/**
+ * Convert LAB color to LCH color.
+ *
+ * @param {number} l - The L value of the LAB color.
+ * @param {number} a - The A value of the LAB color.
+ * @param {number} b - The B value of the LAB color.
+ * @param {number} alpha - [Optional] The alpha value of the color.
+ * @return {number[]} The LCH color representation [L, C, H, ?
+ */
+function lab2lch(l, a, b, alpha) {
+  const {sqrt, atan2, round} = Math;
   const c = sqrt(a * a + b * b);
   const PI = Math.PI;
   const RAD2DEG = 180 / PI;
   let h = (atan2(b, a) * RAD2DEG + 360) % 360;
-  if (round(c*10000) === 0) h = 0;
-  if (alpha!==undefined){
+  if (round(c * 10000) === 0) h = 0;
+  if (alpha !== undefined) {
     return [l, c, h, alpha];
   }
   return [l, c, h];
 }
 
+/**
+ * Converts an RGB color value to linear RGB color value.
+ *
+ * @param {number} c - The RGB color value to be converted.
+ * @returns {number} - The linear RGB color value.
+ */
 function rgb2lrgb(c) {
-  const { abs, pow, sign } = Math;
+  const {abs, pow, sign} = Math;
   if (abs(c) < 0.04045) {
     return c / 12.92;
   }
   return (sign(c) || 1) * pow((abs(c) + 0.055) / 1.055, 2.4);
 }
-
 
 
 const hexTailwind = {
@@ -355,12 +409,12 @@ const hexTailwind = {
  * @param {string} hex - The hex code to convert.
  * @returns {string} - The Tailwind utility class corresponding to the hex code.
  */
-function hexToTailwind(hex){
+function hexToTailwind(hex) {
   return hexTailwind[hex];
 }
 
 
-function  test(){
+function test() {
   const patterns = [
     {rgb: [100, 100, 100], out: 'oklch(50.32% 0 0)'},
     {rgb: [0, 0, 0], out: 'oklch(0% 0 0)'},
@@ -370,7 +424,7 @@ function  test(){
     {rgb: 'rgba(0,0,0,0)', out: 'oklch(0% 0 0 / 0%)'},
   ];
   for (const t of patterns) {
-    const rgb = t.rgb.length<5 ? t.rgb : rgbStringToNumberArray(t.rgb) ;
+    const rgb = t.rgb.length < 5 ? t.rgb : rgbStringToNumberArray(t.rgb);
     const oklch = rgb2oklch(...rgb);
     let out = oklchToString(...oklch);
     if (out !== t.out) {
