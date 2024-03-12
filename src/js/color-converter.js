@@ -9,7 +9,7 @@ const rgbStringToNumberArray = (rgbString) => {
   const rgbaRegex = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(\.\d+)?))?\)/;
   const matches = rgbString.match(rgbaRegex);
   if (!matches) {
-    throw new Error('Ungültiges RGB- oder RGBA-Format');
+    throw new Error('Wrong RGB or RGBA format!');
   }
 
   const [, r, g, b, a] = matches.map(Number); // ignore first match
