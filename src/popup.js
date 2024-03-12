@@ -201,6 +201,11 @@ const getUniqColors = (colors) => {
   return ret;
 };
 
+function getRgbArrFromRgbString(rgb) {
+  rgb = rgb.replace(/rgba?\(/, '').replace(')', '');
+  return rgb.split(', ').map(s=>Number(s));
+}
+
 /**
  * Generates an HTML string to render a list of colors.
  *
@@ -212,18 +217,23 @@ const getUniqColors = (colors) => {
 const renderColors = (colors) => {
   const buf = [''];
   colors.forEach(color => {
+    const [r, g, b] = getRgbArrFromRgbString(color.rgba);
+    const oklch = rgb2oklch(r, g, b);
+    const oklchStr = oklchToString(...oklch);
     const tw = hexToTailwind(color.hex);
     buf.push(`
         <div class="chip">
           <div 
-              title="rgb: click, hex: shift+click, tailwind: alt+click"
+              title="rgb: click, hex: shift+click, oklchStr: alt+click"
               class="colored-div" 
               data-color-1="${color.rgba}" 
               data-color-2="${color.hex}" 
-              data-color-3="${tw}" 
+              data-color-3="${oklchStr}" 
+              data-color-4="${tw}" 
               style="background-color: ${color.rgba}"></div>
           <div class="color-box-text hex">${color.hex}</div>
-          <div class="color-box-text rgb">${color.rgba}</div>`);
+          <div class="color-box-text rgb">${color.rgba}</div>
+          <div class="color-box-text oklch">${oklchStr}</div>`);
     if (tw) {
       buf.push(`<div class="color-box-text tailwind">${tw}</div>`);
     }
