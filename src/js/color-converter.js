@@ -1,18 +1,45 @@
+const rgbStringToNumberArray = (rgbString) => {
+  const rgbaRegex = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(\.\d+)?))?\)/;
+  const matches = rgbString.match(rgbaRegex);
+  if (!matches) {
+    throw new Error('Ungültiges RGB- oder RGBA-Format');
+  }
+
+  const [, r, g, b, a] = matches.map(Number); // ignore first match
+
+  if (!isNaN(a)) {
+    return [r, g, b, a];
+  } else {
+    return [r, g, b];
+  }
+};
 
 
-function rgb2oklch (r, g, b) {
-  const [l, a, b_] = rgb2oklab(r, g, b);
-  return lab2lch(l, a, b_);
+function rgb2oklch (r, g, b, alpha) {
+  const [l, a, b_, _alpha] = rgb2oklab(r, g, b, alpha);
+  return lab2lch(l, a, b_, _alpha);
 }
 
-function oklchToString(l, c, h){
-  const f = (n)=> n.toFixed(2).replace(/\.00/g, '');
-  let ls = (l *100).toFixed(2).replace(/\.00/g, '');
-  return `oklch(${ls}% ${f(c)} ${f(h)})`;
+function oklchToString(l, c, h, alpha){
+  const f = (n, d)=> n.toFixed(d)
+    .replace(/\.000/g, '')
+    .replace(/\.00/g, '');
+  let per= (n) => (n *100).toFixed(2).replace(/\.00/g, '');
+
+  let ls = per(l);
+  let cs = f(c, 3);
+  if (cs.includes('.')) {
+    cs = cs.replace(/0$/g, '');
+  }
+  let hs = f(h, 2);
+  if (alpha!==undefined) {
+    return `oklch(${ls}% ${cs} ${hs} / ${per(alpha)}%)`;
+  }
+  return `oklch(${ls}% ${cs} ${hs})`;
 }
 
 
-function rgb2oklab  (r,g,b) {
+function rgb2oklab  (r,g,b, alpha) {
   const { cbrt } = Math;
   // OKLab color space implementation taken from https://bottosson.github.io/posts/oklab/
   const [lr, lg, lb] = [rgb2lrgb(r / 255), rgb2lrgb(g / 255), rgb2lrgb(b / 255)];
@@ -20,24 +47,37 @@ function rgb2oklab  (r,g,b) {
   const m = cbrt(0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb);
   const s = cbrt(0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb);
 
-  let h = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
-  if (isNaN(h)) {
-    h = 0;
+  let hue = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
+  if (isNaN(hue)) {
+    hue = 0;
+  }
+  let lightness = 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s;
+  let chroma = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
+  if (alpha!==undefined){
+    return [
+      lightness,
+      chroma,
+      hue,
+      alpha
+    ];
   }
   return [
-    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
-    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
-    h
+    lightness,
+    chroma,
+    hue
   ];
 }
 
-function lab2lch (l,a,b)  {
+function lab2lch (l,a,b, alpha)  {
   const {sqrt,atan2,round} = Math;
   const c = sqrt(a * a + b * b);
   const PI = Math.PI;
   const RAD2DEG = 180 / PI;
   let h = (atan2(b, a) * RAD2DEG + 360) % 360;
   if (round(c*10000) === 0) h = 0;
+  if (alpha!==undefined){
+    return [l, c, h, alpha];
+  }
   return [l, c, h];
 }
 
@@ -318,3 +358,27 @@ const hexTailwind = {
 function hexToTailwind(hex){
   return hexTailwind[hex];
 }
+
+
+function  test(){
+  const patterns = [
+    {rgb: [100, 100, 100], out: 'oklch(50.32% 0 0)'},
+    {rgb: [0, 0, 0], out: 'oklch(0% 0 0)'},
+    {rgb: [255, 255, 255], out: 'oklch(100% 0 0)'},
+    {rgb: [57, 48, 51], out: 'oklch(32% 0.014 355.81)'},
+    {rgb: 'rgba(200, 100, 88, 0.5)', out: 'oklch(61.93% 0.13 28.41 / 50%)'},
+    {rgb: 'rgba(0,0,0,0)', out: 'oklch(0% 0 0 / 0%)'},
+  ];
+  for (const t of patterns) {
+    const rgb = t.rgb.length<5 ? t.rgb : rgbStringToNumberArray(t.rgb) ;
+    const oklch = rgb2oklch(...rgb);
+    let out = oklchToString(...oklch);
+    if (out !== t.out) {
+      console.warn('rgb( ' + rgb + ') -> ', out + ' <=?=> ' + t.out);
+    } else {
+      console.log('rgb(' + rgb + ') -> ', out);
+    }
+  }
+}
+
+// test();

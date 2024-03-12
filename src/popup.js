@@ -201,9 +201,20 @@ const getUniqColors = (colors) => {
   return ret;
 };
 
-function getRgbArrFromRgbString(rgb) {
-  rgb = rgb.replace(/rgba?\(/, '').replace(')', '');
-  return rgb.split(', ').map(s=>Number(s));
+function getRgbArrFromRgbString(rgbString) {
+  const rgbaRegex = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(\.\d+)?))?\)/;
+  const matches = rgbString.match(rgbaRegex);
+  if (!matches) {
+    throw new Error('Ungültiges RGB- oder RGBA-Format');
+  }
+
+  const [, r, g, b, a] = matches.map(Number); // ignore first match
+
+  if (!isNaN(a)) {
+    return [r, g, b, a];
+  } else {
+    return [r, g, b];
+  }
 }
 
 /**
@@ -217,8 +228,8 @@ function getRgbArrFromRgbString(rgb) {
 const renderColors = (colors) => {
   const buf = [''];
   colors.forEach(color => {
-    const [r, g, b] = getRgbArrFromRgbString(color.rgba);
-    const oklch = rgb2oklch(r, g, b);
+    const [r, g, b, a] = getRgbArrFromRgbString(color.rgba);
+    const oklch = rgb2oklch(r, g, b, a);
     const oklchStr = oklchToString(...oklch);
     const tw = hexToTailwind(color.hex);
     buf.push(`
