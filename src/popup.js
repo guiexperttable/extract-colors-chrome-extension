@@ -5,6 +5,7 @@ const btnToggleDesignMode = document.querySelector(".toggle-designmode-btn");
 
 const btnRescan = document.querySelector(".rescan-btn");
 const btnResizer = document.querySelector(".resizer-btn");
+
 const btnCopyImage = document.querySelector(".copy-img-btn");
 const btnCopyValues = document.querySelector(".copy-values-btn");
 const btnCopyHtml = document.querySelector(".copy-html-btn");
@@ -107,13 +108,24 @@ function createColorImage(colors) {
  */
 function drawColorBox(imgContext, color, x, y, color_box_width, color_box_height) {
   imgContext.shadowBlur = 3;
-  imgContext.shadowColor = 'rgba(0,0,0,0.3)';
+  imgContext.shadowColor = 'rgba(0,0,0,0.5)';
   imgContext.fillStyle = color.rgba;
   imgContext.fillRect(x, y, color_box_width, color_box_height);
   imgContext.fillStyle = '#000';
-  imgContext.textAlign = 'center';
-  imgContext.fillText(color.hex, x + (color_box_width / 2), y + color_box_height + 20);
-  imgContext.fillText(color.rgba, x + (color_box_width / 2), y + color_box_height + 50);
+  imgContext.textAlign = 'left';
+
+  x = x + color_box_width + 20;
+  imgContext.fillText(color.hex, x, y + 20);
+  imgContext.fillText(color.rgba, x, y + 50);
+
+  const [r, g, b, a] = getRgbArrFromRgbString(color.rgba);
+  const oklch = rgb2oklch(r, g, b, a);
+  const oklchStr = oklchToString(...oklch);
+  const tw = hexToTailwind(color.hex);
+  imgContext.fillText(oklchStr, x, y + 80);
+  if (tw) {
+    imgContext.fillText(tw, x, y  + 110);
+  }
 }
 
 /**
@@ -126,13 +138,14 @@ function drawColorBox(imgContext, color, x, y, color_box_width, color_box_height
  */
 function createColorImageCanvas(colors) {
   const canvas = document.createElement('canvas');
-  const numberOfColorBoxesPerRow = 5;
-  const boxWidth = 140;
+  const numberOfColorBoxesPerRow = 3;
+  const boxWidth = 100;
   const colorBoxHeight = 100;
-  const padding = 20;
+  const paddingX = 400;
+  const paddingY = 60;
   const totalRows = Math.ceil(colors.length / numberOfColorBoxesPerRow);
-  const imageWidth = ((boxWidth + (padding * 2)) * numberOfColorBoxesPerRow) + (padding * 2);
-  const imageHeight = ((colorBoxHeight + (padding * 2) + 60) * totalRows) + (padding * 2);
+  const imageWidth = (boxWidth + paddingX) * numberOfColorBoxesPerRow;
+  const imageHeight = ((colorBoxHeight + paddingY) * totalRows);
 
   window.devicePixelRatio = 2;
   canvas.height = imageHeight;
@@ -144,16 +157,16 @@ function createColorImageCanvas(colors) {
     img.putImageData(imageData, 0, 0);
     img.fillStyle = 'white';
     img.fillRect(0, 0, imageWidth, imageHeight);
-    img.font = 'bold 16pt serif';
+    img.font = 'normal 16pt sans-serif';
 
     let colorCounter = 0;
     for (let r = 0; r < totalRows; r++) {
-      const co_y = padding * 2 + ((((padding * 2) + colorBoxHeight) + 60) * r);
+      const co_y =  ((colorBoxHeight + paddingY) * r);
       for (let c = 0; c < numberOfColorBoxesPerRow; c++) {
         if (colorCounter === colors.length) {
           break;
         } else {
-          const co_x = padding * 2 + (((padding * 2) + boxWidth) * c);
+          const co_x =  ((paddingX + boxWidth) * c);
           drawColorBox(img, colors[colorCounter], co_x, co_y, boxWidth, colorBoxHeight);
           colorCounter++;
         }
@@ -377,6 +390,34 @@ function showDiv(div) {
   div.classList.remove('hidden');
 }
 
+/**
+ * Checks if the palette div is visible or hidden.
+ *
+ * @returns {boolean} - Whether the palette div is visible (false) or hidden (true).
+ */
+function isPalleteDivVisible(){
+  return !divPalette.classList.contains('hidden');
+}
+
+/**
+ * Checks if the picker history div is visible.
+ *
+ * @returns {boolean} - Indicates whether the picker history div is visible or not.
+ */
+function isPickerHistoryDivVisible(){
+  return !divPickerHistory.classList.contains('hidden');
+}
+
+/**
+ * Checks if the palette or picker history div is currently visible.
+ *
+ * @returns {boolean} Returns true if either the palette div or the picker history div is visible, otherwise returns false.
+ */
+function isPalleteOrPickerHistoryDivVisible(){
+  return isPalleteDivVisible() || isPickerHistoryDivVisible();
+}
+
+
 
 /**
  * Sets the visibility of the progress bar.
@@ -537,9 +578,14 @@ function initListener() {
   });
 
   btnCopyValues.addEventListener("click", async () => {
-    showDiv(divPalette);
+    if (!isPalleteOrPickerHistoryDivVisible()) {
+      showDiv(divPalette);
+    }
+    const colorArr = isPalleteDivVisible() ? currentColors : pickerHistory;
+    console.log('currentColors', currentColors)
+    console.log('pickerHistory', pickerHistory)
     const buf = [];
-    for (const color of currentColors) {
+    for (const color of colorArr) {
       buf.push(`${color.rgba}`);
     }
     navigator.clipboard
@@ -548,7 +594,6 @@ function initListener() {
   });
 
   btnCopyRules.addEventListener("click", async () => {
-    showDiv(divPalette);
     const s = renderCSSCustomPropertyMap();
     if (s) {
       navigator.clipboard
@@ -561,8 +606,10 @@ function initListener() {
   });
 
   btnCopyHtml.addEventListener("click", async () => {
-    showDiv(divPalette);
-    const box = document.querySelector('.palette-div').innerHTML;
+    if (!isPalleteOrPickerHistoryDivVisible()) {
+      showDiv(divPalette);
+    }
+    const box = isPalleteDivVisible() ? divPalette.innerHTML : divPickerHistory.innerHTML;
     const html = `
   <html lang="en" data-theme="light">
     <style>
@@ -601,8 +648,11 @@ function initListener() {
   });
 
   btnCopyImage.addEventListener("click", async () => {
-    showDiv(divPalette);
-    const canvas = createColorImageCanvas(currentColors);
+    if (!isPalleteOrPickerHistoryDivVisible()) {
+      showDiv(divPalette);
+    }
+    const colorArr = isPalleteDivVisible() ? currentColors : pickerHistory;
+    const canvas = createColorImageCanvas(colorArr);
     // Copy canvas to blob
     canvas.toBlob(blob => {
       // Create ClipboardItem with blob and it's type, and add to an array
@@ -624,17 +674,13 @@ function initListener() {
       .then((result) => {
         showDiv(divPickerHistory);
         const color = result.sRGBHex;
-        if (!pickerHistory.includes(color)) {
-          pickerHistory.push(color);
-        }
+        pickerHistory.push({hex: color, rgba: hexToRgb(color)});
+
         navigator.clipboard
           .writeText(color)
           .then(() => setLabelText(`${color} copied to clipboard.`));
 
-        const colors = pickerHistory.map(c => {
-          return {rgba: hexToRgb(c), hex: c};
-        });
-        divPickerHistory.innerHTML = renderColors(colors);
+        divPickerHistory.innerHTML = renderColors(pickerHistory);
         divPickerHistory
           .querySelectorAll('div[data-color]')
           .forEach(ele =>
