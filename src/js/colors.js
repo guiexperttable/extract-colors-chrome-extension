@@ -277,24 +277,29 @@ const getColors = () => {
    */
   function getCSSCustomProperties() {
     const ret = [];
+
+    function handleRule(rule) {
+      const style = rule.style;
+      for (let i = 0; i < style.length; i++) {
+        const propertyName = style[i];
+        if (propertyName.startsWith('--')) {
+          let propertyValue = style.getPropertyValue(propertyName);
+          if (isColor(propertyValue)) {
+            ret.push({
+              rule: rule.selectorText,
+              propertyName,
+              propertyValue
+            });
+          }
+        }
+      }
+    }
+
     for (const styleSheet of document.styleSheets) {
       if (styleSheet.href===null || styleSheet.href.startsWith(window.location.origin)) {
         for (const rule of styleSheet.cssRules) {
           if (rule instanceof CSSStyleRule) {
-            const style = rule.style;
-            for (let i = 0; i < style.length; i++) {
-              const propertyName = style[i];
-              if (propertyName.startsWith('--')) {
-                let propertyValue = style.getPropertyValue(propertyName);
-                if (isColor(propertyValue)) {
-                  ret.push({
-                    rule: rule.selectorText,
-                    propertyName,
-                    propertyValue
-                  });
-                }
-              }
-            }
+            handleRule(rule);
           }
         }
       }
