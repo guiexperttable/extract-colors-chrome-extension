@@ -278,7 +278,7 @@ const getColors = () => {
   function getCSSCustomProperties() {
     const ret = [];
     for (const styleSheet of document.styleSheets) {
-      if (styleSheet.href && styleSheet.href.startsWith(window.location.origin)) {
+      if (styleSheet.href===null || styleSheet.href.startsWith(window.location.origin)) {
         for (const rule of styleSheet.cssRules) {
           if (rule instanceof CSSStyleRule) {
             const style = rule.style;
@@ -298,7 +298,7 @@ const getColors = () => {
           }
         }
       }
-    }
+    } // for
     return ret;
   }
 

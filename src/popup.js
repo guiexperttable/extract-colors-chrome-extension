@@ -1,7 +1,7 @@
 // main actions:
 const btnRescan = document.querySelector(".rescan-btn");
 const btnEyeDropper = document.querySelector(".eyedropper-btn");
-const btnCopyRules = document.querySelector(".copy-rules-btn");
+const btnCopyCustomProperties = document.querySelector(".copy-rules-btn");
 const btnCaptureScreen = document.querySelector(".capture-screen-btn");
 const btnCleaner = document.querySelector(".cleaner-btn");
 const btnToggleDesignMode = document.querySelector(".toggle-designmode-btn");
@@ -609,7 +609,7 @@ function initListener() {
       .then(() => setLabelText(`Data copied to clipboard.`));
   });
 
-  btnCopyRules.addEventListener("click", async () => {
+  btnCopyCustomProperties.addEventListener("click", async () => {
     showDiv(divDummy);
     const s = renderCSSCustomPropertyMap();
     if (s) {
