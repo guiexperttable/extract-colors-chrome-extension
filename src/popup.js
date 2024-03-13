@@ -37,6 +37,7 @@ let data = {
   currentTheme: 'light',
   visibleOnly: true
 };
+let displayInfo = [];
 
 const pickerHistory = [];
 
@@ -586,6 +587,18 @@ function initListener() {
   });
 
   btnResizer.addEventListener("click", async () => {
+    let maxWidth = 10240;
+    let maxHeight = 4320;
+    if (displayInfo.length) {
+      for (const di of displayInfo) {
+        if (di.activeState ==='active' ){
+          maxWidth = di.workArea.width;
+          maxHeight = di.workArea.height;
+          break;
+        }
+      }
+    }
+    initDivResizer(maxWidth, maxHeight);
     showDiv(divResizer);
   });
 
@@ -736,22 +749,27 @@ function initListener() {
 function resizeWindow(ele) {
   const width = parseInt(ele.getAttribute('data-width'));
   const height = parseInt(ele.getAttribute('data-height'));
-  updateWindow(windowId, {width, height});
+  updateWindow(windowId, {width, height, top:0, left:0});
 }
 
 /**
  * Initializes the div resizer by generating the necessary HTML elements
  * and attaching event listeners for resizing the window.
  */
-function initDivResizer() {
+function initDivResizer(maxWidth, maxHeight) {
   const buf = [];
-  for (const ws of windowSizes) {
-    buf.push(`
+  const found = windowSizes.filter((ws)=> (ws.height===maxHeight && ws===maxWidth)).length===1;
+  const sizes = found ? windowSizes : [...windowSizes, {width: maxWidth, height: maxHeight, label: 'Your screen'}];
+  for (const ws of sizes) {
+    if (ws.width <= maxWidth && ws.height <= maxHeight) {
+      console.log(ws)
+      buf.push(`
     <div class="resolution-div" data-width="${ws.width}" data-height="${ws.height}">
         <div class="resolution">${ws.width} × ${ws.height}</div>
         <div class="label">${ws.label}</div>
     </div>
     `);
+    }
   }
   divResizer.innerHTML = buf.join('');
   divResizer
@@ -836,12 +854,21 @@ async function go() {
         initListener();
       });
 
-    initDivResizer();
     initDivCleaner();
 
   } catch (_e) {
     divPalette.innerHTML = `<span class="ge-error-color">Error! This page cannot be scripted.</span>`;
   }
+
+
+  chrome.runtime.onMessage
+    .addListener((message, sender, sendResponse) => {
+      if (message.displayInfo) {
+        displayInfo = message.displayInfo;
+        sendResponse(true);
+      }
+    });
+  chrome.runtime.sendMessage("requestDisplayInfo", () => {});
 }
 
 // Go:
