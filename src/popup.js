@@ -1,7 +1,7 @@
 // main actions:
 const btnRescan = document.querySelector(".rescan-btn");
 const btnEyeDropper = document.querySelector(".eyedropper-btn");
-const btnCopyCustomProperties = document.querySelector(".copy-rules-btn");
+const btnCopyCustomProperties = document.querySelector(".copy-custom-properties-btn");
 const btnCaptureScreen = document.querySelector(".capture-screen-btn");
 const btnCleaner = document.querySelector(".cleaner-btn");
 const btnToggleDesignMode = document.querySelector(".toggle-designmode-btn");
@@ -303,14 +303,18 @@ const grabColors = () => {
     ).sort((a, b) => a.sum - b.sum);
 
     currentColors = [...colors];
-    divPalette.innerHTML = renderColors(colors);
-    divPalette
-      .querySelectorAll('div[data-color-1]')
-      .forEach(ele =>
-        ele.addEventListener('click', (evt) => copyColor(ele, evt))
-      );
+    renderColorsOnDiv(currentColors, divPalette);
     downLoadImgLink.setAttribute('href', createColorImage(colors));
   });
+}
+
+function renderColorsOnDiv(colors, div){
+  div.innerHTML = renderColors(colors);
+  div
+    .querySelectorAll('div[data-color-1]')
+    .forEach(ele =>
+      ele.addEventListener('click', (evt) => copyColor(ele, evt))
+    );
 }
 
 
@@ -387,6 +391,20 @@ function isUrlAllowed(url) {
 }
 
 /**
+ * Set visibility of color action buttons based on the given div element.
+ *
+ * @param {HTMLElement} div - The div element to check visibility against.
+ */
+function setColorActionsVisibility(div) {
+  const colorActionBtns = document.querySelectorAll('.color-action');
+  if (div === divPickerHistory || div === divPalette) {
+    colorActionBtns.forEach(ele => ele.classList.remove('hidden'));
+  } else {
+    colorActionBtns.forEach(ele => ele.classList.add('hidden'));
+  }
+}
+
+/**
  * Show a specific div by removing the 'hidden' class and hiding all other divs.
  *
  * @param {HTMLElement} div - The div element to be shown.
@@ -394,15 +412,12 @@ function isUrlAllowed(url) {
  * @return {void}
  */
 function showDiv(div) {
+  if (div===divDummy) {
+    divDummy.innerText = '';
+  }
   mainDivs.forEach(d => d.classList.add('hidden'));
   div.classList.remove('hidden');
-
-  const colorActionBtns = document.querySelectorAll('.color-action');
-  if (div === divPickerHistory || div === divPalette) {
-    colorActionBtns.forEach(ele => ele.classList.remove('hidden'));
-  } else {
-    colorActionBtns.forEach(ele => ele.classList.add('hidden'));
-  }
+  setColorActionsVisibility(div);
 }
 
 /**
@@ -610,8 +625,14 @@ function initListener() {
   });
 
   btnCopyCustomProperties.addEventListener("click", async () => {
-    showDiv(divDummy);
+
     const s = renderCSSCustomPropertyMap();
+    showDiv(divDummy);
+    divDummy.innerHTML = `
+    <div>
+      <pre>${s}</pre>
+    </div>
+    `;
     if (s) {
       navigator.clipboard
         .writeText(s)
@@ -698,11 +719,7 @@ function initListener() {
           .then(() => setLabelText(`${color} copied to clipboard.`));
 
         divPickerHistory.innerHTML = renderColors(pickerHistory);
-        divPickerHistory
-          .querySelectorAll('div[data-color]')
-          .forEach(ele =>
-            ele.addEventListener('click', () => copyColor(ele))
-          );
+        renderColorsOnDiv(pickerHistory, divPickerHistory);
       })
       .catch((e) => {
         console.error(e);
