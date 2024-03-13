@@ -386,11 +386,18 @@ const CaptureUtil = (() => {
   }
 
 
+
+
   /**
-   * Captures screenshots of a given tab and returns them as blobs.
+   * Captures screenshots of a web page and saves them as blobs.
    *
-   * @param {Object} tab - The tab object to capture screenshots from.
-   * @return {Promise} A promise that resolves when the capture process is complete.
+   * @param {Object} tab - The tab object representing the web page.
+   * @param {Object} listener - The listener object containing event callbacks.
+   *
+   * @param {Function} listener.onCompleted - The callback function called when capturing is completed.
+   * @param {Function} listener.onError - The callback function called when an error occurs.
+   * @param {Function} listener.onProgress - The callback function called to report the progress of capturing.
+   * @param {Function} listener.onSplitting - The callback function called when the page is being split.
    */
   function captureToBlobs(tab, listener) {
     const {onCompleted, onError, onProgress, onSplitting} = listener;
@@ -414,27 +421,46 @@ const CaptureUtil = (() => {
       }
     });
 
-
+    const scriptLoaded = false;
     try {
-      const now = Date.now();
-      return chrome.scripting.executeScript({
-        target: {tabId: tab.id}, files: ['js/screen-capture-page.js']
-      })
-        .then((res) => {
-          if (!loaded && Date.now() - now > SINGLE_CAPTURE_TIMEOUT) {
-            console.error('Timed out too early while waiting for ' + 'chrome.tabs.executeScript. Try increasing the timeout.');
-          } else {
-            loaded = true;
-            onProgress(0);
+      if (scriptLoaded) {
+        startCaptering(tab, screenshots, onCompleted);
 
-            startCapture(tab, () => {
-              onCompleted(getBlobsFromScreenshots(screenshots));
-            });
-          }
+      } else {
+        const now = Date.now();
+        return chrome.scripting.executeScript({
+          target: {tabId: tab.id}, files: ['js/screen-capture-page.js']
         })
+          .then((_res) => {
+            if (!loaded && Date.now() - now > SINGLE_CAPTURE_TIMEOUT) {
+              console.error('Timed out too early while waiting for ' + 'chrome.tabs.executeScript. Try increasing the timeout.');
+            } else {
+              loaded = true;
+              startCaptering(tab, screenshots, onCompleted);
+            }
+          });
+      }
     } catch (err) {
       console.error(`Failed to execute script: ${err}`);
     }
+  }
+
+
+
+  /**
+   * Starts capturing screenshots from a given tab.
+   *
+   * @param {string} tab - The tab to capture the screenshots from.
+   * @param {Array} screenshots - Array of screenshots to capture.
+   * @param {function} onCompleted - A callback function to be called when capturing is completed. Accepts an array of blobs representing captured screenshots as an argument.
+   *
+   * @return {void}
+   */
+  function startCaptering(tab, screenshots, onCompleted){
+    onProgress(0);
+    startCapture(tab, () => {
+      onCompleted(getBlobsFromScreenshots(screenshots));
+    });
   }
 
 
