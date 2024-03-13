@@ -1,22 +1,30 @@
+// main actions:
+const btnRescan = document.querySelector(".rescan-btn");
+const btnEyeDropper = document.querySelector(".eyedropper-btn");
+const btnCopyRules = document.querySelector(".copy-rules-btn");
 const btnCaptureScreen = document.querySelector(".capture-screen-btn");
 const btnCleaner = document.querySelector(".cleaner-btn");
-const btnToggleTheme = document.querySelector(".toggle-theme-btn");
 const btnToggleDesignMode = document.querySelector(".toggle-designmode-btn");
-
-const btnRescan = document.querySelector(".rescan-btn");
 const btnResizer = document.querySelector(".resizer-btn");
 
+// light / dark
+const btnToggleTheme = document.querySelector(".toggle-theme-btn");
+
+
+// color actions:
 const btnCopyImage = document.querySelector(".copy-img-btn");
 const btnCopyValues = document.querySelector(".copy-values-btn");
 const btnCopyHtml = document.querySelector(".copy-html-btn");
-const btnCopyRules = document.querySelector(".copy-rules-btn");
-const btnEyeDropper = document.querySelector(".eyedropper-btn");
+
+
+// divs:
 const divText = document.querySelector(".text-div");
 
 const divPalette = document.querySelector(".palette-div");
 const divResizer = document.querySelector(".resizer-div");
 const divPickerHistory = document.querySelector(".picker-div");
-const mainDivs = [divPalette, divResizer, divPickerHistory];
+const divDummy = document.querySelector(".dummy-div");
+const mainDivs = [divPalette, divResizer, divPickerHistory, divDummy];
 
 const progressbar = document.querySelector("progress");
 const downLoadImgLink = document.querySelector(".download-img-a");
@@ -339,11 +347,11 @@ function updateHtmlDataThemeAttributeAndToggleIcon() {
 function renderCSSCustomPropertyMap() {
   const buf = [];
   const map = grabbedData.cssCustomProperties;
-  let keys = Object.keys(map).sort();
+  const keys = Object.keys(map).sort();
   for (const key of keys) {
     const rules = map[key];
     buf.push(`${key} {`);
-    let rulesKeys = Object.keys(rules).sort();
+    const rulesKeys = Object.keys(rules).sort();
     for (const rk of rulesKeys) {
       buf.push('  ' + rk + ': ' + rules[rk] + ';')
     }
@@ -388,6 +396,13 @@ function isUrlAllowed(url) {
 function showDiv(div) {
   mainDivs.forEach(d => d.classList.add('hidden'));
   div.classList.remove('hidden');
+
+  const colorActionBtns = document.querySelectorAll('.color-action');
+  if (div === divPickerHistory || div === divPalette) {
+    colorActionBtns.forEach(ele => ele.classList.remove('hidden'));
+  } else {
+    colorActionBtns.forEach(ele => ele.classList.add('hidden'));
+  }
 }
 
 /**
@@ -545,6 +560,7 @@ function initListener() {
   btnRescan.addEventListener("click", grabColors);
 
   btnToggleDesignMode.addEventListener("click", async () => {
+    showDiv(divDummy);
     toggleDesignMode()
       .then(res => {
         setLabelText(`Design mode is ${res}`);
@@ -559,13 +575,13 @@ function initListener() {
   });
 
   btnCleaner.addEventListener("click", async () => {
+    showDiv(divDummy);
     const count = await cleanPage();
     setLabelText(`Items removed: ${count}`);
-    // showDiv(divCleaner);
   });
 
   btnCaptureScreen.addEventListener("click", async () => {
-    showDiv(divPalette);
+    showDiv(divDummy);
     const onSplitting = console.warn;
     setProgressbarVisible(true);
     CaptureUtil.captureToFiles(currentTab, screenshotFileName, {onCompleted, onError, onProgress, onSplitting});
@@ -594,6 +610,7 @@ function initListener() {
   });
 
   btnCopyRules.addEventListener("click", async () => {
+    showDiv(divDummy);
     const s = renderCSSCustomPropertyMap();
     if (s) {
       navigator.clipboard
