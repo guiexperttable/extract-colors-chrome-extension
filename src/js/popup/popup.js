@@ -1,5 +1,5 @@
 import {initRuler, toogleRulerVisibility} from './ruler.js';
-import {getUniqColors, renderColorsOnDiv, scrapColors} from "./colors.js";
+import {createColorImage, getUniqColors, renderColors, renderColorsOnDiv, scrapColors} from "./colors.js";
 import {cleanPage} from "./cleaner.js";
 import {hexToTailwind, oklchToString, rgb2oklch} from "./color-converter.js";
 
@@ -68,85 +68,6 @@ function storeData() {
 
 
 
-/**
- * Draws a color box on a canvas context.
- *
- * @param {CanvasRenderingContext2D} imgContext - The canvas rendering context on which to draw the color box.
- * @param {object} color - The color object that contains the rgba and hex values of the color.
- * @param {number} x - The x-coordinate of the top-left corner of the color box.
- * @param {number} y - The y-coordinate of the top-left corner of the color box.
- * @param {number} color_box_width - The width of the color box.
- * @param {number} color_box_height - The height of the color box.
- */
-function drawColorBox(imgContext, color, x, y, color_box_width, color_box_height) {
-  imgContext.shadowBlur = 3;
-  imgContext.shadowColor = 'rgba(0,0,0,0.5)';
-  imgContext.fillStyle = color.rgba;
-  imgContext.fillRect(x, y, color_box_width, color_box_height);
-  imgContext.fillStyle = '#000';
-  imgContext.textAlign = 'left';
-
-  x = x + color_box_width + 20;
-  imgContext.fillText(color.hex, x, y + 20);
-  imgContext.fillText(color.rgba, x, y + 50);
-
-  const [r, g, b, a] = getRgbArrFromRgbString(color.rgba);
-  const oklch = rgb2oklch(r, g, b, a);
-  const oklchStr = oklchToString(...oklch);
-  const tw = hexToTailwind(color.hex);
-  imgContext.fillText(oklchStr, x, y + 80);
-  if (tw) {
-    imgContext.fillText(tw, x, y  + 110);
-  }
-}
-
-/**
- * Creates a color image canvas based on the given colors.
- *
- * @param {Array<Object>} colors - An array of color objects.
- * @property {string} colors[].hex - The hexadecimal representation of the color.
- * @property {string} colors[].rgba - The RGBA representation of the color.
- * @return {HTMLCanvasElement} The color image canvas.
- */
-function createColorImageCanvas(colors) {
-  const canvas = document.createElement('canvas');
-  const numberOfColorBoxesPerRow = 3;
-  const boxWidth = 100;
-  const colorBoxHeight = 100;
-  const paddingX = 400;
-  const paddingY = 60;
-  const totalRows = Math.ceil(colors.length / numberOfColorBoxesPerRow);
-  const imageWidth = (boxWidth + paddingX) * numberOfColorBoxesPerRow;
-  const imageHeight = ((colorBoxHeight + paddingY) * totalRows);
-
-  window.devicePixelRatio = 2;
-  canvas.height = imageHeight;
-  canvas.width = imageWidth;
-  const img = canvas.getContext('2d');
-
-  if (img) {
-    const imageData = img.createImageData(imageWidth, imageHeight);
-    img.putImageData(imageData, 0, 0);
-    img.fillStyle = 'white';
-    img.fillRect(0, 0, imageWidth, imageHeight);
-    img.font = 'normal 16pt sans-serif';
-
-    let colorCounter = 0;
-    for (let r = 0; r < totalRows; r++) {
-      const co_y =  ((colorBoxHeight + paddingY) * r);
-      for (let c = 0; c < numberOfColorBoxesPerRow; c++) {
-        if (colorCounter === colors.length) {
-          break;
-        } else {
-          const co_x =  ((paddingX + boxWidth) * c);
-          drawColorBox(img, colors[colorCounter], co_x, co_y, boxWidth, colorBoxHeight);
-          colorCounter++;
-        }
-      }
-    }
-  }
-  return canvas;
-}
 
 
 /**
@@ -205,18 +126,6 @@ const grabColors = (tabId) => {
 
 
 
-
-
-/**
- * Copies the color value from the target element to the clipboard.
- *
- * @param {HTMLDivElement} colorDiv - The target of the click.
- */
-function copyColor(colorDiv, evt) {
-  const key = evt.shiftKey ? '2' : evt.altKey ? '3': '1';
-  const color = colorDiv.getAttribute('data-color-' + key);
-  navigator.clipboard.writeText(color).then(() => setLabelText(`"${color}" copied to clipboard.`));
-}
 
 
 /**
