@@ -429,7 +429,7 @@ const CaptureUtil = (() => {
       } else {
         const now = Date.now();
         return chrome.scripting.executeScript({
-          target: {tabId: tab.id}, files: ['js/screen-capture-page.js']
+          target: {tabId: tab.id}, files: ['js/inject/screen-capture-page.js']
         })
           .then((_res) => {
             if (!loaded && Date.now() - now > SINGLE_CAPTURE_TIMEOUT) {

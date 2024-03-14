@@ -8,5 +8,6 @@ chrome.runtime.onMessage
           chrome.runtime.sendMessage({displayInfo: res}, () => {});
         });
       sendResponse(true);
+
     }
   });

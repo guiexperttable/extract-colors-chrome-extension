@@ -1,12 +1,6 @@
 
-if (document.querySelector('html')
-  .getAttribute('data-ruler-js') === 'injected') {
-  console.log('ruler.js skipped');
-
-} else {
-  document
-    .querySelector('html')
-    .setAttribute('data-ruler-js', 'injected');
+if (!window['rulerLoaded']) {
+  window['rulerLoaded'] = true;
 
   (function () {
     // -------------------------------------------------------------   util.js
@@ -176,21 +170,33 @@ if (document.querySelector('html')
         document.documentElement.style.setProperty('--lineWidth', __lineWidth + 'px')
     }
 
-    const __switchSignal = (signal, __ruler_EXT_MAIN) => {
+    const handleMessage = (signal, __ruler_EXT_MAIN) => {
       const {type, value} = signal
       if (type === 'ENABLE') {
-        __enableRuler(value, __ruler_EXT_MAIN)
-      } else if (type === 'TOGGLE_LINE_VISIBILITY') {
-        $__toggleLineVisibility(value)
-      } else if (type === 'TOGGLE_RULER_VISIBILITY') {
-        $__toggleRulerVisibility(value)
-      } else if (type === 'CLEAR') {
-        __clearAllLines()
-      } else if (type === 'CHANGE_COLOR') {
-        __changeLineColor(value)
-      } else if (type === 'CHANGE_WIDTH') {
-        __changeLineWidth(value)
+        __enableRuler(value, __ruler_EXT_MAIN);
+        return true;
       }
+      if (type === 'TOGGLE_LINE_VISIBILITY') {
+        $__toggleLineVisibility(value);
+        return true;
+      }
+      if (type === 'TOGGLE_RULER_VISIBILITY') {
+        $__toggleRulerVisibility(value);
+        return true;
+      }
+      if (type === 'CLEAR') {
+        __clearAllLines();
+        return true;
+      }
+      if (type === 'CHANGE_COLOR') {
+        __changeLineColor(value);
+        return true;
+      }
+      if (type === 'CHANGE_WIDTH') {
+        __changeLineWidth(value);
+        return true;
+      }
+      return false;
     }
 
 
@@ -516,21 +522,17 @@ if (document.querySelector('html')
         loop(Math.round(innerWidth / 50), __rulerX)
         loop(Math.round(innerHeight / 50), __rulerY)
       })
-      __get_saved_line_color()
-      __get_saved_line_width()
+      __get_saved_line_color();
+      __get_saved_line_width();
 
       chrome.runtime.onMessage.addListener((msg, sender, response) => {
-        __switchSignal(msg, __ruler_EXT_MAIN)
         console.log('innen ruler listen msg:', msg);
-        // if (msg.type === 'ENABLE') {
-        //   __enableRuler(msg.value, __ruler_EXT_MAIN);
-        // }
-        // response(true);
-      })
+        return handleMessage(msg, __ruler_EXT_MAIN);
+      });
 
-      __switchSignal({
+      handleMessage({
         type: 'ENABLE', value: true
-      }, __ruler_EXT_MAIN)
+      }, __ruler_EXT_MAIN);
     }
     console.log('done'); // TODO
   })();
