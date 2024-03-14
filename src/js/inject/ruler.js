@@ -485,7 +485,6 @@ if (document.querySelector('html')
       /** loop n numbers of time and create li element */
       const loop = (loopCount, rulerListContainer) => {
         for (let _ = 0; _ <= loopCount; _++) {
-          console.log('loop', _) // TODO
           let e = document.createElement('li')
           e.style.boxSizing = 'initial'
           rulerListContainer.appendChild(e)
@@ -521,12 +520,12 @@ if (document.querySelector('html')
       __get_saved_line_width()
 
       chrome.runtime.onMessage.addListener((msg, sender, response) => {
-        // __switchSignal(signal, __ruler_EXT_MAIN)
+        __switchSignal(msg, __ruler_EXT_MAIN)
         console.log('innen ruler listen msg:', msg);
-        if (msg.type === 'ENABLE') {
-          __enableRuler(msg.value, __ruler_EXT_MAIN);
-        }
-        response(true);
+        // if (msg.type === 'ENABLE') {
+        //   __enableRuler(msg.value, __ruler_EXT_MAIN);
+        // }
+        // response(true);
       })
 
       __switchSignal({
