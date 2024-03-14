@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
-  <link rel="stylesheet" href="popup-reset.css">
-  <link rel="stylesheet" href="popup.css">
-  <link rel="stylesheet" href="popup-checkbox.css">
-  <link rel="stylesheet" href="popup-animation.css">
+  <link rel="stylesheet" href="css/popup/popup-reset.css">
+  <link rel="stylesheet" href="css/popup/popup-checkbox.css">
+  <link rel="stylesheet" href="css/popup/popup-animation.css">
+  <link rel="stylesheet" href="css/popup/popup.css">
   <meta charset="UTF-8">
   <title>Extract Colors DevTool</title>
 </head>
@@ -25,6 +25,18 @@
   <button class="btn copy-custom-properties-btn">
     <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M160-120v-80h480v80H160Zm226-194L160-540l84-86 228 226-86 86Zm254-254L414-796l86-84 226 226-86 86Zm184 408L302-682l56-56 522 522-56 56Z"/></svg>
     <span popover>Copy CSS custom properties</span>
+  </button>
+
+  <button class="btn ruler-btn">
+    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
+      <path d="M160-240q-33 0-56.5-23.5T80-320v-320q0-33 23.5-56.5T160-720h640q33 0 56.5 23.5T880-640v320q0 33-23.5 56.5T800-240H160Zm0-80h640v-320H680v160h-80v-160h-80v160h-80v-160h-80v160h-80v-160H160v320Zm120-160h80-80Zm160 0h80-80Zm160 0h80-80Zm-120 0Z"/>
+      <path d="M150-880 L800-100"
+            class="hidden rule-hidden-stroke-path"
+            stroke="currentColor"
+            stroke-width="80px"
+            stroke-linecap="round"/>
+    </svg>
+    <span popover>Ruler</span>
   </button>
 
   <button class="btn capture-screen-btn">
@@ -107,6 +119,6 @@
 <script src="js/screen-capture.js"></script>
 <script src="js/design-mode.js"></script>
 <script src="js/colors.js"></script>
-<script src="popup.js"></script>
+<script src="js/popup/popup.js"></script>
 </body>
 </html>

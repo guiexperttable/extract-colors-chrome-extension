@@ -2,6 +2,7 @@
 const btnRescan = document.querySelector(".rescan-btn");
 const btnEyeDropper = document.querySelector(".eyedropper-btn");
 const btnCopyCustomProperties = document.querySelector(".copy-custom-properties-btn");
+const btnRuler = document.querySelector(".ruler-btn");
 const btnCaptureScreen = document.querySelector(".capture-screen-btn");
 const btnCleaner = document.querySelector(".cleaner-btn");
 const btnToggleDesignMode = document.querySelector(".toggle-designmode-btn");
@@ -309,6 +310,43 @@ const grabColors = () => {
   });
 }
 
+let rv = false;
+function toogleRuler() {
+  rv = !rv;
+  showRuler(rv);
+}
+function showRuler(show) {
+  if (show) {
+    setLabelText('Ruler added.');
+    showDiv(divDummy);
+    document.querySelector('.rule-hidden-stroke-path').classList.remove('hidden');
+
+    chrome.scripting.executeScript({
+      target: {tabId: currentTab.id},
+      files: ['js/inject/ruler.js'],
+    }).then(()=>{
+      chrome.tabs.sendMessage(currentTab.id, {type: 'ENABLE', value: true });
+    })
+
+
+
+  } else {
+    setLabelText('');
+    showDiv(divDummy);
+    document.querySelector('.rule-hidden-stroke-path').classList.add('hidden');
+    console.log('########################')
+    chrome.tabs.sendMessage(currentTab.id, {type: 'ENABLE', value: false });
+  }
+}
+
+
+/**
+ * Renders colors on a specified div element and adds a click listener.
+ *
+ * @param {Array<string>} colors - An array of color values to render.
+ * @param {HTMLElement} div - The target div element to render the colors on.
+ * @return {void}
+ */
 function renderColorsOnDiv(colors, div){
   div.innerHTML = renderColors(colors);
   div
@@ -574,6 +612,8 @@ function hexToRgb(hex)  {
 function initListener() {
 
   btnRescan.addEventListener("click", grabColors);
+  // btnRuler.addEventListener("click", showRuler);
+  btnRuler.addEventListener("click", toogleRuler);
 
   btnToggleDesignMode.addEventListener("click", async () => {
     showDiv(divDummy);
@@ -759,7 +799,10 @@ function resizeWindow(ele) {
 function initDivResizer(maxWidth, maxHeight) {
   const buf = [];
   const found = windowSizes.filter((ws)=> (ws.height===maxHeight && ws===maxWidth)).length===1;
-  const sizes = found ? windowSizes : [...windowSizes, {width: maxWidth, height: maxHeight, label: 'Your screen'}];
+  const sizes = found ?
+    windowSizes :
+    [...windowSizes, {width: maxWidth, height: maxHeight, label: 'Your screen'}];
+
   for (const ws of sizes) {
     if (ws.width <= maxWidth && ws.height <= maxHeight) {
       console.log(ws)
