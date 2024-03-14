@@ -1,23 +1,25 @@
-const btnRuler = document.querySelector(".ruler-btn");
+
 
 let rulerVisible = false;
 
-btnRuler.addEventListener("click", toogleRulerVisibility);
 
-chrome.tabs.sendMessage(currentTab.id, "requestRulerInfo").then((visible)=>{
-  console.log('rulerVisible visible', visible);
-  rulerVisible = visible;
-  syncRulerIcon(visible);
-});
+export function initRuler(tabId) {
+  chrome.tabs.sendMessage(tabId, "requestRulerInfo").then((visible) => {
+    console.log('rulerVisible visible', visible);
+    rulerVisible = visible;
+    syncRulerIcon(visible);
+  });
+}
 
 /**
  * Toggles the visibility of the ruler.
  *
  * @return {undefined}
  */
-function toogleRulerVisibility() {
+export function toogleRulerVisibility(tabId) {
   rulerVisible = !rulerVisible;
-  showRuler(rulerVisible);
+  showRuler(rulerVisible, tabId);
+  return rulerVisible;
 }
 
 /**
@@ -41,25 +43,20 @@ function syncRulerIcon(rulerVisible) {
  *
  * @return {undefined}
  */
-function showRuler(show) {
+function showRuler(show, tabId) {
   syncRulerIcon(show);
 
   try {
     if (show) {
-      setLabelText('Ruler added.');
-      showDiv(divDummy);
-
       chrome.scripting.executeScript({
-        target: {tabId: currentTab.id},
+        target: {tabId},
         files: ['js/inject/ruler.js'],
       }).then(() => {
-        chrome.tabs.sendMessage(currentTab.id, {type: 'ENABLE', value: true});
+        chrome.tabs.sendMessage(tabId, {type: 'ENABLE', value: true});
       })
 
     } else {
-      setLabelText('');
-      showDiv(divDummy);
-      chrome.tabs.sendMessage(currentTab.id, {type: 'ENABLE', value: false});
+      chrome.tabs.sendMessage(tabId, {type: 'ENABLE', value: false});
     }
   } catch (err){
     console.error(err);

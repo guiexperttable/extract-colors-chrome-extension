@@ -6,10 +6,10 @@
  *
  * @returns {Promise<Array>} - A promise that resolves to an array of colors scraped from the tab.
  */
-async function scrapColors() {
+export async function scrapColors(tabId) {
   try {
     return chrome.scripting.executeScript({
-      target: {tabId: currentTab.id},
+      target: {tabId},
       func: getColors
 
     }).then((res) => {

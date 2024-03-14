@@ -1,8 +1,11 @@
+import {initRuler, toogleRulerVisibility} from './ruler.js';
+import {scrapColors} from "./colors.js";
+
 // main actions:
 const btnRescan = document.querySelector(".rescan-btn");
 const btnEyeDropper = document.querySelector(".eyedropper-btn");
 const btnCopyCustomProperties = document.querySelector(".copy-custom-properties-btn");
-
+const btnRuler = document.querySelector(".ruler-btn");
 const btnCaptureScreen = document.querySelector(".capture-screen-btn");
 const btnCleaner = document.querySelector(".cleaner-btn");
 const btnToggleDesignMode = document.querySelector(".toggle-designmode-btn");
@@ -289,7 +292,7 @@ const renderColors = (colors) => {
 const grabColors = () => {
   setLabelText('');
   showDiv(divPalette);
-  scrapColors().then(data => {
+  scrapColors(currentTab.id).then(data => {
     grabbedData = data;
     const colors = getUniqColors(
       data
@@ -586,7 +589,11 @@ function hexToRgb(hex)  {
 function initListener() {
 
   btnRescan.addEventListener("click", grabColors);
-
+  btnRuler.addEventListener("click", ()=>{
+    const vis = toogleRulerVisibility(currentTab.id);
+    setLabelText(vis ? 'Ruler added.': '');
+    showDiv(divDummy);
+  });
 
   btnToggleDesignMode.addEventListener("click", async () => {
     showDiv(divDummy);
@@ -885,7 +892,7 @@ async function go() {
       }
     });
   chrome.runtime.sendMessage("requestDisplayInfo", () => {});
-
+  initRuler(currentTab.id);
 
 
 }
