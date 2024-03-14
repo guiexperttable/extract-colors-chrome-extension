@@ -3,9 +3,14 @@
 let rulerVisible = false;
 
 
+/**
+ * Initializes the ruler for a specific tab.
+ *
+ * @param {number} tabId - The ID of the tab to initialize the ruler for.
+ * @return {Promise} - A promise that resolves when the ruler is initialized.
+ */
 export function initRuler(tabId) {
   chrome.tabs.sendMessage(tabId, "requestRulerInfo").then((visible) => {
-    console.log('rulerVisible visible', visible);
     rulerVisible = visible;
     syncRulerIcon(visible);
   });
@@ -40,6 +45,7 @@ function syncRulerIcon(rulerVisible) {
  * Enables or disables the display of a ruler.
  *
  * @param {boolean} show - A boolean value indicating whether to show the ruler or not.
+ * @param tabId
  *
  * @return {undefined}
  */
