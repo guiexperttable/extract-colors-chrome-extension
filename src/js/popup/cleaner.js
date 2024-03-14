@@ -1,8 +1,8 @@
-function cleanPage() {
+export function cleanPage(tabId) {
   try {
     return chrome.scripting.executeScript({
       target: {
-        tabId: currentTab.id
+        tabId
       },
       func: fnClean
     })

@@ -31,7 +31,7 @@ const rgbStringToNumberArray = (rgbString) => {
  * @param {number} alpha - The alpha/opacity value (0-1).
  * @return {Array} The OKLCH color values [L, C, H, alpha].
  */
-function rgb2oklch(r, g, b, alpha) {
+export function rgb2oklch(r, g, b, alpha) {
   const [l, a, b_, _alpha] = rgb2oklab(r, g, b, alpha);
   return lab2lch(l, a, b_, _alpha);
 }
@@ -44,7 +44,7 @@ function rgb2oklch(r, g, b, alpha) {
  * @param {number} [alpha] - The alpha value (0-1).
  * @returns {string} - The string representation of the OKLCH color values.
  */
-function oklchToString(l, c, h, alpha) {
+export function oklchToString(l, c, h, alpha) {
   const f = (n, d) => n.toFixed(d)
     .replace(/\.000/g, '')
     .replace(/\.00/g, '');
@@ -409,7 +409,7 @@ const hexTailwind = {
  * @param {string} hex - The hex code to convert.
  * @returns {string} - The Tailwind utility class corresponding to the hex code.
  */
-function hexToTailwind(hex) {
+export function hexToTailwind(hex) {
   return hexTailwind[hex];
 }
 

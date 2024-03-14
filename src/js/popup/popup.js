@@ -1,5 +1,7 @@
 import {initRuler, toogleRulerVisibility} from './ruler.js';
-import {scrapColors} from "./colors.js";
+import {getUniqColors, renderColorsOnDiv, scrapColors} from "./colors.js";
+import {cleanPage} from "./cleaner.js";
+import {hexToTailwind, oklchToString, rgb2oklch} from "./color-converter.js";
 
 // main actions:
 const btnRescan = document.querySelector(".rescan-btn");
@@ -64,50 +66,7 @@ function storeData() {
 }
 
 
-/**
- * Checks if an array contains an object using a comparator function.
- *
- * @param {Array} arr - The array to check.
- * @param {Object} obj - The object to look for.
- * @param {Function} comparator - The comparator function to use.
- *                               Should accept two parameters: item (array element) and obj (search object),
- *                               and return a boolean indicating whether they match or not.
- * @return {boolean} - Returns true if the array contains the object, false otherwise.
- */
-function arrayContainsObject(arr, obj, comparator) {
-  return arr.some(item => comparator(item, obj));
-}
 
-/**
- * Checks if the sum of RGB values of two objects are equal.
- *
- * @param {Object} o1 - The first color object to compare.
- * @param {Object} o2 - The second color object to compare.
- * @param {number} o1.sum - The sum of RGB values of o1.
- * @param {number} o2.sum - The sum of RGB values of o2.
- * @return {boolean} Returns true if the sum of RGB values of o1 and o2 are equal, otherwise false.
- */
-function isColorEqual(o1, o2) {
-  return o1.sum === o2.sum;
-}
-
-
-/**
- * Create a color image based on an array of colors.
- *
- * @param {Array<string>} colors - An array of colors in hexadecimal notation.
- *        [
- *         color: {
- *           hex: '#0098db',
- *           rgba: '#0098db',
- *           sum: 678
- *         }, ...
- *      ]
- * @return {string} - The base64 encoded data URL of the generated image.
- */
-function createColorImage(colors) {
-  return createColorImageCanvas(colors).toDataURL('image/png');
-}
 
 /**
  * Draws a color box on a canvas context.
@@ -211,76 +170,7 @@ function setLabelText(s, animation) {
   }
 }
 
-/**
- * Returns an array of unique colors from the given array of colors.
- *
- * @param {string[]} colors - The array of colors.
- * @returns {string[]} - An array of unique colors.
- */
-const getUniqColors = (colors) => {
-  const ret = [];
-  for (const c of colors) {
-    if (!arrayContainsObject(ret, c, isColorEqual)) {
-      ret.push(c);
-    }
-  }
-  return ret;
-};
 
-function getRgbArrFromRgbString(rgbString) {
-  const rgbaRegex = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(\.\d+)?))?\)/;
-  const matches = rgbString.match(rgbaRegex);
-  if (!matches) {
-    throw new Error('Ungültiges RGB- oder RGBA-Format');
-  }
-
-  const [, r, g, b, a] = matches.map(Number); // ignore first match
-
-  if (!isNaN(a)) {
-    return [r, g, b, a];
-  } else {
-    return [r, g, b];
-  }
-}
-
-/**
- * Generates an HTML string to render a list of colors.
- *
- * @param {Array} colors - An array of color objects.
- * @param {string} colors[].hex - The hexadecimal representation of the color.
- * @param {string} colors[].rgba - The RGBA representation of the color.
- * @returns {string} - The generated HTML string.
- */
-const renderColors = (colors) => {
-  const buf = [''];
-  colors.forEach(color => {
-    const [r, g, b, a] = getRgbArrFromRgbString(color.rgba);
-    const oklch = rgb2oklch(r, g, b, a);
-    const oklchStr = oklchToString(...oklch);
-    const tw = hexToTailwind(color.hex);
-    buf.push(`
-        <div class="chip">
-          <div 
-              title="rgb: click, hex: shift+click, oklchStr: alt+click"
-              class="colored-div" 
-              data-color-1="${color.rgba}" 
-              data-color-2="${color.hex}" 
-              data-color-3="${oklchStr}" 
-              data-color-4="${tw}" 
-              style="background-color: ${color.rgba}"></div>
-          <div class="color-box-text hex">${color.hex}</div>
-          <div class="color-box-text rgb">${color.rgba}</div>
-          <div class="color-box-text oklch">${oklchStr}</div>`);
-    if (tw) {
-      buf.push(`<div class="color-box-text tailwind">${tw}</div>`);
-    }
-    buf.push(`
-        </div>
-      `);
-  });
-  buf.push(`</div>`);
-  return buf.join('');
-};
 
 
 /**
@@ -289,7 +179,7 @@ const renderColors = (colors) => {
  * @function grabColors
  * @returns {void}
  */
-const grabColors = () => {
+const grabColors = (tabId) => {
   setLabelText('');
   showDiv(divPalette);
   scrapColors(currentTab.id).then(data => {
@@ -315,23 +205,6 @@ const grabColors = () => {
 
 
 
-
-
-/**
- * Renders colors on a specified div element and adds a click listener.
- *
- * @param {Array<string>} colors - An array of color values to render.
- * @param {HTMLElement} div - The target div element to render the colors on.
- * @return {void}
- */
-function renderColorsOnDiv(colors, div){
-  div.innerHTML = renderColors(colors);
-  div
-    .querySelectorAll('div[data-color-1]')
-    .forEach(ele =>
-      ele.addEventListener('click', (evt) => copyColor(ele, evt))
-    );
-}
 
 
 /**
@@ -624,7 +497,7 @@ function initListener() {
 
   btnCleaner.addEventListener("click", async () => {
     showDiv(divDummy);
-    const count = await cleanPage();
+    const count = await cleanPage(currentTab.id);
     setLabelText(`Items removed: ${count}`);
   });
 
