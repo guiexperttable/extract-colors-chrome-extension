@@ -1,4 +1,4 @@
-const CaptureUtil = (() => {
+export const CaptureUtil = (() => {
 
   const CAPTURE_MSG_KEY = 'capture';
   const CAPTURE_STEP_DELAY = 500;
@@ -8,6 +8,15 @@ const CaptureUtil = (() => {
   const ALLOWED_URL_PATTERNS = ['http://*/*', 'https://*/*', 'ftp://*/*', 'file://*/*'];
   const DISALLOWED_URL_REGEX = [/^https?:\/\/chrome.google.com\/.*$/];
 
+  const progressbar = document.querySelector("progress");
+  const progressNumberFormat = new Intl.NumberFormat('en-EN', {maximumSignificantDigits: 1});
+  const screenshotFileName = 'page-screenshot';
+
+  const divText = document.querySelector(".text-div");
+  const listener = {onCompleted, onError, onProgress, onSplitting: console.log};
+
+  let currentTab;
+  let resultWindowId;
 
   /**
    * Checks if a given URL is allowed based on a set of patterns.
@@ -487,22 +496,106 @@ const CaptureUtil = (() => {
    * Captures the contents of a tab and saves them to files.
    *
    * @param {object} tab - The tab object to capture.
-   * @param {string} filename - The filename for the saved files.
-   * @param {object} listener - The listener object for capturing events.
-   * @param {function} listener.onCompleted - The callback function to be called when capturing completes.
    *
    * @return {void}
    */
-  function captureToFiles(tab, filename, listener) {
+  function captureToFiles(tab) {
+    currentTab = tab;
     const {onCompleted} = listener;
+
+    setProgressbarVisible(true);
 
     captureToBlobs(tab, {
       ...listener,
       onCompleted: async blobs => {
-        const filenames = await saveBlobs(blobs, filename);
+        const filenames = await saveBlobs(blobs, screenshotFileName);
         onCompleted(filenames);
       }
     });
+  }
+
+
+  /**
+   * Sets the visibility of the progress bar.
+   *
+   * @param {boolean} b - Specifies whether the progress bar should be visible or not.
+   * @return {undefined}
+   */
+  function setProgressbarVisible(b) {
+    progressbar.value = 0;
+    if (b) {
+      progressbar.classList.remove('hidden');
+    } else {
+      progressbar.classList.add('hidden');
+    }
+  }
+
+  /**
+   * Updates the progress of capturing
+   *
+   * @param {number} f - The progress of capturing, between 0 and 1
+   *
+   * @return {void}
+   */
+  function onProgress(f) {
+    if (f >= 1) {
+      divText.innerText = `Capturing... done`;
+    } else {
+      progressbar.value = f * 100;
+      const n = progressNumberFormat.format(f * 100);
+      divText.innerText = `Capturing... ${n}% `;
+    }
+  }
+
+  /**
+   * Sets the error message in the palette element.
+   *
+   * @param {string} err - The error message to display.
+   */
+  function onError(err) {
+    divText.innerHTML = `<span class="ge-error-color">${err}</span>`;
+  }
+
+  /**
+   * Function to handle the completion of the screen capture task.
+   *
+   * @param {Array} filenames - Array of filenames representing the captured screens.
+   * @param {number} index - Index indicating the current position in the filenames array. Defaults to 0.
+   * @returns {void}
+   */
+  function onCompleted(filenames, index) {
+    setProgressbarVisible(false);
+    if (!filenames.length) {
+      console.error('Error: no screen captured!');
+      return;
+    }
+    index = index || 0;
+
+    const url = filenames[index];
+    const last = index === filenames.length - 1;
+
+    if (currentTab.incognito && index === 0) {
+      // incognito -> non incognito
+      chrome.windows.create({
+        url: url,
+        incognito: false,
+        focused: last
+      }, win => {
+        resultWindowId = win.id;
+      });
+    } else {
+      chrome.tabs.create({
+        url: url,
+        active: last,
+        windowId: resultWindowId,
+        openerTabId: currentTab.id,
+        index: (currentTab.incognito ? 0 : currentTab.index) + 1 + index
+      });
+    }
+
+    if (!last) {
+      onCompleted(filenames, index + 1);
+    }
   }
 
 

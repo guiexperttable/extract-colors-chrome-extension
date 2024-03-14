@@ -1,7 +1,10 @@
 import {initRuler, toogleRulerVisibility} from './ruler.js';
 import {createColorImage, getUniqColors, renderColors, renderColorsOnDiv, scrapColors} from "./colors.js";
 import {cleanPage} from "./cleaner.js";
-import {hexToTailwind, oklchToString, rgb2oklch} from "./color-converter.js";
+import {toggleDesignMode} from "./design-mode.js";
+import {updateWindow, windowSizes} from "./resizer.js";
+import {CaptureUtil} from "./screen-capture.js";
+
 
 // main actions:
 const btnRescan = document.querySelector(".rescan-btn");
@@ -35,8 +38,7 @@ const mainDivs = [divPalette, divResizer, divPickerHistory, divDummy];
 const progressbar = document.querySelector("progress");
 const downLoadImgLink = document.querySelector(".download-img-a");
 
-const progressNumberFormat = new Intl.NumberFormat('en-EN', {maximumSignificantDigits: 1});
-const screenshotFileName = 'page-screenshot';
+
 
 
 let data = {
@@ -52,7 +54,7 @@ let windowId;
 let currentTab;
 let grabbedData = {};
 let currentColors = [];
-let resultWindowId;
+
 
 /**
  * Stores data in Chrome Sync Storage.
@@ -247,88 +249,6 @@ function isPalleteOrPickerHistoryDivVisible(){
 
 
 
-/**
- * Sets the visibility of the progress bar.
- *
- * @param {boolean} b - Specifies whether the progress bar should be visible or not.
- * @return {undefined}
- */
-function setProgressbarVisible(b) {
-  progressbar.value = 0;
-  if (b) {
-    progressbar.classList.remove('hidden');
-  } else {
-    progressbar.classList.add('hidden');
-  }
-}
-
-/**
- * Updates the progress of capturing
- *
- * @param {number} f - The progress of capturing, between 0 and 1
- *
- * @return {void}
- */
-function onProgress(f) {
-  if (f >= 1) {
-    divText.innerText = `Capturing... done`;
-  } else {
-    progressbar.value = f * 100;
-    const n = progressNumberFormat.format(f * 100);
-    divText.innerText = `Capturing... ${n}% `;
-  }
-}
-
-/**
- * Sets the error message in the palette element.
- *
- * @param {string} err - The error message to display.
- */
-function onError(err) {
-  divPalette.innerHTML = `<span class="ge-error-color">${err}</span>`;
-}
-
-/**
- * Function to handle the completion of the screen capture task.
- *
- * @param {Array} filenames - Array of filenames representing the captured screens.
- * @param {number} index - Index indicating the current position in the filenames array. Defaults to 0.
- * @returns {void}
- */
-function onCompleted(filenames, index) {
-  setProgressbarVisible(false);
-  if (!filenames.length) {
-    console.error('Error: no screen captured!');
-    return;
-  }
-  index = index || 0;
-
-  const url = filenames[index];
-  const last = index === filenames.length - 1;
-
-  if (currentTab.incognito && index === 0) {
-    // incognito -> non incognito
-    chrome.windows.create({
-      url: url,
-      incognito: false,
-      focused: last
-    }, win => {
-      resultWindowId = win.id;
-    });
-  } else {
-    chrome.tabs.create({
-      url: url,
-      active: last,
-      windowId: resultWindowId,
-      openerTabId: currentTab.id,
-      index: (currentTab.incognito ? 0 : currentTab.index) + 1 + index
-    });
-  }
-
-  if (!last) {
-    onCompleted(filenames, index + 1);
-  }
-}
 
 
 
@@ -412,9 +332,7 @@ function initListener() {
 
   btnCaptureScreen.addEventListener("click", async () => {
     showDiv(divDummy);
-    const onSplitting = console.warn;
-    setProgressbarVisible(true);
-    CaptureUtil.captureToFiles(currentTab, screenshotFileName, {onCompleted, onError, onProgress, onSplitting});
+    CaptureUtil.captureToFiles(currentTab);
   });
 
   btnToggleTheme.addEventListener("click", async () => {

@@ -1,6 +1,6 @@
 
 
-const windowSizes = [
+export const windowSizes = [
   { "width": 320, "height": 480, "label": "HVGA" },
   { "width": 480, "height": 800, "label": "WVGA" },
   { "width": 768, "height": 1024, "label": "XGA" },
@@ -20,7 +20,7 @@ const windowSizes = [
 ];
 
 // https://developer.chrome.com/docs/extensions/reference/api/windows?hl=de#method-update
-function updateWindow(winId, config) {
+export function updateWindow(winId, config) {
   return new Promise((resolve, reject) => {
     chrome.windows.update(winId, config, win => {
       if (chrome.runtime.lastError) {

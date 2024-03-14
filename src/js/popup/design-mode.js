@@ -3,7 +3,7 @@
  *
  * @returns {string} The new design mode value.
  */
-async function toggleDesignMode(){
+export async function toggleDesignMode(){
   try {
     return chrome.scripting.executeScript({
       target: {tabId: currentTab.id},
