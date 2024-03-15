@@ -31,6 +31,8 @@ if (!window['rulerLoaded']) {
   let rulerElementX;
   let rulerElementY;
 
+  let snapLineHorizontalDiv;
+  let snapLineVerticalDiv;
 
   const mouse = {
     x: 0,
@@ -116,7 +118,7 @@ if (!window['rulerLoaded']) {
       const element= createElement({
         elementTag: 'div',
         classList: [className],
-        innerHTML: `${indicator}: ${value}`
+        innerHTML: `<div>${indicator}: ${value}</div>`
       });
 
       const crossElement = createElement({
@@ -396,13 +398,28 @@ if (!window['rulerLoaded']) {
     document.addEventListener('mousedown', onMouseDown);
   }
 
-  function onMouseMove(e) {
+  function onMouseMove(evt) {
+    //const target = evt.target;
+    //const boundingRect = target.getBoundingClientRect();
+    //const absoluteX = boundingRect.left + window.scrollX;
+    //const absoluteY = boundingRect.top + window.scrollY;
+    //
+    //applyStyle(snapLineVerticalDiv, {
+    //  left: `${absoluteX}px`,
+    //  display: 'block'
+    //});
+    //applyStyle(snapLineHorizontalDiv, {
+    //  top: `${absoluteY}px`,
+    //  display: 'block'
+    //});
+
+
     if (targetElement) {
-      moveTargetElement(e);
+      moveTargetElement(evt);
     } else if (clickedX) {
-      onRulerXMouseMove(e);
+      onRulerXMouseMove(evt);
     } else if (clickedY) {
-      onRulerYMouseMove(e);
+      onRulerYMouseMove(evt);
     }
   }
 
@@ -481,6 +498,20 @@ if (!window['rulerLoaded']) {
       .forEach(element => parent.appendChild(element));
   }
 
+  //function createSnapperLines(){
+  //  snapLineHorizontalDiv = createElement( {
+  //    elementTag: 'div',
+  //    classList: ['snap-line-horizontal-div snap-line-div']
+  //  });
+  //  rulerMainElement.appendChild(snapLineHorizontalDiv);
+  //
+  //  snapLineVerticalDiv = createElement({
+  //    elementTag: 'div',
+  //    classList: ['snap-line-vertical-div snap-line-div']
+  //  });
+  //  rulerMainElement.appendChild(snapLineVerticalDiv);
+  //}
+
   function init(document) {
     const {innerWidth, innerHeight} = window;
 
@@ -523,6 +554,7 @@ if (!window['rulerLoaded']) {
     rulerMainElement.append(rulerContainerY);
     document.body.appendChild(rulerMainElement);
 
+
     window.addEventListener('resize', createListItemsXandY);
 
     applyLineColor();
@@ -542,6 +574,8 @@ if (!window['rulerLoaded']) {
     }, rulerMainElement);
 
     initMouseAndKeyListener();
+
+    //createSnapperLines();
   }
 
   if (document) {

@@ -1,6 +1,6 @@
 
 .extract-colors-devtool {
-    --ruler-border-color: rgba(0,0,0,0.3);
+    --ruler-border-color: rgba(0,0,0,0.1);
     --rulerNumbers: #000;
     --ruler-num-fontsize: 10px;
     --ruler-num-padding-line-start: 0.75ch;
@@ -27,6 +27,25 @@
     --line-marker-delete-btn-color: cyan;
     --line-marker-delete-btn-hover-bg: #fff;
     --line-marker-delete-btn-hover-color: #5e0000;
+
+    --snap-line-color: rgba(255, 0, 0, 0.5);
+}
+
+.snap-line-div {
+    display: block;
+    position: fixed;
+    background-color: var(--snap-line-color);
+    z-index: 2147483647;
+}
+.snap-line-horizontal-div {
+    left: 0;
+    width: 100vw;
+    height: 1px;
+}
+.snap-line-vertical-div {
+    top:0;
+    width: 1px;
+    height: 100vh;
 }
 
 .extract-colors-devtool {
