@@ -1,96 +1,98 @@
+chrome.runtime.onMessage.addListener((_msg, _sender, _response) => {
+});
+
+
 if (!window['rulerLoaded']) {
+
   window['rulerLoaded'] = true;
 
+  const RULER_SIZE = 20;
   const RULER_EXT_ENABLED = '__ruler_ext_ENABLED';
   const RULER_EXT_LINE_VISIBILITY = '__ruler_ext_LINE_VISIBILITY';
   const RULER_EXT_RULER_VISIBILITY = '__ruler_ext_RULER_VISIBILITY';
   const RULER_EXT_LINE_COLOR = '__ruler_ext_LINE_COLOR';
   const RULER_EXT_LINE_WIDTH = '__ruler_ext_LINE_WIDTH';
-  const {innerWidth, innerHeight} = window
-  const crossIcon = `&#10005;`
+  const {innerWidth, innerHeight} = window;
+  const crossIcon = `&#10005;`;
+
+  let rulerLineElement = null;
+  let clickedX = false;
+  let clickedY = false;
+  let mouseDown = false;
+  let targetElement = null;
+
+  let rulerMainElement;
+  let rulerContainerX;
+  let rulerContainerY;
+  let rulerElementX;
+  let rulerElementY;
+
+
+  const mouse = {
+    x: 0, y: 0, startX: 0, startY: 0, initialX: 0, initialY: 0,
+  }
+
 
   function resetBodyStyle() {
     if (document) {
-      document.body.style.cursor = 'row-resize'
-      document.body.style.userSelect = 'none'
+      document.body.style.cursor = 'row-resize';
+      document.body.style.userSelect = 'none';
     }
   }
 
-
-  /**
-   *
-   * @param {HTMLElement} element - HTML Element
-   * @param {object} style - JavaScript css style object
-   *
-   *  use:
-   * applyStyle(element, {
-   *    color:'red',
-   *    marginRight:'10px'
-   * })
-   */
   function applyStyle(element, style) {
     for (const property in style) {
-      element.style[property] = style[property]
+      element.style[property] = style[property];
     }
   }
 
-
-  /**
-   *  create DOM
-   *  use:
-   * createElement({
-   *    Tag:'div',
-   *    innerHTML:'Hello World'
-   * })
-   *  */
   function createElement(para) {
-    const element = document.createElement(para.elementTag)
+    const element = document.createElement(para.elementTag);
     for (const prop in para) {
       if (prop === 'childNodes') {
         para.childNodes.forEach(node => {
-          element.appendChild(node)
+          element.appendChild(node);
         })
       } else if (prop === 'attributes') {
         para.attributes.forEach(attr => {
-          element.setAttribute(attr.key, attr.value)
+          element.setAttribute(attr.key, attr.value);
         })
       } else {
-        element[prop] = para[prop]
+        element[prop] = para[prop];
       }
     }
-    return element
+    return element;
   }
 
 
   function isTop(clientY) {
-    return clientY <= 20
+    return clientY <= RULER_SIZE;
   }
 
   function isRight(clientX) {
-    return clientX <= 20
+    return clientX <= RULER_SIZE;
   }
 
 
-  /** func to create and update dom */
   function createUpdateDOM(config) {
-    const {rule, className, indicator, value, event} = config
+    const {rule, className, indicator, value, event} = config;
     if (event.target.className === rule) {
       const element = createElement({
         elementTag: 'div',
         classList: [className],
-        innerHTML: value + ` ${indicator}`,
-      })
+        innerHTML: value + ` ${indicator}`
+      });
 
       const crossElement = createElement({
         elementTag: 'button',
         classList: ['__ruler_delete_line'],
         title: 'Right Click + Backspace',
-        innerHTML: crossIcon,
-      })
+        innerHTML: crossIcon
+      });
       element.addEventListener('click', (event) => {
         const selector = (indicator === 'Y') ? '.__rulerXline' : '.__rulerYline';
         event.target.closest(selector).remove();
-      })
+      });
       element.appendChild(crossElement);
       event.target.innerHTML = '';
       event.target.appendChild(element);
@@ -127,14 +129,14 @@ if (!window['rulerLoaded']) {
   }
 
   function enableRuler(value, element) {
-    setStorage(RULER_EXT_ENABLED, value)
+    setStorage(RULER_EXT_ENABLED, value);
     if (isNotNull(value)) {
       setDisplay(element, value === true);
     }
   }
 
   function setLineVisibility(value) {
-    setStorage(RULER_EXT_LINE_VISIBILITY, value)
+    setStorage(RULER_EXT_LINE_VISIBILITY, value);
     document.querySelectorAll('#__ext_ruler_line').forEach((element) => {
       if (element) {
         setDisplay(element, !value);
@@ -143,57 +145,62 @@ if (!window['rulerLoaded']) {
   }
 
   function toggleRulerVisibility(value) {
-    setStorage(RULER_EXT_RULER_VISIBILITY, value)
-    document.querySelectorAll('.__ruler_EXT').forEach((element) => {
-      if (element) {
-        setDisplay(element, !value );
-      }
-    })
+    setStorage(RULER_EXT_RULER_VISIBILITY, value);
+    document
+      .querySelectorAll('.__ruler_EXT')
+      .forEach((element) => {
+        if (element) {
+          setDisplay(element, !value);
+        }
+      });
   }
 
   function removeRulerLines() {
-    document.querySelectorAll('#__ext_ruler_line')
+    document
+      .querySelectorAll('#__ext_ruler_line')
       .forEach((element) => {
         if (element) {
-          element.remove()
+          element.remove();
         }
-      })
+      });
   }
 
   function setLineColor(color) {
-    setStorage(RULER_EXT_LINE_COLOR, color)
+    setStorage(RULER_EXT_LINE_COLOR, color);
     if (isNotUndefined(color)) {
-      document.documentElement.style.setProperty('--lineColor', color)
+      document.documentElement.style.setProperty('--lineColor', color);
     }
   }
 
   function setLineWidth(width) {
-    setStorage(RULER_EXT_LINE_WIDTH, width)
+    setStorage(RULER_EXT_LINE_WIDTH, width);
     if (isNotUndefined(width)) {
-      document.documentElement.style.setProperty('--lineWidth', width + 'px')
+      document.documentElement.style.setProperty('--lineWidth', width + 'px');
     }
   }
 
   function determineRulersMode() {
-    const _rulersMode = getStorage(RULER_EXT_ENABLED)
+    const _rulersMode = getStorage(RULER_EXT_ENABLED);
     if (_rulersMode === 'true') {
-      return 'block'
+      return 'block';
     }
     return 'none';
   }
 
   function applyLineColor() {
-    const lineColor = getStorage(RULER_EXT_LINE_COLOR)
-    if (isNotUndefined(lineColor)) document.documentElement.style.setProperty('--lineColor', lineColor)
+    const lineColor = getStorage(RULER_EXT_LINE_COLOR);
+    if (isNotUndefined(lineColor)) document.documentElement.style.setProperty('--lineColor', lineColor);
   }
 
   function applyLineWidth() {
-    const lineWidth = getStorage(RULER_EXT_LINE_WIDTH)
-    if (isNotUndefined(lineWidth) && isNotNull(lineWidth)) document.documentElement.style.setProperty('--lineWidth', lineWidth + 'px')
+    const lineWidth = getStorage(RULER_EXT_LINE_WIDTH);
+    if (isNotUndefined(lineWidth) && isNotNull(lineWidth)) {
+      document.documentElement.style.setProperty('--lineWidth', lineWidth + 'px');
+    }
   }
 
-  function handleMessage(signal, target) {
-    const {type, value} = signal
+  function handleMessage(message, target) {
+    const {type, value} = message;
     if (type === 'ENABLE') {
       enableRuler(value, target);
       return true;
@@ -221,93 +228,172 @@ if (!window['rulerLoaded']) {
     return false;
   }
 
+  function saveMousePosition(ev) {
+    const {clientX, clientY} = ev
+    mouse.x = clientX;
+    mouse.y = clientY;
+  }
 
+  function onRulerXClick() {
+    mouse.startX = mouse.x;
+    mouse.startY = mouse.y;
+    rulerLineElement = createElement({
+      elementTag: 'div',
+      classList: ['__rulerXline'],
+      id: '__ext_ruler_line'
+    });
+    applyStyle(rulerLineElement, {
+      width: '100%',
+      height: '10px',
+      background: 'transparent',
+      position: 'fixed',
+      zIndex: '9999999999999999999',
+      cursor: 'row-resize',
+    });
+    targetElement = rulerLineElement;
+    rulerLineElement.addEventListener('mousedown', (event) => {
+      targetElement = event.target;
+      clickedX = true;
+    })
 
-  function init(document) {
+    rulerMainElement.append(rulerLineElement)
+  }
 
-    let rulerLineElement = null // ruler line
-    let clickedX = false // is clicked on ruler contgainer area
-    let clickedY = false // is clicked on ruler contgainer area
-    let mouseDown = false
-    let targetElement = null
+  function onRulerYClick() {
+    document.body.style.cursor = 'col-resize';
+    mouse.startX = mouse.x;
+    mouse.startY = mouse.y;
+    rulerLineElement = createElement({
+      elementTag: 'div',
+      classList: ['__rulerYline'],
+      id: '__ext_ruler_line',
+    });
+    applyStyle(rulerLineElement, {
+      width: '10px',
+      height: '100vh',
+      background: 'transparent',
+      position: 'fixed',
+      zIndex: '2147483647',
+      cursor: 'col-resize',
+      top: '0px',
+    });
+    targetElement = rulerLineElement;
 
-    /** preserve mouse position */
-    const mouse = {
-      x: 0, y: 0, startX: 0, startY: 0, initialX: 0, initialY: 0,
+    rulerLineElement.addEventListener('mousedown', (event) => {
+      targetElement = event.target;
+      clickedY = true;
+    })
+    rulerMainElement.append(rulerLineElement);
+  }
+
+  function onRulerXMouseMove(event) {
+    saveMousePosition(event);
+    if (clickedX && rulerLineElement !== null) {
+      createUpdateDOM({
+        rule: '__rulerXline',
+        className: '__rulerXContent__EL',
+        indicator: 'Y',
+        value: event.clientY,
+        event,
+      });
+
+      resetBodyStyle();
+      updatePositionInPixel(rulerLineElement, 'top', mouse.y);
     }
+  }
 
+  function onRulerYMouseMove(event) {
+    saveMousePosition(event);
+    if (clickedY && rulerLineElement !== null) {
+      createUpdateDOM({
+        rule: '__rulerYline',
+        className: '__rulerYContent__EL',
+        indicator: 'X',
+        value: event.clientX,
+        event,
+      });
 
-    /** set mouse position on move */
-    function setMousePosition(e) {
-      const ev = e || window.event // Moz || IE
-      const {clientX, clientY} = ev
-      if (ev.pageX) {
-        // Moz
-        mouse.x = clientX
-        mouse.y = clientY
-      } else if (clientX) {
-        // IE
-        mouse.x = clientX
-        mouse.y = clientY
+      resetBodyStyle();
+      updatePositionInPixel(rulerLineElement, 'left', mouse.x);
+    }
+  }
+
+  function moveTargetElement(event) {
+    saveMousePosition(event);
+    if (targetElement) {
+      resetBodyStyle();
+      if (clickedX) {
+        createUpdateDOM({
+          rule: '__rulerXline',
+          className: '__rulerXContent__EL',
+          indicator: 'Y',
+          value: event.clientY,
+          event,
+        });
+        updatePositionInPixel(targetElement, 'top', mouse.y);
+      } else if (clickedY) {
+        createUpdateDOM({
+          rule: '__rulerYline',
+          className: '__rulerYContent__EL',
+          indicator: 'X',
+          value: event.clientX,
+          event,
+        });
+        updatePositionInPixel(targetElement, 'left', mouse.x);
       }
     }
+  }
 
-    /** set initial mouse position on click */
-      // const setInitialPosition = (e) => {
-      //   const ev = e || window.event // Moz || IE
-      //   if (ev.pageX) {
-      //     // Moz
-      //     mouse.initialX = ev.layerX
-      //     mouse.initialY = ev.layerY
-      //   } else if (ev.clientX) {
-      //     // IE
-      //     mouse.initialX = ev.layerX
-      //     mouse.initialY = ev.layerY
-      //   }
-      // }
+  function onMouseDown(e) {
+    const {clientY, clientX} = e;
+    mouseDown = true;
+    saveMousePosition(e);
+    if (isTop(clientY)) {
+      clickedX = true;
+      onRulerXClick(e);
+    } else if (isRight(clientX)) {
+      clickedY = true;
+      onRulerYClick(e);
+    }
+  }
 
-    const rulerMainElement = createElement({
-        elementTag: 'div', classList: ['__ruler_EXT_MAIN'],
-      })
+  function initMouseAndKeyListener() {
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('mousedown', onMouseDown);
+  }
 
-    applyStyle(rulerMainElement, {
-      display: determineRulersMode(),
-    })
+  function onMouseMove(e) {
+    if (targetElement) {
+      moveTargetElement(e);
+    } else if (clickedX) {
+      onRulerXMouseMove(e);
+    } else if (clickedY) {
+      onRulerYMouseMove(e);
+    }
+  }
 
-    /** ruler X container */
-    const rulerContainerX = createElement({
-      elementTag: 'div', classList: ['__rulerX __ruler_EXT'],
-    })
+  function onMouseUp(e) {
+    clickedX = false;
+    clickedY = false;
+    mouseDown = false;
+    targetElement = null;
+    document.body.style.userSelect = 'auto';
+    document.body.style.cursor = 'auto';
+  }
 
-    /** ruler Y container */
-    const rulerContainerY = createElement({
-      elementTag: 'div', classList: ['__rulerY __ruler_EXT'],
-    })
-
-    /** ruler X list container */
-    const rulerElementX = createElement({
-      elementTag: 'ul', classList: ['__ruler_X'],
-    })
-
-    /** ruler Y list container */
-    const rulerElementY = createElement({
-      elementTag: 'ul', classList: ['__ruler_Y'],
-    })
-
-    rulerElementX.addEventListener('mouseover', () => {
-      rulerElementX.style.cursor = 'row-resize'
-    })
-
-    rulerElementY.addEventListener('mouseover', () => {
-      rulerElementY.style.cursor = 'col-resize'
-    })
-
-    function onRulerXClick() {
-      mouse.startX = mouse.x
-      mouse.startY = mouse.y
+  function onKeyDown(e) {
+    const {key} = e
+    if (key === 'Backspace' && targetElement) {
+      targetElement.remove();
+    }
+    if (mouseDown && key === 'h') {
       rulerLineElement = createElement({
-        elementTag: 'div', classList: ['__rulerXline'], id: '__ext_ruler_line',
-      })
+        elementTag: 'div',
+        classList: ['__rulerXline'],
+        id: '__ext_ruler_line',
+      });
       applyStyle(rulerLineElement, {
         width: '100%',
         height: '10px',
@@ -315,23 +401,24 @@ if (!window['rulerLoaded']) {
         position: 'fixed',
         zIndex: '9999999999999999999',
         cursor: 'row-resize',
-      })
+        top: mouse.y + 'px',
+        left: '0px',
+      });
       targetElement = rulerLineElement
       rulerLineElement.addEventListener('mousedown', (event) => {
-        targetElement = event.target
-        clickedX = true
-      })
+        targetElement = event.target;
+        clickedX = true;
+      });
 
-      rulerMainElement.append(rulerLineElement)
+      rulerMainElement.append(rulerLineElement);
     }
-
-    function onRulerYClick() {
-      document.body.style.cursor = 'col-resize'
-      mouse.startX = mouse.x
-      mouse.startY = mouse.y
+    if (mouseDown && key === 'v') {
       rulerLineElement = createElement({
-        elementTag: 'div', classList: ['__rulerYline'], id: '__ext_ruler_line',
-      })
+        elementTag: 'div',
+        classList: ['__rulerYline'],
+        id: '__ext_ruler_line',
+      });
+
       applyStyle(rulerLineElement, {
         width: '10px',
         height: '100vh',
@@ -340,164 +427,80 @@ if (!window['rulerLoaded']) {
         zIndex: '9999999999999999999',
         cursor: 'col-resize',
         top: '0px',
-      })
-      targetElement = rulerLineElement
+        left: mouse.x + 'px',
+      });
+      targetElement = rulerLineElement;
 
       rulerLineElement.addEventListener('mousedown', (event) => {
         targetElement = event.target
         clickedY = true
-      })
-      rulerMainElement.append(rulerLineElement)
+      });
+      rulerMainElement.append(rulerLineElement);
     }
+  }
 
-    function onRulerXMouseMove(event) {
-      setMousePosition(event)
-      if (clickedX && rulerLineElement !== null) {
-        createUpdateDOM({
-          rule: '__rulerXline', className: '__rulerXContent__EL', indicator: 'Y', value: event.clientY, event,
-        })
 
-        resetBodyStyle()
-        updatePositionInPixel(rulerLineElement, 'top', mouse.y)
-      }
+
+  function loop(loopCount, rulerListContainer) {
+    for (let _ = 0; _ <= loopCount; _++) {
+      let e = document.createElement('li');
+      e.style.boxSizing = 'initial';
+      rulerListContainer.appendChild(e);
     }
-
-    function onRulerYMouseMove(event) {
-      setMousePosition(event)
-      if (clickedY && rulerLineElement !== null) {
-        createUpdateDOM({
-          rule: '__rulerYline', className: '__rulerYContent__EL', indicator: 'X', value: event.clientX, event,
-        })
-
-        resetBodyStyle()
-        updatePositionInPixel(rulerLineElement, 'left', mouse.x)
-      }
-    }
-
-    function moveTargetElement(event) {
-      setMousePosition(event)
-      if (targetElement) {
-        resetBodyStyle()
-        if (clickedX) {
-          createUpdateDOM({
-            rule: '__rulerXline', className: '__rulerXContent__EL', indicator: 'Y', value: event.clientY, event,
-          })
-          updatePositionInPixel(targetElement, 'top', mouse.y)
-        } else if (clickedY) {
-          createUpdateDOM({
-            rule: '__rulerYline', className: '__rulerYContent__EL', indicator: 'X', value: event.clientX, event,
-          })
-          updatePositionInPixel(targetElement, 'left', mouse.x)
-        }
-      }
-    }
-
-    // TODO add listener
-    document.onmousedown = (e) => {
-      const {clientY, clientX} = e
-      mouseDown = true
-      setMousePosition(e)
-      if (isTop(clientY)) {
-        clickedX = true
-        onRulerXClick(e)
-      } else if (isRight(clientX)) {
-        clickedY = true
-        onRulerYClick(e)
-      }
-    }
-
-    // TODO add listener
-    document.onmousemove = (e) => {
-      if (targetElement) {
-        moveTargetElement(e)
-      } else if (clickedX) {
-        onRulerXMouseMove(e)
-      } else if (clickedY) {
-        onRulerYMouseMove(e)
-      }
-    }
-
-    // TODO add listener
-    document.onmouseup = (e) => {
-      clickedX = false
-      clickedY = false
-      mouseDown = false
-      __ruler__Line__ruler__Line = null
-      targetElement = null
-      document.body.style.userSelect = 'auto'
-      document.body.style.cursor = 'auto'
-    }
-
-    // TODO add listener
-    document.onkeydown = (e) => {
-      const {key} = e
-      if (key === 'Backspace' && targetElement) {
-        targetElement.remove()
-      }
-      if (mouseDown && key === 'h') {
-        rulerLineElement = createElement({
-          elementTag: 'div', classList: ['__rulerXline'], id: '__ext_ruler_line',
-        })
-        applyStyle(rulerLineElement, {
-          width: '100%',
-          height: '10px',
-          background: 'transparent',
-          position: 'fixed',
-          zIndex: '9999999999999999999',
-          cursor: 'row-resize',
-          top: mouse.y + 'px',
-          left: '0px',
-        })
-        targetElement = rulerLineElement
-        rulerLineElement.addEventListener('mousedown', (event) => {
-          targetElement = event.target
-          clickedX = true
-        })
-
-        rulerMainElement.append(rulerLineElement)
-      }
-      if (mouseDown && key === 'v') {
-        rulerLineElement = createElement({
-          elementTag: 'div', classList: ['__rulerYline'], id: '__ext_ruler_line',
-        })
-        applyStyle(rulerLineElement, {
-          width: '10px',
-          height: '100vh',
-          background: 'transparent',
-          position: 'fixed',
-          zIndex: '9999999999999999999',
-          cursor: 'col-resize',
-          top: '0px',
-          left: mouse.x + 'px',
-        })
-        targetElement = rulerLineElement
-
-        rulerLineElement.addEventListener('mousedown', (event) => {
-          targetElement = event.target
-          clickedY = true
-        })
-        rulerMainElement.append(rulerLineElement)
-      }
-    }
+  }
 
 
-    function loop(loopCount, rulerListContainer) {
-      for (let _ = 0; _ <= loopCount; _++) {
-        let e = document.createElement('li')
-        e.style.boxSizing = 'initial'
-        rulerListContainer.appendChild(e)
-      }
-    }
+  function init(document) {
 
-    // /** rulerX lists */
-    loop(Math.round(innerWidth / 50), rulerElementX)
+    rulerMainElement = createElement({
+      elementTag: 'div',
+      classList: ['__ruler_EXT_MAIN'],
+    });
 
-    // /** rulerY lists */
-    loop(Math.round(innerHeight / 50), rulerElementY)
+    applyStyle(rulerMainElement, {
+      display: determineRulersMode(),
+    });
+
+    rulerContainerX = createElement({
+      elementTag: 'div',
+      classList: ['__rulerX __ruler_EXT'],
+    });
+
+    rulerContainerY = createElement({
+      elementTag: 'div',
+      classList: ['__rulerY __ruler_EXT'],
+    });
+
+    rulerElementX = createElement({
+      elementTag: 'ul',
+      classList: ['__ruler_X'],
+    });
+
+    rulerElementY = createElement({
+      elementTag: 'ul',
+      classList: ['__ruler_Y'],
+    });
+
+    // TODO better :hover css?
+    rulerElementX.addEventListener('mouseover', () => {
+      rulerElementX.style.cursor = 'row-resize';
+    });
+
+    // TODO better :hover css?
+    rulerElementY.addEventListener('mouseover', () => {
+      rulerElementY.style.cursor = 'col-resize';
+    });
+
+
+
+    loop(Math.round(innerWidth / 50), rulerElementX);
+
+
+    loop(Math.round(innerHeight / 50), rulerElementY);
 
     /** append rulers to container */
-    rulerContainerY.append(rulerElementY)
-    rulerContainerX.append(rulerElementX)
+    rulerContainerY.append(rulerElementY);
+    rulerContainerX.append(rulerElementX);
 
     /** append ruler to body */
     rulerMainElement.append(rulerContainerX)
@@ -517,14 +520,17 @@ if (!window['rulerLoaded']) {
     applyLineColor();
     applyLineWidth();
 
-    chrome.runtime.onMessage.addListener((msg, sender, response) => {
-      console.log('innen ruler listen msg:', msg);
+    chrome.runtime.onMessage.addListener((msg, _sender, _response) => {
+      console.log('inner ruler listen msg:', msg);
       return handleMessage(msg, rulerMainElement);
     });
 
     handleMessage({
-      type: 'ENABLE', value: true
+      type: 'ENABLE',
+      value: true
     }, rulerMainElement);
+
+    initMouseAndKeyListener();
   }
 
   if (document) {
@@ -532,5 +538,3 @@ if (!window['rulerLoaded']) {
   }
 }
 
-chrome.runtime.onMessage.addListener((_msg, _sender, _response) => {
-});
