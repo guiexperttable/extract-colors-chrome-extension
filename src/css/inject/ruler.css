@@ -17,6 +17,11 @@
     --ruler2-space: 50;
     --lineColor: rgba(0, 255, 255, 0.83);
     --lineWidth: 1px;
+
+    --line-marker-bg: rgba(0,0,0,0.9);
+    --line-marker-color: #fff;
+    --line-marker-delete-btn-bg: #fff;
+    --line-marker-delete-btn-color: #5e0000;
 }
 
 .extract-colors-devtool.ruler-main-div {
@@ -157,40 +162,33 @@
     left: 5px;
 }
 
-.extract-colors-devtool .ruler-content-x-top-line {
-    margin: 9px 0 0 20px;
+.extract-colors-devtool .y-left-line-marker,
+.extract-colors-devtool .x-left-line-marker {
     border: 0;
     text-align: center;
     display: none;
     font-size: 14px;
-    position: relative;
-    background: #cdcdcd;
+    background: var(--line-marker-bg);
+    color: var(--line-marker-color);
     border-radius: 5px;
     padding: 2px 5px;
     min-width: 80px;
-    width: fit-content;
+    gap: 0.4em;
     justify-content: center;
     align-items: center;
-    gap: 0.4em;
+}
+.extract-colors-devtool .x-left-line-marker {
+    margin: 9px 0 0 20px;
+    position: relative;
+    width: fit-content;
     top: -2px;
     left: 5px;
 }
 
-.extract-colors-devtool .ruler-content-y-left-line {
+.extract-colors-devtool .y-left-line-marker {
     margin: 9px 0 0 3px;
-    border: 0;
-    text-align: center;
-    display: none;
-    font-size: 14px;
     position: absolute;
     bottom: 40px;
-    background: #cdcdcd;
-    border-radius: 5px;
-    padding: 2px 5px;
-    min-width: 80px;
-    justify-content: center;
-    align-items: center;
-    gap: 0.4em;
     left: 4px;
 }
 
@@ -202,15 +200,16 @@
     justify-content: center;
     align-items: center;
     border-radius: 100%;
-    background: #fff;
+    background: var(--line-marker-delete-btn-bg);
+    color: var(--line-marker-delete-btn-color);
     cursor: pointer;
 
 }
 
-.extract-colors-devtool .ruler-content-x-topline:hover .ruler-content-x-top-line {
+.extract-colors-devtool .ruler-content-x-topline:hover .x-left-line-marker {
     display: flex;
 }
 
-.extract-colors-devtool .ruler-y-line-div:hover .ruler-content-y-left-line {
+.extract-colors-devtool .ruler-y-line-div:hover .y-left-line-marker {
     display: flex;
 }

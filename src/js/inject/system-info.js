@@ -5,7 +5,6 @@ chrome.runtime.onMessage
 
     let b = !!window['rulerLoaded'];
     if (message === "requestRulerInfo") {
-      console.log('injected: requestRulerInfo:', b);
       sendResponse(b);
       return true;
     }

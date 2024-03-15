@@ -17,6 +17,7 @@ if (!window['rulerLoaded']) {
   const STORAGE_KEY_RULER_EXT_LINE_WIDTH = 'ruler-div-line-width';
 
   const crossIcon = `&#10005;`;
+  const DELETE_KEY = `Backspace`;
 
   let rulerLineElement = null;
   let clickedX = false;
@@ -109,19 +110,19 @@ if (!window['rulerLoaded']) {
   }
 
 
-  function createUpdateDOM(config) {
+  function createLineMarkerWithDeleteButton(config) {
     const {rule, className, indicator, value, event} = config;
     if (event.target.className === rule) {
       const element = createElement({
         elementTag: 'div',
         classList: [className],
-        innerHTML: value + ` ${indicator}`
+        innerHTML: `${indicator}: ${value}`
       });
 
       const crossElement = createElement({
         elementTag: 'button',
         classList: ['ruler-delete-line-btn'],
-        title: 'Right Click + Backspace',
+        title: `${DELETE_KEY} + Click`,
         innerHTML: crossIcon
       });
       element.addEventListener('click', (event) => {
@@ -324,9 +325,9 @@ if (!window['rulerLoaded']) {
   function onRulerXMouseMove(event) {
     saveMousePosition(event);
     if (clickedX && rulerLineElement !== null) {
-      createUpdateDOM({
+      createLineMarkerWithDeleteButton({
         rule: 'ruler-content-x-topline',
-        className: 'ruler-content-x-top-line',
+        className: 'x-left-line-marker',
         indicator: 'Y',
         value: event.clientY,
         event,
@@ -339,9 +340,9 @@ if (!window['rulerLoaded']) {
   function onRulerYMouseMove(event) {
     saveMousePosition(event);
     if (clickedY && rulerLineElement !== null) {
-      createUpdateDOM({
+      createLineMarkerWithDeleteButton({
         rule: 'ruler-y-line-div',
-        className: 'ruler-content-y-left-line',
+        className: 'y-left-line-marker',
         indicator: 'X',
         value: event.clientX,
         event,
@@ -355,18 +356,18 @@ if (!window['rulerLoaded']) {
     saveMousePosition(event);
     if (targetElement) {
       if (clickedX) {
-        createUpdateDOM({
+        createLineMarkerWithDeleteButton({
           rule: 'ruler-content-x-topline',
-          className: 'ruler-content-x-top-line',
+          className: 'x-left-line-marker',
           indicator: 'Y',
           value: event.clientY,
           event,
         });
         updatePositionInPixel(targetElement, 'top', mouse.y);
       } else if (clickedY) {
-        createUpdateDOM({
+        createLineMarkerWithDeleteButton({
           rule: 'ruler-y-line-div',
-          className: 'ruler-content-y-left-line',
+          className: 'y-left-line-marker',
           indicator: 'X',
           value: event.clientX,
           event,
@@ -415,23 +416,22 @@ if (!window['rulerLoaded']) {
     document.body.style.cursor = 'auto';
   }
 
-  function onKeyDown(e) {
-    const {key} = e
-    if (key === 'Backspace' && targetElement) {
+  function onKeyDown(evt) {
+    const {key} = evt;
+    if (key === DELETE_KEY && targetElement) {
       targetElement.remove();
     }
     if (mouseDown && key === 'h') {
       rulerLineElement = createElement({
         elementTag: 'div',
         classList: ['ruler-content-x-topline'],
-        //id: '__ext_ruler_line',
       });
       applyStyle(rulerLineElement, {
         width: '100%',
         height: '10px',
         background: 'transparent',
         position: 'fixed',
-        zIndex: '9999999999999999999',
+        zIndex: MAX_Z_INDEX,
         cursor: 'row-resize',
         top: mouse.y + 'px',
         left: '0px',
@@ -456,7 +456,7 @@ if (!window['rulerLoaded']) {
         height: '100vh',
         background: 'transparent',
         position: 'fixed',
-        zIndex: '9999999999999999999',
+        zIndex: MAX_Z_INDEX,
         cursor: 'col-resize',
         top: '0px',
         left: mouse.x + 'px',
