@@ -179,9 +179,9 @@
     font-size: 14px;
     background: var(--line-marker-bg);
     color: var(--line-marker-color);
-    border-radius: 5px;
+    border-radius: 15px;
     padding: 2px 5px;
-    min-width: 80px;
+    min-width: 70px;
     gap: 0.4em;
     justify-content: center;
     align-items: center;

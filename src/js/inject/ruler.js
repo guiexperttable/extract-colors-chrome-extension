@@ -111,9 +111,9 @@ if (!window['rulerLoaded']) {
 
 
   function createLineMarkerWithDeleteButton(config) {
-    const {rule, className, indicator, value, event} = config;
-    if (event.target.className === rule) {
-      const element = createElement({
+    const {targetClassName, className, indicator, value, event} = config;
+    if (event.target.className === targetClassName) {
+      const element= createElement({
         elementTag: 'div',
         classList: [className],
         innerHTML: `${indicator}: ${value}`
@@ -275,8 +275,7 @@ if (!window['rulerLoaded']) {
     mouse.startY = mouse.y;
     rulerLineElement = createElement({
       elementTag: 'div',
-      classList: ['ruler-free-horizontal-line'],
-      //id: '__ext_ruler_line'
+      classList: ['ruler-free-horizontal-line']
     });
     applyStyle(rulerLineElement, {
       width: '100%',
@@ -292,7 +291,7 @@ if (!window['rulerLoaded']) {
       clickedX = true;
     })
 
-    rulerMainElement.append(rulerLineElement)
+    rulerMainElement.append(rulerLineElement);
   }
 
   function onRulerYClick() {
@@ -301,17 +300,16 @@ if (!window['rulerLoaded']) {
     mouse.startY = mouse.y;
     rulerLineElement = createElement({
       elementTag: 'div',
-      classList: ['ruler-free-vertical-line'],
-      //id: '__ext_ruler_line',
+      classList: ['ruler-free-vertical-line']
     });
     applyStyle(rulerLineElement, {
       width: '10px',
-      height: '100vh',
+      height: '100%',
       background: 'transparent',
       position: 'fixed',
       zIndex: MAX_Z_INDEX,
       cursor: 'col-resize',
-      top: '0px',
+      top: '0',
     });
     targetElement = rulerLineElement;
 
@@ -326,7 +324,7 @@ if (!window['rulerLoaded']) {
     saveMousePosition(event);
     if (clickedX && rulerLineElement !== null) {
       createLineMarkerWithDeleteButton({
-        rule: 'ruler-free-horizontal-line',
+        targetClassName: 'ruler-free-horizontal-line',
         className: 'line-marker',
         indicator: 'Y',
         value: event.clientY,
@@ -341,7 +339,7 @@ if (!window['rulerLoaded']) {
     saveMousePosition(event);
     if (clickedY && rulerLineElement !== null) {
       createLineMarkerWithDeleteButton({
-        rule: 'ruler-free-vertical-line',
+        targetClassName: 'ruler-free-vertical-line',
         className: 'line-marker',
         indicator: 'X',
         value: event.clientX,
@@ -357,16 +355,17 @@ if (!window['rulerLoaded']) {
     if (targetElement) {
       if (clickedX) {
         createLineMarkerWithDeleteButton({
-          rule: 'ruler-free-horizontal-line',
+          targetClassName: 'ruler-free-horizontal-line',
           className: 'line-marker',
           indicator: 'Y',
           value: event.clientY,
           event,
         });
         updatePositionInPixel(targetElement, 'top', mouse.y);
+
       } else if (clickedY) {
         createLineMarkerWithDeleteButton({
-          rule: 'ruler-free-vertical-line',
+          targetClassName: 'ruler-free-vertical-line',
           className: 'line-marker',
           indicator: 'X',
           value: event.clientX,
@@ -434,7 +433,7 @@ if (!window['rulerLoaded']) {
         zIndex: MAX_Z_INDEX,
         cursor: 'row-resize',
         top: mouse.y + 'px',
-        left: '0px',
+        left: '0',
       });
       targetElement = rulerLineElement
       rulerLineElement.addEventListener('mousedown', (event) => {
@@ -447,18 +446,17 @@ if (!window['rulerLoaded']) {
     if (mouseDown && key === 'v') {
       rulerLineElement = createElement({
         elementTag: 'div',
-        classList: ['ruler-free-vertical-line'],
-        //id: '__ext_ruler_line',
+        classList: ['ruler-free-vertical-line']
       });
 
       applyStyle(rulerLineElement, {
         width: '10px',
-        height: '100vh',
+        height: '100%',
         background: 'transparent',
         position: 'fixed',
         zIndex: MAX_Z_INDEX,
         cursor: 'col-resize',
-        top: '0px',
+        top: '0',
         left: mouse.x + 'px',
       });
       targetElement = rulerLineElement;
