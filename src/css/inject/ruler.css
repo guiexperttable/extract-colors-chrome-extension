@@ -1,4 +1,6 @@
+
 .extract-colors-devtool {
+    --ruler-border-color: rgba(0,0,0,0.3);
     --rulerNumbers: #000;
     --ruler-num-fontsize: 10px;
     --ruler-num-padding-line-start: 0.75ch;
@@ -7,14 +9,15 @@
     --ruler-y: 1;
 
     --ruler1-bdw: 1px;
-    --rulerBaseLine: #000;
+    --ruler-hash-mark-fraction-line: #111;
     --ruler1-h: 8px;
     --ruler1-space: 5;
 
     --ruler2-bdw: 1px;
-    --rulerTopLine: #000;
+    --ruler-hash-mark-main-line: #000;
     --ruler2-h: 20px;
     --ruler2-space: 50;
+
     --lineColor: rgba(0, 255, 255, 0.83);
     --lineWidth: 1px;
 
@@ -24,6 +27,10 @@
     --line-marker-delete-btn-color: cyan;
     --line-marker-delete-btn-hover-bg: #fff;
     --line-marker-delete-btn-hover-color: #5e0000;
+}
+
+.extract-colors-devtool {
+    display: block;
 }
 
 .extract-colors-devtool.ruler-main-div {
@@ -43,9 +50,9 @@
 .extract-colors-devtool .ruler-content-x-top {
     width: 100%;
     height: 20px;
-    border-bottom: 1px solid;
-    background-image: linear-gradient(90deg, var(--rulerBaseLine) 0 var(--ruler1-bdw), transparent 0),
-    linear-gradient(90deg, var(--rulerTopLine) 0 var(--ruler2-bdw), transparent 0);
+    border-bottom: 1px solid var(--ruler-border-color);
+    background-image: linear-gradient(90deg, var(--ruler-hash-mark-fraction-line) 0 var(--ruler1-bdw), transparent 0),
+    linear-gradient(90deg, var(--ruler-hash-mark-main-line) 0 var(--ruler2-bdw), transparent 0);
     background-repeat: repeat-x, repeat-x;
     background-size: calc(var(--ruler-unit) * var(--ruler1-space) * var(--ruler-x)) var(--ruler1-h),
     calc(var(--ruler-unit) * var(--ruler2-space) * var(--ruler-x)) var(--ruler2-h);
@@ -55,11 +62,11 @@
     width: 22px;
     height: 100vh;
     left: 0;
-    border-right: 1px solid;
-    background-image: linear-gradient(90deg, var(--rulerBaseLine) 0 var(--ruler1-bdw), transparent 0),
-    linear-gradient(90deg, var(--rulerTopLine) 0 var(--ruler2-bdw), transparent 0),
-    linear-gradient(0deg, var(--rulerBaseLine) 0 var(--ruler1-bdw), transparent 0),
-    linear-gradient(0deg, var(--rulerTopLine) 0 var(--ruler2-bdw), transparent 0);
+    border-right: 1px solid var(--ruler-border-color);
+    background-image: linear-gradient(90deg, var(--ruler-hash-mark-fraction-line) 0 var(--ruler1-bdw), transparent 0),
+    linear-gradient(90deg, var(--ruler-hash-mark-main-line) 0 var(--ruler2-bdw), transparent 0),
+    linear-gradient(0deg, var(--ruler-hash-mark-fraction-line) 0 var(--ruler1-bdw), transparent 0),
+    linear-gradient(0deg, var(--ruler-hash-mark-main-line) 0 var(--ruler2-bdw), transparent 0);
     background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
     background-size: calc(var(--ruler-unit) * var(--ruler1-space) * var(--ruler-x)) var(--ruler1-h),
     calc(var(--ruler-unit) * var(--ruler2-space) * var(--ruler-x)) var(--ruler2-h),
