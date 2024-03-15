@@ -2,6 +2,7 @@ chrome.runtime.onMessage.addListener((_msg, _sender, _response) => {
 });
 
 
+
 if (!window['rulerLoaded']) {
 
   window['rulerLoaded'] = true;
@@ -29,9 +30,40 @@ if (!window['rulerLoaded']) {
 
 
   const mouse = {
-    x: 0, y: 0, startX: 0, startY: 0, initialX: 0, initialY: 0,
+    x: 0,
+    y: 0,
+    startX: 0,
+    startY: 0,
+    initialX: 0,
+    initialY: 0
+  };
+
+
+
+  function createListItemsX(rulerElementX, innerWidth) {
+    appendElements({
+      parent: rulerElementX,
+      elementCount: innerWidth / 50,
+      createElement: createListItem
+    });
   }
 
+  function createListItemsY(rulerElementY, innerHeight) {
+    appendElements({
+      parent: rulerElementY,
+      elementCount: innerHeight / 50,
+      createElement: createListItem
+    });
+  }
+
+  function createListItemsXandY(event) {
+    const {innerWidth, innerHeight} = event.currentTarget;
+
+    rulerElementX.innerHTML = "";
+    rulerElementY.innerHTML = "";
+    createListItemsX(rulerElementX, innerWidth);
+    createListItemsY(rulerElementY, innerHeight);
+  }
 
   function resetBodyStyle() {
     if (document) {
@@ -440,15 +472,18 @@ if (!window['rulerLoaded']) {
   }
 
 
-
-  function loop(loopCount, rulerListContainer) {
-    for (let _ = 0; _ <= loopCount; _++) {
-      let e = document.createElement('li');
-      e.style.boxSizing = 'initial';
-      rulerListContainer.appendChild(e);
-    }
+  function createListItem() {
+    const listItem = document.createElement('li');
+    listItem.style.boxSizing = 'initial';
+    return listItem;
   }
 
+  function appendElements({ parent, elementCount, createElement }) {
+    Array(Math.floor(elementCount))
+      .fill(undefined)
+      .map(createElement)
+      .forEach(element => parent.appendChild(element));
+  }
 
   function init(document) {
 
@@ -490,40 +525,26 @@ if (!window['rulerLoaded']) {
     rulerElementY.addEventListener('mouseover', () => {
       rulerElementY.style.cursor = 'col-resize';
     });
+    createListItemsX(rulerElementX, innerWidth);
+    createListItemsY(rulerElementY, innerHeight);
 
-
-
-    loop(Math.round(innerWidth / 50), rulerElementX);
-
-
-    loop(Math.round(innerHeight / 50), rulerElementY);
-
-    /** append rulers to container */
     rulerContainerY.append(rulerElementY);
     rulerContainerX.append(rulerElementX);
 
-    /** append ruler to body */
     rulerMainElement.append(rulerContainerX)
     rulerMainElement.append(rulerContainerY)
     document.body.appendChild(rulerMainElement)
 
-    /** listen for windo resize */
-    window.addEventListener('resize', function (event) {
-      const {innerWidth, innerHeight} = event.currentTarget
+    window.addEventListener('resize', createListItemsXandY);
 
-      /** clear existing rulers and calculate new rulers */
-      rulerElementX.innerHTML = ''
-      rulerElementY.innerHTML = ''
-      loop(Math.round(innerWidth / 50), rulerElementX)
-      loop(Math.round(innerHeight / 50), rulerElementY)
-    })
     applyLineColor();
     applyLineWidth();
 
-    chrome.runtime.onMessage.addListener((msg, _sender, _response) => {
-      console.log('inner ruler listen msg:', msg);
-      return handleMessage(msg, rulerMainElement);
-    });
+    chrome.runtime.onMessage
+      .addListener((msg, _sender, _response) => {
+        console.log("inner ruler listen msg:", msg);
+        return handleMessage(msg, rulerMainElement);
+      });
 
     handleMessage({
       type: 'ENABLE',
