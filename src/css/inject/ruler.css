@@ -1,4 +1,4 @@
-:root {
+.extract-colors-devtool {
     --rulerNumbers: #000;
     --ruler-num-fontsize: 10px;
     --ruler-num-padding-line-start: 0.75ch;
@@ -15,15 +15,15 @@
     --rulerTopLine: #000;
     --ruler2-h: 20px;
     --ruler2-space: 50;
-    --lineColor: #f89406;
+    --lineColor: rgba(0, 255, 255, 0.83);
     --lineWidth: 1px;
 }
 
-.__ruler_EXT_MAIN {
+.extract-colors-devtool.__ruler_EXT_MAIN {
     display: none;
 }
 
-.__ruler_EXT {
+.extract-colors-devtool .__ruler_EXT {
     position: fixed;
     top: 0;
     right: 0;
@@ -33,7 +33,7 @@
     box-sizing: initial;
 }
 
-.__rulerX {
+.extract-colors-devtool .__rulerX {
     width: 100%;
     height: 20px;
     border-bottom: 1px solid;
@@ -44,7 +44,7 @@
     calc(var(--ruler-unit) * var(--ruler2-space) * var(--ruler-x)) var(--ruler2-h);
 }
 
-.__rulerY {
+.extract-colors-devtool .__rulerY {
     width: 22px;
     height: 100vh;
     left: 0;
@@ -60,14 +60,14 @@
     var(--ruler2-h) calc(var(--ruler-unit) * var(--ruler2-space) * var(--ruler-y));
 }
 
-.__ruler ul {
+.extract-colors-devtool .__ruler ul {
     box-sizing: initial;
     pointer-events: all;
 }
 
 /* Ruler Numbers */
-.__ruler_X,
-.__ruler_Y {
+.extract-colors-devtool .__ruler_X,
+.extract-colors-devtool .__ruler_Y {
     color: var(--rulerNumbers);
     counter-reset: d 0;
     display: flex;
@@ -80,7 +80,7 @@
     position: fixed;
 }
 
-.__ruler_X {
+.extract-colors-devtool .__ruler_X {
     height: var(--ruler2-h);
     inset-block-start: 0;
     inset-inline-start: calc(var(--ruler-unit) * var(--ruler2-space));
@@ -88,7 +88,7 @@
     width: 100%;
 }
 
-.__ruler_Y {
+.extract-colors-devtool .__ruler_Y {
     flex-direction: column;
     height: 100%;
     inset-block-start: calc(var(--ruler-unit) * var(--ruler2-space));
@@ -96,28 +96,34 @@
     opacity: var(--ruler-y);
     width: var(--ruler2-h);
 }
+.extract-colors-devtool .__ruler_X:hover {
+    cursor: row-resize;
+}
+.extract-colors-devtool .__ruler_Y:hover {
+    cursor: col-resize;
+}
 
-.__ruler_X li {
+.extract-colors-devtool .__ruler_X li {
     align-self: flex-end;
 }
 
-.__ruler_X li,
-.__ruler_Y li {
+.extract-colors-devtool .__ruler_X li,
+.extract-colors-devtool .__ruler_Y li {
     counter-increment: d var(--ruler2-space);
     flex: 0 0 calc(var(--ruler-unit) * var(--ruler2-space));
 }
 
-.__ruler_Y li {
+.extract-colors-devtool .__ruler_Y li {
     margin-left: 3px;
 }
 
-.__ruler_X li::after {
+.extract-colors-devtool .__ruler_X li::after {
     content: counter(d) '';
     line-height: 1;
     padding-inline-start: var(--ruler-num-padding-line-start);
 }
 
-.__ruler_Y li::after {
+.extract-colors-devtool .__ruler_Y li::after {
     content: counter(d) '';
     display: block;
     padding-inline-end: var(--ruler-num-padding-line-start);
@@ -127,11 +133,11 @@
     width: fit-content;
 }
 
-.__rulerXline {
+.extract-colors-devtool .__rulerXline {
     left: 0;
 }
 
-.__rulerXline::after {
+.extract-colors-devtool .__rulerXline::after {
     content: ' ';
     position: absolute;
     background: var(--lineColor);
@@ -140,7 +146,7 @@
     top: 5px;
 }
 
-.__rulerYline::before {
+.extract-colors-devtool .__rulerYline::before {
     content: ' ';
     position: absolute;
     background: var(--lineColor);
@@ -150,7 +156,7 @@
     left: 5px;
 }
 
-.__rulerXContent__EL {
+.extract-colors-devtool .__rulerXContent__EL {
     margin: 9px 0 0 20px;
     border: 0;
     text-align: center;
@@ -169,7 +175,7 @@
     left: 5px;
 }
 
-.__rulerYContent__EL {
+.extract-colors-devtool .__rulerYContent__EL {
     margin: 9px 0 0 3px;
     border: 0;
     text-align: center;
@@ -187,7 +193,7 @@
     left: 4px;
 }
 
-.__ruler_delete_line {
+.extract-colors-devtool .__ruler_delete_line {
     border: 0;
     width: 20px;
     height: 20px;
@@ -200,10 +206,10 @@
 
 }
 
-.__rulerXline:hover .__rulerXContent__EL {
+.extract-colors-devtool .__rulerXline:hover .__rulerXContent__EL {
     display: flex;
 }
 
-.__rulerYline:hover .__rulerYContent__EL {
+.extract-colors-devtool .__rulerYline:hover .__rulerYContent__EL {
     display: flex;
 }

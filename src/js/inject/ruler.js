@@ -14,7 +14,6 @@ if (!window['rulerLoaded']) {
   const RULER_EXT_RULER_VISIBILITY = '__ruler_ext_RULER_VISIBILITY';
   const RULER_EXT_LINE_COLOR = '__ruler_ext_LINE_COLOR';
   const RULER_EXT_LINE_WIDTH = '__ruler_ext_LINE_WIDTH';
-  const {innerWidth, innerHeight} = window;
   const crossIcon = `&#10005;`;
 
   let rulerLineElement = null;
@@ -66,13 +65,6 @@ if (!window['rulerLoaded']) {
     createListItemsY(rulerElementY, innerHeight);
   }
 
-  function resetBodyStyle() {
-    if (document) {
-      document.body.style.cursor = 'row-resize';
-      document.body.style.userSelect = 'none';
-    }
-  }
-
   function applyStyle(element, style) {
     for (const property in style) {
       element.style[property] = style[property];
@@ -85,11 +77,19 @@ if (!window['rulerLoaded']) {
       if (prop === 'childNodes') {
         para.childNodes.forEach(node => {
           element.appendChild(node);
-        })
+        });
+
       } else if (prop === 'attributes') {
         para.attributes.forEach(attr => {
           element.setAttribute(attr.key, attr.value);
-        })
+        });
+
+      } else if (prop === 'classList') {
+        for (const clazz of para.classList) {
+          clazz.split(" ")
+            .forEach(c => element.classList.add(c));
+        }
+
       } else {
         element[prop] = para[prop];
       }
@@ -330,7 +330,6 @@ if (!window['rulerLoaded']) {
         event,
       });
 
-      resetBodyStyle();
       updatePositionInPixel(rulerLineElement, 'top', mouse.y);
     }
   }
@@ -346,7 +345,6 @@ if (!window['rulerLoaded']) {
         event,
       });
 
-      resetBodyStyle();
       updatePositionInPixel(rulerLineElement, 'left', mouse.x);
     }
   }
@@ -354,7 +352,6 @@ if (!window['rulerLoaded']) {
   function moveTargetElement(event) {
     saveMousePosition(event);
     if (targetElement) {
-      resetBodyStyle();
       if (clickedX) {
         createUpdateDOM({
           rule: '__rulerXline',
@@ -407,7 +404,7 @@ if (!window['rulerLoaded']) {
     }
   }
 
-  function onMouseUp(e) {
+  function onMouseUp(_evt) {
     clickedX = false;
     clickedY = false;
     mouseDown = false;
@@ -487,10 +484,11 @@ if (!window['rulerLoaded']) {
   }
 
   function init(document) {
+    const {innerWidth, innerHeight} = window;
 
     rulerMainElement = createElement({
       elementTag: 'div',
-      classList: ['__ruler_EXT_MAIN'],
+      classList: ['extract-colors-devtool', '__ruler_EXT_MAIN'],
     });
 
     applyStyle(rulerMainElement, {
@@ -517,15 +515,6 @@ if (!window['rulerLoaded']) {
       classList: ['__ruler_Y'],
     });
 
-    // TODO better :hover css?
-    rulerElementX.addEventListener('mouseover', () => {
-      rulerElementX.style.cursor = 'row-resize';
-    });
-
-    // TODO better :hover css?
-    rulerElementY.addEventListener('mouseover', () => {
-      rulerElementY.style.cursor = 'col-resize';
-    });
     createListItemsX(rulerElementX, innerWidth);
     createListItemsY(rulerElementY, innerHeight);
 
