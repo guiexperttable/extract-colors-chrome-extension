@@ -141,11 +141,11 @@
     width: fit-content;
 }
 
-.extract-colors-devtool .ruler-content-x-topline {
+.extract-colors-devtool .ruler-free-horizontal-line {
     left: 0;
 }
 
-.extract-colors-devtool .ruler-content-x-topline::after {
+.extract-colors-devtool .ruler-free-horizontal-line::after {
     content: ' ';
     position: absolute;
     background: var(--lineColor);
@@ -154,7 +154,7 @@
     top: 5px;
 }
 
-.extract-colors-devtool .ruler-y-line-div::before {
+.extract-colors-devtool .ruler-free-vertical-line::before {
     content: ' ';
     position: absolute;
     background: var(--lineColor);
@@ -164,8 +164,8 @@
     left: 5px;
 }
 
-.extract-colors-devtool .y-left-line-marker,
-.extract-colors-devtool .x-left-line-marker {
+.extract-colors-devtool .ruler-free-horizontal-line .line-marker,
+.extract-colors-devtool .ruler-free-vertical-line .line-marker {
     border: 0;
     text-align: center;
     display: none;
@@ -178,8 +178,9 @@
     gap: 0.4em;
     justify-content: center;
     align-items: center;
+    user-select: none;
 }
-.extract-colors-devtool .x-left-line-marker {
+.extract-colors-devtool .ruler-free-horizontal-line .line-marker {
     margin: 9px 0 0 20px;
     position: relative;
     width: fit-content;
@@ -187,7 +188,7 @@
     left: 5px;
 }
 
-.extract-colors-devtool .y-left-line-marker {
+.extract-colors-devtool .ruler-free-vertical-line .line-marker {
     margin: 9px 0 0 3px;
     position: absolute;
     bottom: 40px;
@@ -211,10 +212,13 @@
     color: var(--line-marker-delete-btn-hover-color);
 }
 
-.extract-colors-devtool .ruler-content-x-topline:hover .x-left-line-marker {
+.extract-colors-devtool .ruler-free-horizontal-line:hover .line-marker {
     display: flex;
 }
 
-.extract-colors-devtool .ruler-y-line-div:hover .y-left-line-marker {
+.extract-colors-devtool .ruler-free-vertical-line:hover .line-marker {
     display: flex;
+        /*display: grid;*/
+        /*grid-template-columns: 1fr 20px;*/
+        /*user-select: none;*/
 }
