@@ -3,10 +3,10 @@
  *
  * @returns {string} The new design mode value.
  */
-export async function toggleDesignMode(){
+export async function toggleDesignMode(tabId){
   try {
     return chrome.scripting.executeScript({
-      target: {tabId: currentTab.id},
+      target: {tabId: tabId},
       func: ()=> {
         const value = document.designMode === 'on' ? 'off': 'on';
         document.designMode = value;

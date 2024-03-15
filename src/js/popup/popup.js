@@ -299,7 +299,7 @@ function initListener() {
 
   btnToggleDesignMode.addEventListener("click", async () => {
     showDiv(divDummy);
-    toggleDesignMode()
+    toggleDesignMode(currentTab.id)
       .then(res => {
         setLabelText(`Design mode is ${res}`);
         btnToggleDesignMode.classList.remove('not-editable');
