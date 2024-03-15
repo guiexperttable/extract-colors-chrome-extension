@@ -7,6 +7,7 @@ if (!window['rulerLoaded']) {
 
   window['rulerLoaded'] = true;
 
+  const MAX_Z_INDEX = '2147483647';
   const RULER_SIZE = 20;
   const RULER_EXT_ENABLED = '__ruler_ext_ENABLED';
   const RULER_EXT_LINE_VISIBILITY = '__ruler_ext_LINE_VISIBILITY';
@@ -279,7 +280,7 @@ if (!window['rulerLoaded']) {
       height: '10px',
       background: 'transparent',
       position: 'fixed',
-      zIndex: '9999999999999999999',
+      zIndex: MAX_Z_INDEX,
       cursor: 'row-resize',
     });
     targetElement = rulerLineElement;
@@ -305,7 +306,7 @@ if (!window['rulerLoaded']) {
       height: '100vh',
       background: 'transparent',
       position: 'fixed',
-      zIndex: '2147483647',
+      zIndex: MAX_Z_INDEX,
       cursor: 'col-resize',
       top: '0px',
     });
@@ -531,9 +532,9 @@ if (!window['rulerLoaded']) {
     rulerContainerY.append(rulerElementY);
     rulerContainerX.append(rulerElementX);
 
-    rulerMainElement.append(rulerContainerX)
-    rulerMainElement.append(rulerContainerY)
-    document.body.appendChild(rulerMainElement)
+    rulerMainElement.append(rulerContainerX);
+    rulerMainElement.append(rulerContainerY);
+    document.body.appendChild(rulerMainElement);
 
     window.addEventListener('resize', createListItemsXandY);
 
