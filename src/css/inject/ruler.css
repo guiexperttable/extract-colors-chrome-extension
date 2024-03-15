@@ -19,21 +19,21 @@
     --lineWidth: 1px;
 }
 
-.extract-colors-devtool.__ruler_EXT_MAIN {
+.extract-colors-devtool.ruler-main-div {
     display: none;
 }
 
-.extract-colors-devtool .__ruler_EXT {
+.extract-colors-devtool .single-ruler-div {
     position: fixed;
     top: 0;
     right: 0;
-    z-index: 1000000000000;
+    z-index: 2147483647;
     background-attachment: fixed;
     background-position: 0 0;
     box-sizing: initial;
 }
 
-.extract-colors-devtool .__rulerX {
+.extract-colors-devtool .ruler-content-x-top {
     width: 100%;
     height: 20px;
     border-bottom: 1px solid;
@@ -44,7 +44,7 @@
     calc(var(--ruler-unit) * var(--ruler2-space) * var(--ruler-x)) var(--ruler2-h);
 }
 
-.extract-colors-devtool .__rulerY {
+.extract-colors-devtool .ruler-content-y-left {
     width: 22px;
     height: 100vh;
     left: 0;
@@ -66,8 +66,8 @@
 }
 
 /* Ruler Numbers */
-.extract-colors-devtool .__ruler_X,
-.extract-colors-devtool .__ruler_Y {
+.extract-colors-devtool .ruler-x-ul,
+.extract-colors-devtool .ruler-y-ul {
     color: var(--rulerNumbers);
     counter-reset: d 0;
     display: flex;
@@ -80,7 +80,7 @@
     position: fixed;
 }
 
-.extract-colors-devtool .__ruler_X {
+.extract-colors-devtool .ruler-x-ul {
     height: var(--ruler2-h);
     inset-block-start: 0;
     inset-inline-start: calc(var(--ruler-unit) * var(--ruler2-space));
@@ -88,7 +88,7 @@
     width: 100%;
 }
 
-.extract-colors-devtool .__ruler_Y {
+.extract-colors-devtool .ruler-y-ul {
     flex-direction: column;
     height: 100%;
     inset-block-start: calc(var(--ruler-unit) * var(--ruler2-space));
@@ -96,34 +96,35 @@
     opacity: var(--ruler-y);
     width: var(--ruler2-h);
 }
-.extract-colors-devtool .__ruler_X:hover {
+.extract-colors-devtool .ruler-x-ul:hover {
     cursor: row-resize;
 }
-.extract-colors-devtool .__ruler_Y:hover {
+.extract-colors-devtool .ruler-y-ul:hover {
     cursor: col-resize;
 }
 
-.extract-colors-devtool .__ruler_X li {
+.extract-colors-devtool .ruler-x-ul li {
     align-self: flex-end;
 }
 
-.extract-colors-devtool .__ruler_X li,
-.extract-colors-devtool .__ruler_Y li {
+.extract-colors-devtool .ruler-x-ul li,
+.extract-colors-devtool .ruler-y-ul li {
     counter-increment: d var(--ruler2-space);
     flex: 0 0 calc(var(--ruler-unit) * var(--ruler2-space));
+    box-sizing: initial;
 }
 
-.extract-colors-devtool .__ruler_Y li {
+.extract-colors-devtool .ruler-y-ul li {
     margin-left: 3px;
 }
 
-.extract-colors-devtool .__ruler_X li::after {
+.extract-colors-devtool .ruler-x-ul li::after {
     content: counter(d) '';
     line-height: 1;
     padding-inline-start: var(--ruler-num-padding-line-start);
 }
 
-.extract-colors-devtool .__ruler_Y li::after {
+.extract-colors-devtool .ruler-y-ul li::after {
     content: counter(d) '';
     display: block;
     padding-inline-end: var(--ruler-num-padding-line-start);
@@ -133,11 +134,11 @@
     width: fit-content;
 }
 
-.extract-colors-devtool .__rulerXline {
+.extract-colors-devtool .ruler-content-x-topline {
     left: 0;
 }
 
-.extract-colors-devtool .__rulerXline::after {
+.extract-colors-devtool .ruler-content-x-topline::after {
     content: ' ';
     position: absolute;
     background: var(--lineColor);
@@ -146,7 +147,7 @@
     top: 5px;
 }
 
-.extract-colors-devtool .__rulerYline::before {
+.extract-colors-devtool .ruler-y-line-div::before {
     content: ' ';
     position: absolute;
     background: var(--lineColor);
@@ -156,7 +157,7 @@
     left: 5px;
 }
 
-.extract-colors-devtool .__rulerXContent__EL {
+.extract-colors-devtool .ruler-content-x-top-line {
     margin: 9px 0 0 20px;
     border: 0;
     text-align: center;
@@ -175,7 +176,7 @@
     left: 5px;
 }
 
-.extract-colors-devtool .__rulerYContent__EL {
+.extract-colors-devtool .ruler-content-y-left-line {
     margin: 9px 0 0 3px;
     border: 0;
     text-align: center;
@@ -193,7 +194,7 @@
     left: 4px;
 }
 
-.extract-colors-devtool .__ruler_delete_line {
+.extract-colors-devtool .ruler-delete-line-btn {
     border: 0;
     width: 20px;
     height: 20px;
@@ -206,10 +207,10 @@
 
 }
 
-.extract-colors-devtool .__rulerXline:hover .__rulerXContent__EL {
+.extract-colors-devtool .ruler-content-x-topline:hover .ruler-content-x-top-line {
     display: flex;
 }
 
-.extract-colors-devtool .__rulerYline:hover .__rulerYContent__EL {
+.extract-colors-devtool .ruler-y-line-div:hover .ruler-content-y-left-line {
     display: flex;
 }
