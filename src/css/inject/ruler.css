@@ -20,8 +20,10 @@
 
     --line-marker-bg: rgba(0,0,0,0.9);
     --line-marker-color: #fff;
-    --line-marker-delete-btn-bg: #fff;
-    --line-marker-delete-btn-color: #5e0000;
+    --line-marker-delete-btn-bg: #111;
+    --line-marker-delete-btn-color: cyan;
+    --line-marker-delete-btn-hover-bg: #fff;
+    --line-marker-delete-btn-hover-color: #5e0000;
 }
 
 .extract-colors-devtool.ruler-main-div {
@@ -203,7 +205,10 @@
     background: var(--line-marker-delete-btn-bg);
     color: var(--line-marker-delete-btn-color);
     cursor: pointer;
-
+}
+.extract-colors-devtool .ruler-delete-line-btn:hover {
+    background: var(--line-marker-delete-btn-hover-bg);
+    color: var(--line-marker-delete-btn-hover-color);
 }
 
 .extract-colors-devtool .ruler-content-x-topline:hover .x-left-line-marker {
