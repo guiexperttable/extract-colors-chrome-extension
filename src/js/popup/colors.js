@@ -464,7 +464,7 @@ export function createColorImage(colors) {
  * @property {string} colors[].rgba - The RGBA representation of the color.
  * @return {HTMLCanvasElement} The color image canvas.
  */
-function createColorImageCanvas(colors) {
+export function createColorImageCanvas(colors) {
   const canvas = document.createElement('canvas');
   const numberOfColorBoxesPerRow = 3;
   const boxWidth = 100;

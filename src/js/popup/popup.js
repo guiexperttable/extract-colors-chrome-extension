@@ -1,5 +1,12 @@
 import {initRuler, toogleRulerVisibility} from './ruler.js';
-import {createColorImage, getUniqColors, renderColors, renderColorsOnDiv, scrapColors} from "./colors.js";
+import {
+  createColorImage,
+  createColorImageCanvas,
+  getUniqColors,
+  renderColors,
+  renderColorsOnDiv,
+  scrapColors
+} from "./colors.js";
 import {cleanPage} from "./cleaner.js";
 import {toggleDesignMode} from "./design-mode.js";
 import {updateWindow, windowSizes} from "./resizer.js";
