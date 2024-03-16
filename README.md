@@ -13,11 +13,12 @@ color schemes, developers can enhance their design process, ensuring coherence a
 projects. Boost your productivity and creativity with **Extract Colors DevTool** – your go-to solution for efficient
 color extraction in web development.
 
-* Extract Colors 
-* Full page screen capture
-* CSS custom properties
-* Color Report
-* Color Picker
-* Window Resizer 
-* Window Ruler
+- Extract Colors
+- Full Page Screen Capture
+- CSS Custom Properties
+- Color Report
+- Color Picker
+- Window Resizer
+- Window Ruler
+- Clean Page (Remove Ads)
 
