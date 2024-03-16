@@ -291,8 +291,14 @@ function initListener() {
   btnRescan.addEventListener("click", grabColors);
   btnRuler.addEventListener("click", () => {
     const vis = toogleRulerVisibility(currentTab.id);
-    setLabelText(vis ? "Ruler added." : "Ruler removed.");
-    showDiv(vis ? divRuler : divDummy);
+    if (vis) {
+      showDiv(divRuler);
+      setLabelText("Ruler added.");
+
+    } else {
+      showDiv(divDummy);
+      setLabelText("Ruler removed.");
+    }
   });
 
   btnToggleDesignMode.addEventListener("click", async () => {
