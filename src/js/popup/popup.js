@@ -28,14 +28,13 @@ const btnCopyHtml = document.querySelector(".copy-html-btn");
 // divs:
 const divText = document.querySelector(".text-div");
 
+const divActions = document.querySelector(".actions-div");
 const divPalette = document.querySelector(".palette-div");
 const divResizer = document.querySelector(".resizer-div");
 const divPickerHistory = document.querySelector(".picker-div");
 const divRuler = document.querySelector(".ruler-div");
 const divDummy = document.querySelector(".dummy-div");
 const mainDivs = [divPalette, divResizer, divPickerHistory, divDummy, divRuler];
-
-const progressbar = document.querySelector("progress");
 const downLoadImgLink = document.querySelector(".download-img-a");
 
 
@@ -97,10 +96,10 @@ function setLabelText(s, animation) {
 /**
  * Function to grab colors and update the UI.
  *
- * @function grabColors
+ * @function onGrabColorsButtonClicked
  * @returns {void}
  */
-const grabColors = (tabId) => {
+const onGrabColorsButtonClicked = (tabId) => {
   setLabelText('');
   showDiv(divPalette);
   scrapColors(currentTab.id).then(data => {
@@ -281,111 +280,164 @@ function hexToRgb(hex)  {
 }
 
 
+/**
+ * Handles the click event on the ruler button.
+ * Toggles the visibility of the ruler based on the current tab.
+ *
+ * @return {boolean} - Returns true if the ruler is currently visible, false otherwise.
+ */
+function onRulerButtonClicked() {
+  const vis = toogleRulerVisibility(currentTab.id);
+  if (vis) {
+    showDiv(divRuler);
+    setLabelText("Ruler added.");
+
+  } else {
+    showDiv(divDummy);
+    setLabelText("Ruler removed.");
+  }
+}
 
 /**
- * Attaches event listeners to various buttons and checkboxes.
- * @return {void}
+ * Function for handling the click event of the toggle design mode button.
+ * @async
+ * @function onToggleDesignModeButtonClicked
+ * @returns {Promise<void>} A promise that resolves once the design mode is toggled and the UI is updated.
  */
-function initListener() {
+async function onToggleDesignModeButtonClicked() {
+  showDiv(divDummy);
+  toggleDesignMode(currentTab.id).then(res => {
+      setLabelText(`Design mode is ${res}`);
+      btnToggleDesignMode.classList.remove("not-editable");
+      btnToggleDesignMode.classList.remove("editable");
+      btnToggleDesignMode.classList.add(res === "on" ? "editable" : "not-editable");
+    });
+}
 
-  btnRescan.addEventListener("click", grabColors);
-  btnRuler.addEventListener("click", () => {
-    const vis = toogleRulerVisibility(currentTab.id);
-    if (vis) {
-      showDiv(divRuler);
-      setLabelText("Ruler added.");
 
-    } else {
-      showDiv(divDummy);
-      setLabelText("Ruler removed.");
-    }
-  });
-
-  btnToggleDesignMode.addEventListener("click", async () => {
-    showDiv(divDummy);
-    toggleDesignMode(currentTab.id)
-      .then(res => {
-        setLabelText(`Design mode is ${res}`);
-        btnToggleDesignMode.classList.remove('not-editable');
-        btnToggleDesignMode.classList.remove('editable');
-        btnToggleDesignMode.classList.add(res === 'on' ? 'editable' : 'not-editable');
-      });
-  });
-
-  btnResizer.addEventListener("click", async () => {
-    let maxWidth = 10240;
-    let maxHeight = 4320;
-    if (displayInfo.length) {
-      for (const di of displayInfo) {
-        if (di.activeState ==='active' ){
-          maxWidth = di.workArea.width;
-          maxHeight = di.workArea.height;
-          break;
-        }
+/**
+ * Handles the click event of the resizer button.
+ *
+ * Sets the maximum width and height for the div resizer based on the active display's work area.
+ * Initializes the div resizer with the maximum width and height.
+ * Shows the div resizer on the screen.
+ *
+ * @return {Promise<void>} A Promise that resolves when the div resizer is displayed.
+ */
+async function onResizerButtonClicked() {
+  let maxWidth = 10240;
+  let maxHeight = 4320;
+  if (displayInfo.length) {
+    for (const di of displayInfo) {
+      if (di.activeState === "active") {
+        maxWidth = di.workArea.width;
+        maxHeight = di.workArea.height;
+        break;
       }
     }
-    initDivResizer(maxWidth, maxHeight);
-    showDiv(divResizer);
-  });
+  }
+  initDivResizer(maxWidth, maxHeight);
+  showDiv(divResizer);
+}
 
-  btnCleaner.addEventListener("click", async () => {
-    showDiv(divDummy);
-    const count = await cleanPage(currentTab.id);
-    setLabelText(`Items removed: ${count}`);
-  });
+/**
+ * Handles the click event of the "Cleaner" button.
+ * It shows a specified div, cleans the current page, and sets the label text with the number of items removed.
+ *
+ * @returns {Promise<number>} The number of items removed from the page.
+ */
+async function onCleanerButtonClicked() {
+  showDiv(divDummy);
+  const count = await cleanPage(currentTab.id);
+  setLabelText(`Items removed: ${count}`);
+}
 
-  btnCaptureScreen.addEventListener("click", async () => {
-    showDiv(divDummy);
-    CaptureUtil.captureToFiles(currentTab);
-  });
 
-  btnToggleTheme.addEventListener("click", async () => {
-    data.currentTheme = data.currentTheme === 'light' ? 'dark' : 'light';
-    updateHtmlDataThemeAttributeAndToggleIcon();
-    storeData();
-  });
+/**
+ * This method is invoked when the screen capture button is clicked.
+ * It shows a dummy div and captures the screen to files using CaptureUtil.
+ *
+ * @returns {void}
+ */
+async function onCaptureScreenButtonClicked() {
+  showDiv(divDummy);
+  CaptureUtil.captureToFiles(currentTab);
+}
 
-  btnCopyValues.addEventListener("click", async () => {
-    if (!isPalleteOrPickerHistoryDivVisible()) {
-      showDiv(divPalette);
-    }
-    const colorArr = isPalleteDivVisible() ? currentColors : pickerHistory;
-    console.log('currentColors', currentColors)
-    console.log('pickerHistory', pickerHistory)
-    const buf = [];
-    for (const color of colorArr) {
-      buf.push(`${color.rgba}`);
-    }
-    navigator.clipboard
-      .writeText(buf.join('\n'))
-      .then(() => setLabelText(`Data copied to clipboard.`));
-  });
 
-  btnCopyCustomProperties.addEventListener("click", async () => {
+/**
+ * Toggles the theme and performs necessary actions when the theme toggle button is clicked.
+ * Updates the current theme, updates HTML data-theme attribute, toggles the theme icon, and stores the updated data.
+ *
+ * @returns {void}
+ */
+async function onToggleThemeButtonClicked() {
+  data.currentTheme = data.currentTheme === "light" ? "dark" : "light";
+  updateHtmlDataThemeAttributeAndToggleIcon();
+  storeData();
+}
 
-    const s = renderCSSCustomPropertyMap();
-    showDiv(divDummy);
-    divDummy.innerHTML = `
+
+/**
+ * Executes when the user clicks on the "Copy Values" button.
+ * Copies the color values to the clipboard.
+ * If the palette or picker history div is not visible, it shows the palette div.
+ *
+ * @async
+ * @returns {Promise<void>} Returns a promise that resolves when the operation is completed.
+ */
+async function onCopyValuesButtonClicked() {
+  if (!isPalleteOrPickerHistoryDivVisible()) {
+    showDiv(divPalette);
+  }
+  const colorArr = isPalleteDivVisible() ? currentColors : pickerHistory;
+  console.log("currentColors", currentColors);
+  console.log("pickerHistory", pickerHistory);
+  const buf = [];
+  for (const color of colorArr) {
+    buf.push(`${color.rgba}`);
+  }
+  navigator.clipboard
+    .writeText(buf.join("\n"))
+    .then(() => setLabelText(`Data copied to clipboard.`));
+}
+
+/**
+ * Copies CSS color custom properties to clipboard and displays them on the page.
+ *
+ * @returns {Promise<void>} A promise that resolves when the custom properties are copied to clipboard.
+ */
+async function onCopyCustomPropertiesClicked() {
+  const s = renderCSSCustomPropertyMap();
+  showDiv(divDummy);
+  divDummy.innerHTML = `
     <div>
       <pre>${s}</pre>
     </div>
     `;
-    if (s) {
-      navigator.clipboard
-        .writeText(s)
-        .then(() => setLabelText(`CSS color custom properties copied to clipboard.`));
-    } else {
-      setLabelText(`No CSS color custom properties found.`)
-    }
+  if (s) {
+    navigator.clipboard
+      .writeText(s)
+      .then(() => setLabelText(`CSS color custom properties copied to clipboard.`));
+  } else {
+    setLabelText(`No CSS color custom properties found.`);
+  }
+}
 
-  });
 
-  btnCopyHtml.addEventListener("click", async () => {
-    if (!isPalleteOrPickerHistoryDivVisible()) {
-      showDiv(divPalette);
-    }
-    const box = isPalleteDivVisible() ? divPalette.innerHTML : divPickerHistory.innerHTML;
-    const html = `
+/**
+ * Copies the HTML content of a palette or picker history div to the clipboard.
+ *
+ * @async
+ * @function onCopyHtmlButtonClicked
+ * @returns {Promise<void>} Promise that resolves when the HTML is copied to the clipboard.
+ */
+async function onCopyHtmlButtonClicked() {
+  if (!isPalleteOrPickerHistoryDivVisible()) {
+    showDiv(divPalette);
+  }
+  const box = isPalleteDivVisible() ? divPalette.innerHTML : divPickerHistory.innerHTML;
+  const html = `
   <html lang="en" data-theme="light">
     <style>
       html, body {
@@ -415,53 +467,88 @@ function initListener() {
   </html>
   `;
 
+  navigator.clipboard
+    .write([new ClipboardItem({
+      "text/html": new Blob([html], {type: "text/html"})
+    })])
+    .then(() => setLabelText(`HTML copied to clipboard.`));
+}
+
+
+/**
+ * Handles the event when the "Copy Image" button is clicked.
+ * If the palette or picker history div is not visible, it will be displayed.
+ * Creates a canvas with the current colors or picker history.
+ * Copies the canvas as an image to the clipboard.
+ */
+async function onCopyImageButtonClicked() {
+  if (!isPalleteOrPickerHistoryDivVisible()) {
+    showDiv(divPalette);
+  }
+  const colorArr = isPalleteDivVisible() ? currentColors : pickerHistory;
+  const canvas = createColorImageCanvas(colorArr);
+  // Copy canvas to blob
+  canvas.toBlob(blob => {
+    // Create ClipboardItem with blob and it's type, and add to an array
+    const data = [new ClipboardItem({[blob.type]: blob})];
+
+    // Write the data to the clipboard
     navigator.clipboard
-      .write([new ClipboardItem({
-        'text/html': new Blob([html], {type: 'text/html'})
-      })])
-      .then(() => setLabelText(`HTML copied to clipboard.`));
+      .write(data)
+      .then(() => setLabelText(`Image copied to clipboard.`));
   });
+}
 
-  btnCopyImage.addEventListener("click", async () => {
-    if (!isPalleteOrPickerHistoryDivVisible()) {
-      showDiv(divPalette);
-    }
-    const colorArr = isPalleteDivVisible() ? currentColors : pickerHistory;
-    const canvas = createColorImageCanvas(colorArr);
-    // Copy canvas to blob
-    canvas.toBlob(blob => {
-      // Create ClipboardItem with blob and it's type, and add to an array
-      const data = [new ClipboardItem({[blob.type]: blob})];
 
-      // Write the data to the clipboard
+/**
+ * Handle the click event of the eye dropper button.
+ * Hide the palette, open the eye dropper, and perform actions based on the result.
+ * @async
+ * @function onEyeDropperButtonClicked
+ *
+ * @returns {Promise<void>} - A promise that resolves when all actions are completed.
+ */
+async function onEyeDropperButtonClicked() {
+  divPalette.classList.add("hidden");
+  const eyeDropper = new EyeDropper();
+  eyeDropper
+    .open()
+    .then((result) => {
+      showDiv(divPickerHistory);
+      const color = result.sRGBHex;
+      pickerHistory.push({hex: color, rgba: hexToRgb(color)});
+
       navigator.clipboard
-        .write(data)
-        .then(() => setLabelText(`Image copied to clipboard.`));
+        .writeText(color)
+        .then(() => setLabelText(`${color} copied to clipboard.`));
+
+      divPickerHistory.innerHTML = renderColors(pickerHistory);
+      renderColorsOnDiv(pickerHistory, divPickerHistory);
+    })
+    .catch((e) => {
+      console.error(e);
     });
-  });
+}
 
 
-  btnEyeDropper.addEventListener("click", async () => {
-    divPalette.classList.add('hidden');
-    const eyeDropper = new EyeDropper();
-    eyeDropper
-      .open()
-      .then((result) => {
-        showDiv(divPickerHistory);
-        const color = result.sRGBHex;
-        pickerHistory.push({hex: color, rgba: hexToRgb(color)});
-
-        navigator.clipboard
-          .writeText(color)
-          .then(() => setLabelText(`${color} copied to clipboard.`));
-
-        divPickerHistory.innerHTML = renderColors(pickerHistory);
-        renderColorsOnDiv(pickerHistory, divPickerHistory);
-      })
-      .catch((e) => {
-        console.error(e);
-      });
-  });
+/**
+ * Initializes the event listeners for various buttons.
+ *
+ * @return {void}
+ */
+function initListener() {
+  btnRescan.addEventListener("click", onGrabColorsButtonClicked);
+  btnRuler.addEventListener("click", onRulerButtonClicked);
+  btnToggleDesignMode.addEventListener("click", onToggleDesignModeButtonClicked);
+  btnResizer.addEventListener("click", onResizerButtonClicked);
+  btnCleaner.addEventListener("click", onCleanerButtonClicked);
+  btnCaptureScreen.addEventListener("click", onCaptureScreenButtonClicked);
+  btnToggleTheme.addEventListener("click", onToggleThemeButtonClicked);
+  btnCopyValues.addEventListener("click", onCopyValuesButtonClicked);
+  btnCopyCustomProperties.addEventListener("click", onCopyCustomPropertiesClicked);
+  btnCopyHtml.addEventListener("click", onCopyHtmlButtonClicked);
+  btnCopyImage.addEventListener("click", onCopyImageButtonClicked);
+  btnEyeDropper.addEventListener("click", onEyeDropperButtonClicked);
 }
 
 /**
@@ -511,42 +598,6 @@ function initDivResizer(maxWidth, maxHeight) {
 }
 
 
-/**
- * Initializes the div cleaner component on the page.
- *
- * This method generates and inserts HTML elements into the divCleaner element,
- * including a heading, a checkbox, and a button. It also adds a click event listener
- * to the button to invoke the cleanPage() method when clicked.
- *
- * @returns {void} This method does not return anything.
- */
-function initDivCleaner() {
-  /*
-  const buf = [];
-    buf.push(`
-  <h2>Page Cleaner</h2>
-  
-  <label class="container">
-    <input type="checkbox" checked="checked">
-    <span class="checkmark"></span> Images
-  </label>
-  
-  <button class="btn cleaner-ok-btn">
-     Clean
-    <span popover>Start cleaning</span>
-  </button>
-    `);
-
-  divCleaner.innerHTML = buf.join('');
-  divCleaner
-    .querySelectorAll('.cleaner-ok-btn')
-    .forEach(ele =>
-      ele.addEventListener('click', () => cleanPage({para:'test'}))
-    );
-
-   */
-}
-
 
 export async function initRulerListener(tabId) {
   try {
@@ -562,6 +613,18 @@ export async function initRulerListener(tabId) {
   }
 }
 
+function initDisplayMessageListener() {
+  chrome.runtime.onMessage
+    .addListener((message, sender, sendResponse) => {
+      if (message.displayInfo) {
+        displayInfo = message.displayInfo;
+        sendResponse(true);
+      }
+    });
+  chrome.runtime.sendMessage("requestDisplayInfo", () => {
+  });
+}
+
 /**
  * Executes the main logic of the application.
  * Retrieves the data from chrome storage and updates the UI accordingly.
@@ -570,50 +633,39 @@ export async function initRulerListener(tabId) {
  * @return {void}
  */
 async function go() {
-
   try {
     const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
-    currentTab = tab;
+    if (!isUrlAllowed(tab.url)) {
+      divPalette.innerHTML = ``;
+      divActions.innerHTML = '';
+      return;
+    }
 
+    // normal Start:
+    currentTab = tab;
+    divPalette.innerHTML = '';
     currentWindow = await chrome.windows.getCurrent();
     windowId = currentWindow.id;
 
-    if (!isUrlAllowed(tab.url)) {
-      divPalette.innerHTML = `<span class="ge-error-color">Oops! It seems that this page is not allowed to be analyzed.</span>`;
-      return;
+    const result = await chrome.storage.sync.get();
+    if (result){
+      data = Object.assign(data, result);
     }
-    chrome.storage
-      .sync
-      .get()
-      .then((result) => {
-        if (result) {
-          data = Object.assign(data, result);
-        }
-        updateHtmlDataThemeAttributeAndToggleIcon();
 
-        grabColors();
-        initListener();
-      });
+    updateHtmlDataThemeAttributeAndToggleIcon();
+    onGrabColorsButtonClicked();
+    initListener();
 
-    initDivCleaner();
+    initDisplayMessageListener();
 
-  } catch (_e) {
-    divPalette.innerHTML = `<span class="ge-error-color">Error! This page cannot be scripted.</span>`;
+    await initRulerListener(currentTab.id);
+    await initRuler(currentTab.id);
+
+  } catch (e) {
+    divText.innerHTML = `<span class="ge-error-color">Oops! It seems that this page is not allowed to be analyzed.</span>`;
+    divPalette.innerHTML = e;
+    divActions.innerHTML = '';
   }
-
-
-  chrome.runtime.onMessage
-    .addListener((message, sender, sendResponse) => {
-      if (message.displayInfo) {
-        displayInfo = message.displayInfo;
-        sendResponse(true);
-      }
-    });
-  chrome.runtime.sendMessage("requestDisplayInfo", () => {});
-
-
-  await initRulerListener(currentTab.id);
-  initRuler(currentTab.id);
 }
 
 // Go:
