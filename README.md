@@ -12,3 +12,12 @@ developers with valuable insights into the design and helping them streamline th
 color schemes, developers can enhance their design process, ensuring coherence and aesthetic appeal throughout their
 projects. Boost your productivity and creativity with **Extract Colors DevTool** – your go-to solution for efficient
 color extraction in web development.
+
+* Extract Colors 
+* Full page screen capture
+* CSS custom properties
+* Color Report
+* Color Picker
+* Window Resizer 
+* Window Ruler
+

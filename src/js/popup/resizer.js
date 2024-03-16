@@ -7,6 +7,7 @@ export const windowSizes = [
   { "width": 1024, "height": 768, "label": "XGA" },
   { "width": 1080, "height": 1920, "label": "FHD (1080p)" },
   { "width": 1200, "height": 1920, "label": "WUXGA" },
+  { "width": 1280, "height": 800, "label": "13,3\" Wide" },
   { "width": 1440, "height": 900, "label": "WXGA" },
   { "width": 1680, "height": 1050, "label": "WSXGA" },
   { "width": 1920, "height": 1080, "label": "FHD (1080p)" },
