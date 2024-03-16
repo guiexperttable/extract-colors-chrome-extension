@@ -10,6 +10,7 @@ if (!window['rulerLoaded']) {
   window['rulerLoaded'] = true;
 
   const MAX_Z_INDEX = '2147483647';
+  const FREELINE_SIZE = 10;
   const RULER_SIZE = 20;
 
   const STORAGE_KEY_RULER_EXT_ENABLED = 'ruler-div-enabled';
@@ -33,8 +34,12 @@ if (!window['rulerLoaded']) {
   let rulerElementX;
   let rulerElementY;
 
-  let snapLineHorizontalDiv;
-  let snapLineVerticalDiv;
+  let _snapLinesVisible = true;
+  let snapLineTopDiv;
+  let snapLineRightDiv;
+  let snapLineBottomDiv;
+  let snapLineLeftDiv;
+
 
   const mouse = {
     x: 0,
@@ -45,6 +50,24 @@ if (!window['rulerLoaded']) {
     initialY: 0
   };
 
+
+  function isSnapperVisible(){
+    return _snapLinesVisible;
+  }
+  function setSnapperVisible(visible){
+    _snapLinesVisible = visible;
+    if (visible){
+      snapLineTopDiv.classList.remove('hidden');
+      snapLineBottomDiv.classList.remove('hidden');
+      snapLineLeftDiv.classList.remove('hidden');
+      snapLineRightDiv.classList.remove('hidden');
+    } else {
+      snapLineTopDiv.classList.add('hidden');
+      snapLineBottomDiv.classList.add('hidden');
+      snapLineLeftDiv.classList.add('hidden');
+      snapLineRightDiv.classList.add('hidden');
+    }
+  }
 
 
   function createListItemsX(rulerElementX, innerWidth) {
@@ -277,6 +300,7 @@ if (!window['rulerLoaded']) {
     mouse.y = clientY;
   }
 
+
   function onRulerXClick() {
     mouse.startX = mouse.x;
     mouse.startY = mouse.y;
@@ -286,7 +310,7 @@ if (!window['rulerLoaded']) {
     });
     applyStyle(rulerLineElement, {
       width: '100%',
-      height: '10px',
+      height: `${FREELINE_SIZE}px`,
       background: 'transparent',
       position: 'fixed',
       zIndex: MAX_Z_INDEX,
@@ -310,7 +334,7 @@ if (!window['rulerLoaded']) {
       classList: ['ruler-free-vertical-line']
     });
     applyStyle(rulerLineElement, {
-      width: '10px',
+      width: `${FREELINE_SIZE}px`,
       height: '100%',
       background: 'transparent',
       position: 'fixed',
@@ -403,21 +427,91 @@ if (!window['rulerLoaded']) {
     document.addEventListener('mousedown', onMouseDown);
   }
 
-  function onMouseMove(evt) {
-    //const target = evt.target;
-    //const boundingRect = target.getBoundingClientRect();
-    //const absoluteX = boundingRect.left + window.scrollX;
-    //const absoluteY = boundingRect.top + window.scrollY;
-    //
-    //applyStyle(snapLineVerticalDiv, {
-    //  left: `${absoluteX}px`,
-    //  display: 'block'
-    //});
-    //applyStyle(snapLineHorizontalDiv, {
-    //  top: `${absoluteY}px`,
-    //  display: 'block'
-    //});
 
+  function moveSnapLines(target) {
+    const {left, top, width, height} = target.getBoundingClientRect();
+    const absoluteX = left + window.scrollX;
+    const absoluteY = top + window.scrollY;
+
+    applyStyle(snapLineLeftDiv, {
+      left: `${absoluteX}px`,
+      display: 'block'
+    });
+    applyStyle(snapLineRightDiv, {
+      left: `${absoluteX + width}px`,
+      display: 'block'
+    });
+    applyStyle(snapLineTopDiv, {
+      top: `${absoluteY}px`,
+      display: 'block'
+    });
+    applyStyle(snapLineBottomDiv, {
+      top: `${absoluteY + height}px`,
+      display: 'block'
+    });
+  }
+
+  function convertSnapToRulerLine() {
+    createHorizontalRulerLine(snapLineTopDiv.getBoundingClientRect().top - FREELINE_SIZE/2);
+    createHorizontalRulerLine(snapLineBottomDiv.getBoundingClientRect().top - FREELINE_SIZE/2);
+    createVerticalRulerLine(snapLineLeftDiv.getBoundingClientRect().left - FREELINE_SIZE/2);
+    createVerticalRulerLine(snapLineRightDiv.getBoundingClientRect().left - FREELINE_SIZE/2);
+
+    setSnapperVisible(false);
+  }
+
+  function createVerticalRulerLine(x) {
+    rulerLineElement = createElement({
+      elementTag: 'div',
+      classList: ['ruler-free-vertical-line']
+    });
+
+    applyStyle(rulerLineElement, {
+      width: '10px',
+      height: '100%',
+      background: 'transparent',
+      position: 'fixed',
+      zIndex: MAX_Z_INDEX,
+      cursor: 'col-resize',
+      top: '0',
+      left: x + 'px',
+    });
+    targetElement = rulerLineElement;
+
+    rulerLineElement.addEventListener('mousedown', (event) => {
+      targetElement = event.target
+      clickedY = true
+    });
+    rulerMainElement.append(rulerLineElement);
+  }
+
+  function createHorizontalRulerLine(y) {
+    rulerLineElement = createElement({
+      elementTag: 'div',
+      classList: ['ruler-free-horizontal-line'],
+    });
+    applyStyle(rulerLineElement, {
+      width: '100%',
+      height: '10px',
+      background: 'transparent',
+      position: 'fixed',
+      zIndex: MAX_Z_INDEX,
+      cursor: 'row-resize',
+      top: y + 'px',
+      left: '0',
+    });
+    targetElement = rulerLineElement
+    rulerLineElement.addEventListener('mousedown', (event) => {
+      targetElement = event.target;
+      clickedX = true;
+    });
+
+    rulerMainElement.append(rulerLineElement);
+  }
+
+
+  function onMouseMove(evt) {
+    const target = evt.target;
 
     if (targetElement) {
       moveTargetElement(evt);
@@ -425,6 +519,8 @@ if (!window['rulerLoaded']) {
       onRulerXMouseMove(evt);
     } else if (clickedY) {
       onRulerYMouseMove(evt);
+    } else {
+      moveSnapLines(target);
     }
   }
 
@@ -439,55 +535,18 @@ if (!window['rulerLoaded']) {
 
   function onKeyDown(evt) {
     const {key} = evt;
+    console.log(evt);
     if (key === DELETE_KEY && targetElement) {
       targetElement.remove();
     }
+    if (isSnapperVisible() && key === 's') {
+      convertSnapToRulerLine();
+    }
     if (mouseDown && key === 'h') {
-      rulerLineElement = createElement({
-        elementTag: 'div',
-        classList: ['ruler-free-horizontal-line'],
-      });
-      applyStyle(rulerLineElement, {
-        width: '100%',
-        height: '10px',
-        background: 'transparent',
-        position: 'fixed',
-        zIndex: MAX_Z_INDEX,
-        cursor: 'row-resize',
-        top: mouse.y + 'px',
-        left: '0',
-      });
-      targetElement = rulerLineElement
-      rulerLineElement.addEventListener('mousedown', (event) => {
-        targetElement = event.target;
-        clickedX = true;
-      });
-
-      rulerMainElement.append(rulerLineElement);
+      createHorizontalRulerLine(mouse.y);
     }
     if (mouseDown && key === 'v') {
-      rulerLineElement = createElement({
-        elementTag: 'div',
-        classList: ['ruler-free-vertical-line']
-      });
-
-      applyStyle(rulerLineElement, {
-        width: '10px',
-        height: '100%',
-        background: 'transparent',
-        position: 'fixed',
-        zIndex: MAX_Z_INDEX,
-        cursor: 'col-resize',
-        top: '0',
-        left: mouse.x + 'px',
-      });
-      targetElement = rulerLineElement;
-
-      rulerLineElement.addEventListener('mousedown', (event) => {
-        targetElement = event.target
-        clickedY = true
-      });
-      rulerMainElement.append(rulerLineElement);
+      createVerticalRulerLine(mouse.x);
     }
   }
 
@@ -503,19 +562,29 @@ if (!window['rulerLoaded']) {
       .forEach(element => parent.appendChild(element));
   }
 
-  //function createSnapperLines(){
-  //  snapLineHorizontalDiv = createElement( {
-  //    elementTag: 'div',
-  //    classList: ['snap-line-horizontal-div snap-line-div']
-  //  });
-  //  rulerMainElement.appendChild(snapLineHorizontalDiv);
-  //
-  //  snapLineVerticalDiv = createElement({
-  //    elementTag: 'div',
-  //    classList: ['snap-line-vertical-div snap-line-div']
-  //  });
-  //  rulerMainElement.appendChild(snapLineVerticalDiv);
-  //}
+  function appendElement(target, element){
+    target.appendChild(element);
+    return element;
+  }
+
+  function createSnapperLines(){
+    snapLineTopDiv = appendElement(rulerMainElement, createElement( {
+      elementTag: 'div',
+      classList: ['snap-line-horizontal snap-line-top snap-line-div']
+    }));
+    snapLineBottomDiv = appendElement(rulerMainElement, createElement( {
+      elementTag: 'div',
+      classList: ['snap-line-horizontal snap-line-bottom snap-line-div']
+    }));
+    snapLineLeftDiv = appendElement(rulerMainElement, createElement( {
+      elementTag: 'div',
+      classList: ['snap-line-vertical snap-line-left snap-line-div']
+    }));
+    snapLineRightDiv = appendElement(rulerMainElement, createElement( {
+      elementTag: 'div',
+      classList: ['snap-line-vertical snap-line-right snap-line-div']
+    }));
+  }
 
   function init(document) {
     const {innerWidth, innerHeight} = window;
@@ -557,25 +626,31 @@ if (!window['rulerLoaded']) {
     --snap-line-color: rgba(255, 0, 0, 0.5);
 }
 
-.snap-line-div {
+
+
+.extract-colors-devtool {
+    display: block;
+}
+
+.extract-colors-devtool .hidden{
+    display: none;
+}
+
+.extract-colors-devtool .snap-line-div {
     display: block;
     position: fixed;
     background-color: var(--snap-line-color);
     z-index: 2147483647;
 }
-.snap-line-horizontal-div {
+.extract-colors-devtool .snap-line-horizontal {
     left: 0;
     width: 100vw;
     height: 1px;
 }
-.snap-line-vertical-div {
+.extract-colors-devtool .snap-line-vertical {
     top:0;
     width: 1px;
     height: 100vh;
-}
-
-.extract-colors-devtool {
-    display: block;
 }
 
 .extract-colors-devtool.ruler-main-div {
@@ -775,7 +850,6 @@ if (!window['rulerLoaded']) {
         /*user-select: none;*/
 }
 </style>
-
 `
     });
 
@@ -834,7 +908,7 @@ if (!window['rulerLoaded']) {
 
     initMouseAndKeyListener();
 
-    //createSnapperLines();
+    createSnapperLines();
   }
 
   if (document) {
