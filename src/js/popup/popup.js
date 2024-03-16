@@ -31,8 +31,9 @@ const divText = document.querySelector(".text-div");
 const divPalette = document.querySelector(".palette-div");
 const divResizer = document.querySelector(".resizer-div");
 const divPickerHistory = document.querySelector(".picker-div");
+const divRuler = document.querySelector(".ruler-div");
 const divDummy = document.querySelector(".dummy-div");
-const mainDivs = [divPalette, divResizer, divPickerHistory, divDummy];
+const mainDivs = [divPalette, divResizer, divPickerHistory, divDummy, divRuler];
 
 const progressbar = document.querySelector("progress");
 const downLoadImgLink = document.querySelector(".download-img-a");
@@ -288,10 +289,10 @@ function hexToRgb(hex)  {
 function initListener() {
 
   btnRescan.addEventListener("click", grabColors);
-  btnRuler.addEventListener("click", ()=>{
+  btnRuler.addEventListener("click", () => {
     const vis = toogleRulerVisibility(currentTab.id);
-    setLabelText(vis ? 'Ruler added.': '');
-    showDiv(divDummy);
+    setLabelText(vis ? "Ruler added." : "Ruler removed.");
+    showDiv(vis ? divRuler : divDummy);
   });
 
   btnToggleDesignMode.addEventListener("click", async () => {

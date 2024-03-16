@@ -159,6 +159,23 @@ a {
     grid-template-columns: repeat(auto-fit, var(--ge-box-div-width));
 }
 
+.ruler-div {
+    padding: 16px 0;
+    font-size: 16px;
+}
+.ruler-div p {
+     padding-bottom: 8px;
+ }
+.ruler-div kbd {
+    font-family: monospace;
+    font-weight: bold;
+    border-radius: 3px;
+    border: 1px solid #adb5bd;
+    padding: 0.2em 0.4em;
+    font-size: 0.875em;
+    box-shadow: inset 0 -0.1em 0.2em rgba(0,0,0,0.1);
+}
+
 .resizer-div {
     display: grid;
     grid-gap: var(--ge-palette-div-gap);
