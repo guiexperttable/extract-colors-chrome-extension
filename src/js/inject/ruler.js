@@ -9,6 +9,8 @@ if (!window['rulerLoaded']) {
 
   window['rulerLoaded'] = true;
 
+  const debugging = window.location.href.includes('debug=1');
+
   const CSS_TO_INJECT = `
  <style>     
 .extract-colors-devtool {
@@ -746,22 +748,23 @@ if (!window['rulerLoaded']) {
   }
 
   function onKeyDown(evt) {
-    const {key} = evt;
+    const {key, code} = evt;
+
+    if (debugging) {
+      console.log(`key: "${key}", code: ${code}`, evt);
+    }
 
     if (key === DELETE_KEY && targetElement) {
       targetElement.remove();
       evt.stopPropagation();
 
-    } else if (isSnapperVisible() && key === 's') {
+    } else if (isSnapperVisible() && code === 'Enter') {
       convertSnapToRulerLine();
       evt.stopPropagation();
 
-    } else if (key === 'S') {
+    } else if (key === 's') {
       setSnapperVisible(!isSnapperVisible());
       evt.stopPropagation();
-
-    //} else if (key === ' ') {
-    //  console.log('key\"' + key + '"', key.code);
 
     } else if (mouseDown && key === 'h') {
       createHorizontalRulerFreeLine(mouse.y);
@@ -856,7 +859,7 @@ if (!window['rulerLoaded']) {
 
     chrome.runtime.onMessage
       .addListener((message, _sender, _response) => {
-        if (window.location.href.includes('debug=1')) {
+        if (debugging) {
           console.log("message:", message);
         }
         return handleMessage(message, rulerMainElement);
