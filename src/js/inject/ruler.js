@@ -56,8 +56,9 @@ if (!window['rulerLoaded']) {
   }
   function setSnapperVisible(visible){
     _snapLinesVisible = visible;
-    if (visible){
-      snapLineTopDiv.classList.remove('hidden');
+    console.log('setSnapperVisible', visible);
+    if (visible) {
+      snapLineTopDiv.classList.remove(['hidden']);
       snapLineBottomDiv.classList.remove('hidden');
       snapLineLeftDiv.classList.remove('hidden');
       snapLineRightDiv.classList.remove('hidden');
@@ -434,20 +435,16 @@ if (!window['rulerLoaded']) {
     const absoluteY = top + window.scrollY;
 
     applyStyle(snapLineLeftDiv, {
-      left: `${absoluteX}px`,
-      display: 'block'
+      left: `${absoluteX}px`
     });
     applyStyle(snapLineRightDiv, {
-      left: `${absoluteX + width}px`,
-      display: 'block'
+      left: `${absoluteX + width}px`
     });
     applyStyle(snapLineTopDiv, {
-      top: `${absoluteY}px`,
-      display: 'block'
+      top: `${absoluteY}px`
     });
     applyStyle(snapLineBottomDiv, {
-      top: `${absoluteY + height}px`,
-      display: 'block'
+      top: `${absoluteY + height}px`
     });
   }
 
@@ -536,17 +533,29 @@ if (!window['rulerLoaded']) {
   function onKeyDown(evt) {
     const {key} = evt;
     console.log(evt);
+
     if (key === DELETE_KEY && targetElement) {
       targetElement.remove();
-    }
-    if (isSnapperVisible() && key === 's') {
+      evt.stopPropagation();
+
+    } else if (isSnapperVisible() && key === 's') {
       convertSnapToRulerLine();
-    }
-    if (mouseDown && key === 'h') {
+      evt.stopPropagation();
+
+    } else if (key === 'S') {
+      setSnapperVisible(!isSnapperVisible());
+      evt.stopPropagation();
+
+    } else if (key === ' ') {
+      console.log('key\"' + key + '"', key.code);
+
+    } else if (mouseDown && key === 'h') {
       createHorizontalRulerLine(mouse.y);
-    }
-    if (mouseDown && key === 'v') {
+      evt.stopPropagation();
+
+    } else if (mouseDown && key === 'v') {
       createVerticalRulerLine(mouse.x);
+      evt.stopPropagation();
     }
   }
 
@@ -633,7 +642,7 @@ if (!window['rulerLoaded']) {
 }
 
 .extract-colors-devtool .hidden{
-    display: none;
+    display: none !important;
 }
 
 .extract-colors-devtool .snap-line-div {
