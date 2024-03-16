@@ -56,7 +56,9 @@ function showRuler(show, tabId) {
     if (show) {
       chrome.scripting.executeScript({
         target: {tabId},
-        files: ['js/inject/ruler.js'],
+        files: [
+          'js/inject/ruler.js'
+        ],
       }).then(() => {
         chrome.tabs.sendMessage(tabId, {type: 'ENABLE', value: true});
       })

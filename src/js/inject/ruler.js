@@ -1,3 +1,5 @@
+
+
 chrome.runtime.onMessage.addListener((_msg, _sender, _response) => {
 });
 
@@ -88,6 +90,9 @@ if (!window['rulerLoaded']) {
         para.attributes.forEach(attr => {
           element.setAttribute(attr.key, attr.value);
         });
+
+      } else if (prop === 'innerHTML') {
+        element.innerHTML = para.innerHTML;
 
       } else if (prop === 'classList') {
         for (const clazz of para.classList) {
@@ -518,6 +523,260 @@ if (!window['rulerLoaded']) {
     rulerMainElement = createElement({
       elementTag: 'div',
       classList: ['extract-colors-devtool', 'ruler-main-div'],
+      innerHTML:   `
+ <style>     
+.extract-colors-devtool {
+    --ruler-border-color: rgba(0,0,0,0.1);
+    --rulerNumbers: #000;
+    --ruler-num-fontsize: 10px;
+    --ruler-num-padding-line-start: 0.75ch;
+    --ruler-unit: 1px;
+    --ruler-x: 1;
+    --ruler-y: 1;
+
+    --ruler1-bdw: 1px;
+    --ruler-hash-mark-fraction-line: #111;
+    --ruler1-h: 8px;
+    --ruler1-space: 5;
+
+    --ruler2-bdw: 1px;
+    --ruler-hash-mark-main-line: #000;
+    --ruler2-h: 20px;
+    --ruler2-space: 50;
+
+    --lineColor: rgba(0, 255, 255, 0.83);
+    --lineWidth: 1px;
+
+    --line-marker-bg: rgba(0,0,0,0.9);
+    --line-marker-color: #fff;
+    --line-marker-delete-btn-bg: #111;
+    --line-marker-delete-btn-color: cyan;
+    --line-marker-delete-btn-hover-bg: #fff;
+    --line-marker-delete-btn-hover-color: #5e0000;
+
+    --snap-line-color: rgba(255, 0, 0, 0.5);
+}
+
+.snap-line-div {
+    display: block;
+    position: fixed;
+    background-color: var(--snap-line-color);
+    z-index: 2147483647;
+}
+.snap-line-horizontal-div {
+    left: 0;
+    width: 100vw;
+    height: 1px;
+}
+.snap-line-vertical-div {
+    top:0;
+    width: 1px;
+    height: 100vh;
+}
+
+.extract-colors-devtool {
+    display: block;
+}
+
+.extract-colors-devtool.ruler-main-div {
+    display: none;
+}
+
+.extract-colors-devtool .single-ruler-div {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 2147483647;
+    background-attachment: fixed;
+    background-position: 0 0;
+    box-sizing: initial;
+}
+
+.extract-colors-devtool .ruler-content-x-top {
+    width: 100%;
+    height: 20px;
+    border-bottom: 1px solid var(--ruler-border-color);
+    background-image: linear-gradient(90deg, var(--ruler-hash-mark-fraction-line) 0 var(--ruler1-bdw), transparent 0),
+    linear-gradient(90deg, var(--ruler-hash-mark-main-line) 0 var(--ruler2-bdw), transparent 0);
+    background-repeat: repeat-x, repeat-x;
+    background-size: calc(var(--ruler-unit) * var(--ruler1-space) * var(--ruler-x)) var(--ruler1-h),
+    calc(var(--ruler-unit) * var(--ruler2-space) * var(--ruler-x)) var(--ruler2-h);
+}
+
+.extract-colors-devtool .ruler-content-y-left {
+    width: 22px;
+    height: 100vh;
+    left: 0;
+    border-right: 1px solid var(--ruler-border-color);
+    background-image: linear-gradient(90deg, var(--ruler-hash-mark-fraction-line) 0 var(--ruler1-bdw), transparent 0),
+    linear-gradient(90deg, var(--ruler-hash-mark-main-line) 0 var(--ruler2-bdw), transparent 0),
+    linear-gradient(0deg, var(--ruler-hash-mark-fraction-line) 0 var(--ruler1-bdw), transparent 0),
+    linear-gradient(0deg, var(--ruler-hash-mark-main-line) 0 var(--ruler2-bdw), transparent 0);
+    background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+    background-size: calc(var(--ruler-unit) * var(--ruler1-space) * var(--ruler-x)) var(--ruler1-h),
+    calc(var(--ruler-unit) * var(--ruler2-space) * var(--ruler-x)) var(--ruler2-h),
+    var(--ruler1-h) calc(var(--ruler-unit) * var(--ruler1-space) * var(--ruler-y)),
+    var(--ruler2-h) calc(var(--ruler-unit) * var(--ruler2-space) * var(--ruler-y));
+}
+
+.extract-colors-devtool .__ruler ul {
+    box-sizing: initial;
+    pointer-events: all;
+}
+
+/* Ruler Numbers */
+.extract-colors-devtool .ruler-x-ul,
+.extract-colors-devtool .ruler-y-ul {
+    color: var(--rulerNumbers);
+    counter-reset: d 0;
+    display: flex;
+    font-size: var(--ruler-num-fontsize);
+    line-height: 1;
+    list-style: none;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+    position: fixed;
+}
+
+.extract-colors-devtool .ruler-x-ul {
+    height: var(--ruler2-h);
+    inset-block-start: 0;
+    inset-inline-start: calc(var(--ruler-unit) * var(--ruler2-space));
+    opacity: var(--ruler-x);
+    width: 100%;
+}
+
+.extract-colors-devtool .ruler-y-ul {
+    flex-direction: column;
+    height: 100%;
+    inset-block-start: calc(var(--ruler-unit) * var(--ruler2-space));
+    inset-inline-start: 0;
+    opacity: var(--ruler-y);
+    width: var(--ruler2-h);
+}
+.extract-colors-devtool .ruler-x-ul:hover {
+    cursor: row-resize;
+}
+.extract-colors-devtool .ruler-y-ul:hover {
+    cursor: col-resize;
+}
+
+.extract-colors-devtool .ruler-x-ul li {
+    align-self: flex-end;
+}
+
+.extract-colors-devtool .ruler-x-ul li,
+.extract-colors-devtool .ruler-y-ul li {
+    counter-increment: d var(--ruler2-space);
+    flex: 0 0 calc(var(--ruler-unit) * var(--ruler2-space));
+    box-sizing: initial;
+}
+
+.extract-colors-devtool .ruler-y-ul li {
+    margin-left: 3px;
+}
+
+.extract-colors-devtool .ruler-x-ul li::after {
+    content: counter(d) '';
+    line-height: 1;
+    padding-inline-start: var(--ruler-num-padding-line-start);
+}
+
+.extract-colors-devtool .ruler-y-ul li::after {
+    content: counter(d) '';
+    display: block;
+    padding-inline-end: var(--ruler-num-padding-line-start);
+    transform: rotate(-90deg) translateY(-13px);
+    transform-origin: 100% 0;
+    text-align: end;
+    width: fit-content;
+}
+
+.extract-colors-devtool .ruler-free-horizontal-line {
+    left: 0;
+}
+
+.extract-colors-devtool .ruler-free-horizontal-line::after {
+    content: ' ';
+    position: absolute;
+    background: var(--lineColor);
+    width: 100%;
+    height: var(--lineWidth);
+    top: 5px;
+}
+
+.extract-colors-devtool .ruler-free-vertical-line::before {
+    content: ' ';
+    position: absolute;
+    background: var(--lineColor);
+    width: var(--lineWidth);
+    height: 100vh;
+    top: 0;
+    left: 5px;
+}
+
+.extract-colors-devtool .ruler-free-horizontal-line .line-marker,
+.extract-colors-devtool .ruler-free-vertical-line .line-marker {
+    border: 0;
+    text-align: center;
+    display: none;
+    font-size: 14px;
+    background: var(--line-marker-bg);
+    color: var(--line-marker-color);
+    border-radius: 15px;
+    padding: 2px 5px;
+    min-width: 70px;
+    gap: 0.4em;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+}
+.extract-colors-devtool .ruler-free-horizontal-line .line-marker {
+    margin: 9px 0 0 20px;
+    position: relative;
+    width: fit-content;
+    top: -2px;
+    left: 5px;
+}
+
+.extract-colors-devtool .ruler-free-vertical-line .line-marker {
+    margin: 9px 0 0 3px;
+    position: absolute;
+    bottom: 40px;
+    left: 4px;
+}
+
+.extract-colors-devtool .ruler-delete-line-btn {
+    border: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 100%;
+    background: var(--line-marker-delete-btn-bg);
+    color: var(--line-marker-delete-btn-color);
+    cursor: pointer;
+}
+.extract-colors-devtool .ruler-delete-line-btn:hover {
+    background: var(--line-marker-delete-btn-hover-bg);
+    color: var(--line-marker-delete-btn-hover-color);
+}
+
+.extract-colors-devtool .ruler-free-horizontal-line:hover .line-marker {
+    display: flex;
+}
+
+.extract-colors-devtool .ruler-free-vertical-line:hover .line-marker {
+    display: flex;
+        /*display: grid;*/
+        /*grid-template-columns: 1fr 20px;*/
+        /*user-select: none;*/
+}
+</style>
+
+`
     });
 
     applyStyle(rulerMainElement, {

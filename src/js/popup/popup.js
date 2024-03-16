@@ -5,7 +5,6 @@ import {toggleDesignMode} from "./design-mode.js";
 import {updateWindow, windowSizes} from "./resizer.js";
 import {CaptureUtil} from "./screen-capture.js";
 
-
 // main actions:
 const btnRescan = document.querySelector(".rescan-btn");
 const btnEyeDropper = document.querySelector(".eyedropper-btn");
@@ -56,6 +55,8 @@ let grabbedData = {};
 let currentColors = [];
 
 
+
+
 /**
  * Stores data in Chrome Sync Storage.
  *
@@ -66,10 +67,6 @@ let currentColors = [];
 function storeData() {
   chrome.storage.sync.set(data);
 }
-
-
-
-
 
 
 /**
@@ -544,6 +541,20 @@ function initDivCleaner() {
 }
 
 
+export async function initRulerListener(tabId) {
+  try {
+    return chrome.scripting.executeScript({
+      target: {tabId},
+      files: ['js/inject/ruler-listener.js']
+
+    }).then((res) => {
+      return res[0].result;
+    });
+  } catch (err) {
+    console.error(`failed to execute script: ${err}`);
+  }
+}
+
 /**
  * Executes the main logic of the application.
  * Retrieves the data from chrome storage and updates the UI accordingly.
@@ -592,9 +603,10 @@ async function go() {
       }
     });
   chrome.runtime.sendMessage("requestDisplayInfo", () => {});
+
+
+  await initRulerListener(currentTab.id);
   initRuler(currentTab.id);
-
-
 }
 
 // Go:

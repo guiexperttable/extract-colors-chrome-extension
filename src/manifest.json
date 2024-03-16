@@ -1,7 +1,7 @@
 {
   "name": "Extract Colors DevTool",
   "description": "Extract Colors DevTool is a powerful developer tool designed to simplify the process of extracting color palettes from any webpage.",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "manifest_version": 3,
   "permissions": [
     "storage",
@@ -16,20 +16,6 @@
   "background": {
     "service_worker": "js/background/display-info.js"
   },
-  "content_scripts": [
-    {
-      "js": [
-        "js/inject/system-info.js"
-      ],
-      "css": [
-        "css/inject/ruler.css"
-      ],
-      "matches": [
-        "https://*/*",
-        "http://*/*"
-      ]
-    }
-  ],
   "icons": {
     "128": "icon/logo-128.png",
     "48": "icon/logo-48.png",
