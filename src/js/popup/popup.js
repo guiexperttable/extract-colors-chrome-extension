@@ -516,7 +516,10 @@ async function onEyeDropperButtonClicked() {
     .then((result) => {
       showDiv(divPickerHistory);
       const color = result.sRGBHex;
-      pickerHistory.push({hex: color, rgba: hexToRgb(color)});
+      const alreadyPicked = pickerHistory.filter(c => c.hex === color).length;
+      if (!alreadyPicked) {
+        pickerHistory.push({hex: color, rgba: hexToRgb(color)});
+      }
 
       navigator.clipboard
         .writeText(color)
