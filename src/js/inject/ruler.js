@@ -3,13 +3,6 @@
 chrome.runtime.onMessage
   .addListener((_msg, _sender, _response) => {});
 
-/*
-TODO snappline corect y!!!!
-rulerContainerY
-ruler-container-vertical-left single-ruler-div
-top: var(--ruler-margin-top);
-
- */
 
 if (!window['rulerLoaded']) {
 
@@ -342,7 +335,7 @@ if (!window['rulerLoaded']) {
     'CHANGE_WIDTH': (value) => setLineWidth(value)
   };
 
-  let scrollY = 0;
+  let scrollY = window.scrollY;
 
   let rulerLineElement = null;
   let clickedOnTopRuler = false;
@@ -375,11 +368,11 @@ if (!window['rulerLoaded']) {
   };
 
 
-  function isSnapperVisible(){
+  function isSnapperVisible() {
     return _snapLinesVisible;
   }
 
-  function setSnapperVisible(visible){
+  function setSnapperVisible(visible) {
     _snapLinesVisible = visible;
 
     const classAction = visible ? 'remove' : 'add';
@@ -463,7 +456,7 @@ if (!window['rulerLoaded']) {
   function createLineMarkerWithDeleteButton(config) {
     const {targetClassName, className, indicator, value, target} = config;
     if (target.className === targetClassName) {
-      const element= createElement({
+      const element = createElement({
         elementTag: 'div',
         classList: [className],
         innerHTML: `${indicator}: <span class="value">${value}</span>`
@@ -586,12 +579,11 @@ if (!window['rulerLoaded']) {
   }
 
 
-
   function handleMessage(message, target) {
     const {type, value} = message;
     const handler = messageHandlers[type];
 
-    if(handler){
+    if (handler) {
       handler(value, target);
       return true;
     }
@@ -622,7 +614,7 @@ if (!window['rulerLoaded']) {
     saveMousePosition(event);
     if (clickedOnTopRuler && rulerLineElement !== null) {
       updatePositionInPixel(rulerLineElement, 'top', mouse.y);
-      updateRulerMarkerValue(targetElement, mouse.y + RULER_SIZE/4 - 1);
+      updateRulerMarkerValue(targetElement, mouse.y + RULER_SIZE / 4 - 1);
     }
   }
 
@@ -630,11 +622,11 @@ if (!window['rulerLoaded']) {
     saveMousePosition(event);
     if (clickedOnLeftRuler && rulerLineElement !== null) {
       updatePositionInPixel(rulerLineElement, 'left', mouse.x);
-      updateRulerMarkerValue(targetElement, mouse.x + RULER_SIZE/4);
+      updateRulerMarkerValue(targetElement, mouse.x + RULER_SIZE / 4);
     }
   }
 
-  function updateRulerMarkerValue(rulerLineElement, value){
+  function updateRulerMarkerValue(rulerLineElement, value) {
     const valueEle = rulerLineElement.querySelector('.value');
     if (valueEle) {
       valueEle.innerText = value;
@@ -648,11 +640,11 @@ if (!window['rulerLoaded']) {
         // Free horizontal line is dragged:
         const y = Math.round(mouse.y + scrollY);
         updatePositionInPixel(targetElement, 'top', y);
-        updateRulerMarkerValue(targetElement, 1 + y + + RULER_SIZE/4);
+        updateRulerMarkerValue(targetElement, 1 + y + +RULER_SIZE / 4);
 
       } else if (clickedOnLeftRuler) {
         updatePositionInPixel(targetElement, 'left', mouse.x);
-        updateRulerMarkerValue(targetElement, mouse.x + RULER_SIZE/4);
+        updateRulerMarkerValue(targetElement, mouse.x + RULER_SIZE / 4);
       }
     }
   }
@@ -670,14 +662,14 @@ if (!window['rulerLoaded']) {
       clickedOnLeftRuler = true;
       onRulerYClick(e);
 
-    } else if (isSnapperVisible()){
+    } else if (isSnapperVisible()) {
       convertSnapToRulerLine();
     }
   }
 
 
   function onScroll(event) {
-    scrollY =  window.scrollY;
+    scrollY = window.scrollY;
 
     const modY = (scrollY % counterIncrement);
     const startY = Math.floor(scrollY / counterIncrement);
@@ -792,8 +784,10 @@ if (!window['rulerLoaded']) {
 
     } else if (clickedOnTopRuler) {
       onMouseMoveAfterTopRulerClicked(evt);
+
     } else if (clickedOnLeftRuler) {
       onMouseMoveAfterLeftRulerClicked(evt);
+
     } else {
       moveSnapLines(target);
     }
@@ -814,32 +808,39 @@ if (!window['rulerLoaded']) {
     if (debugging) {
       console.log(`key: "${key}", code: ${code}`, evt);
     }
-
-    if (key === DELETE_KEY && targetElement) {
-      targetElement.remove();
-      evt.stopPropagation();
-
-    } else if (isSnapperVisible() && code === 'Enter') {
-      convertSnapToRulerLine();
-      evt.stopPropagation();
-
-    } else if (key === 's') {
-      setSnapperVisible(!isSnapperVisible());
-      evt.stopPropagation();
-
-    } else if (mouseDown && key === 'h') {
-      createHorizontalRulerFreeLine(mouse.y);
-      evt.stopPropagation();
-
-    } else if (mouseDown && key === 'v') {
-      createVerticalRulerFreeLine(mouse.x);
-      evt.stopPropagation();
-
-    } else if (key === 'm') {
-      toggleMarkerVisibility();
+    if (handleKeyEvent(key, code, mouseDown)) {
       evt.stopPropagation();
     }
   }
+
+  function handleKeyEvent(key, code, mouseDown) {
+    if (key === DELETE_KEY && targetElement) {
+      targetElement.remove();
+      return true;
+    }
+    if (isSnapperVisible() && code === "Enter") {
+      convertSnapToRulerLine();
+      return true;
+    }
+    if (key === "s") {
+      setSnapperVisible(!isSnapperVisible());
+      return true;
+    }
+    if (mouseDown && key === "h") {
+      createHorizontalRulerFreeLine(mouse.y);
+      return true;
+    }
+    if (mouseDown && key === "v") {
+      createVerticalRulerFreeLine(mouse.x);
+      return true;
+    }
+    if (key === "m") {
+      toggleMarkerVisibility();
+      return true;
+    }
+    return false;
+  }
+
 
   function toggleMarkerVisibility(){
     const classList = rulerMainElement.classList;

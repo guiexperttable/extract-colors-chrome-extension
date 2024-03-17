@@ -21,7 +21,6 @@ if (!window['screenCaptureLoaded']) {
       getPositions(callback);
       return true;
     }
-    console.error('Unknown message: ' + data.msg);
     return false;
   }
 
