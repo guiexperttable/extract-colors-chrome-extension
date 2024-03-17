@@ -4,7 +4,7 @@ chrome.runtime.onMessage
   .addListener((_msg, _sender, _response) => {});
 
 /*
-
+TODO snappline corect y!!!!
 rulerContainerY
 ruler-container-vertical-left single-ruler-div
 top: var(--ruler-margin-top);
@@ -620,7 +620,6 @@ if (!window['rulerLoaded']) {
 
   function onMouseMoveAfterTopRulerClicked(event) {
     saveMousePosition(event);
-    console.log(mouse.y, event);
     if (clickedOnTopRuler && rulerLineElement !== null) {
       updatePositionInPixel(rulerLineElement, 'top', mouse.y);
       updateRulerMarkerValue(targetElement, mouse.y + RULER_SIZE/4 - 1);
@@ -676,17 +675,13 @@ if (!window['rulerLoaded']) {
     }
   }
 
-  function onSrollend(event) {
-    onScroll(event);
-  }
+
   function onScroll(event) {
     scrollY =  window.scrollY;
 
     const modY = (scrollY % counterIncrement);
     const startY = Math.floor(scrollY / counterIncrement);
     const marginTop = -modY;
-
-    // console.log(scrollY + ", modY:" + modY + ",  startY:" + startY, marginTop);
 
     rulerMainElement.style.setProperty("--ruler-container-horizontal-top-pos", `${scrollY}px`);
     rulerMainElement.style.setProperty("--counter-y-start", startY * counterIncrement);
@@ -699,33 +694,34 @@ if (!window['rulerLoaded']) {
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('mousedown', onMouseDown);
     document.addEventListener("scroll", onScroll);
-    document.addEventListener("scrollend", onSrollend);
   }
 
 
   function moveSnapLines(target) {
-    const {left, top, width, height} = target.getBoundingClientRect();
-    const absoluteX = left + window.scrollX;
-    const absoluteY = top + window.scrollY;
+    if (!target.closest('.extract-colors-devtool')) {
+      const {left, top, width, height} = target.getBoundingClientRect();
+      const absoluteX = left + window.scrollX;
+      const absoluteY = top;
 
-    applyStyle(snapLineLeftDiv, {
-      left: `${absoluteX}px`
-    });
-    applyStyle(snapLineRightDiv, {
-      left: `${absoluteX + width}px`
-    });
-    applyStyle(snapLineTopDiv, {
-      top: `${absoluteY}px`
-    });
-    applyStyle(snapLineBottomDiv, {
-      top: `${absoluteY + height}px`
-    });
+      applyStyle(snapLineLeftDiv, {
+        left: `${absoluteX}px`
+      });
+      applyStyle(snapLineRightDiv, {
+        left: `${absoluteX + width}px`
+      });
+      applyStyle(snapLineTopDiv, {
+        top: `${absoluteY}px`
+      });
+      applyStyle(snapLineBottomDiv, {
+        top: `${absoluteY + height}px`
+      });
+    }
   }
 
   function convertSnapToRulerLine() {
     const offset = FREELINE_SIZE / 2;
-    createHorizontalRulerFreeLine(snapLineTopDiv.getBoundingClientRect().top - offset);
-    createHorizontalRulerFreeLine(snapLineBottomDiv.getBoundingClientRect().top - offset);
+    createHorizontalRulerFreeLine(snapLineTopDiv.getBoundingClientRect().top - offset + scrollY);
+    createHorizontalRulerFreeLine(snapLineBottomDiv.getBoundingClientRect().top - offset + scrollY);
     createVerticalRulerFreeLine(snapLineLeftDiv.getBoundingClientRect().left - offset);
     createVerticalRulerFreeLine(snapLineRightDiv.getBoundingClientRect().left - offset);
 
@@ -788,9 +784,7 @@ if (!window['rulerLoaded']) {
 
 
   function onMouseMove(evt) {
-    document.title = evt.clientY; // TODO
     const target = evt.target;
-    //console.log({targetElement, clickedOnTopRuler, clickedOnLeftRuler});
 
     if (targetElement) {
       // we are dragging a line:
