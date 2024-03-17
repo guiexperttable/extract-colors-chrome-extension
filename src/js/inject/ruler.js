@@ -1,4 +1,4 @@
-
+//noinspection CssUnresolvedCustomProperty
 
 chrome.runtime.onMessage
   .addListener((_msg, _sender, _response) => {});
@@ -10,6 +10,7 @@ if (!window['rulerLoaded']) {
   window['rulerLoaded'] = true;
 
   const debugging = window.location.href.includes('debug=1');
+  const counterIncrement = 50;
 
   const CSS_TO_INJECT = `
  <style>     
@@ -30,7 +31,7 @@ if (!window['rulerLoaded']) {
     --ruler2-bdw: 1px;
     --ruler-hash-mark-main-line: #000;
     --ruler2-h: 20px;
-    --ruler2-space: 50;
+    --ruler2-space: ${counterIncrement};
 
     --lineColor: rgba(0, 255, 255, 0.83);
     --lineWidth: 1px;
@@ -43,6 +44,11 @@ if (!window['rulerLoaded']) {
     --line-marker-delete-btn-hover-color: #5e0000;
 
     --snap-line-color: rgba(255, 0, 0, 0.5);
+    
+    --counter-x-start: 0;
+    --counter-y-start: 0;
+    --ruler-margin-top: 0px;
+    --ruler-margin-left: 0px;
 }
 
 
@@ -77,9 +83,6 @@ if (!window['rulerLoaded']) {
 }
 
 .extract-colors-devtool .single-ruler-div {
-    position: fixed;
-    top: 0;
-    right: 0;
     z-index: 2147483647;
     background-attachment: fixed;
     background-position: 0 0;
@@ -87,6 +90,9 @@ if (!window['rulerLoaded']) {
 }
 
 .extract-colors-devtool .ruler-content-x-top {
+    position: fixed;
+    top: 0;
+    right: 0;
     width: 100%;
     height: 20px;
     border-bottom: 1px solid var(--ruler-border-color);
@@ -97,11 +103,25 @@ if (!window['rulerLoaded']) {
     calc(var(--ruler-unit) * var(--ruler2-space) * var(--ruler-x)) var(--ruler2-h);
 }
 
-.extract-colors-devtool .ruler-content-y-left {
+.extract-colors-devtool .ruler-content-y-left-outer-div {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 22px;
     height: 100vh;
+    overflow: clip;
+}
+.extract-colors-devtool .ruler-content-y-left {
+    overflow: clip;
+    position: relative;
+    top: var(--ruler-margin-top);
+    right: 0;
+    width: 22px;
+    height: max( calc(100% - var(--ruler-margin-top) ), calc(100vh - var(--ruler-margin-top)));
+    /*top: var(--ruler-margin-top);*/
     left: 0;
     border-right: 1px solid var(--ruler-border-color);
+    background-attachment: local;
     background-image: linear-gradient(90deg, var(--ruler-hash-mark-fraction-line) 0 var(--ruler1-bdw), transparent 0),
     linear-gradient(90deg, var(--ruler-hash-mark-main-line) 0 var(--ruler2-bdw), transparent 0),
     linear-gradient(0deg, var(--ruler-hash-mark-fraction-line) 0 var(--ruler1-bdw), transparent 0),
@@ -122,7 +142,6 @@ if (!window['rulerLoaded']) {
 .extract-colors-devtool .ruler-x-ul,
 .extract-colors-devtool .ruler-y-ul {
     color: var(--rulerNumbers);
-    counter-reset: d 0;
     display: flex;
     font-size: var(--ruler-num-fontsize);
     line-height: 1;
@@ -134,6 +153,7 @@ if (!window['rulerLoaded']) {
 }
 
 .extract-colors-devtool .ruler-x-ul {
+    counter-reset: counter-x var(--counter-x-start);
     height: var(--ruler2-h);
     inset-block-start: 0;
     inset-inline-start: calc(var(--ruler-unit) * var(--ruler2-space));
@@ -142,12 +162,14 @@ if (!window['rulerLoaded']) {
 }
 
 .extract-colors-devtool .ruler-y-ul {
+    counter-reset: counter-y var(--counter-y-start);
     flex-direction: column;
     height: 100%;
     inset-block-start: calc(var(--ruler-unit) * var(--ruler2-space));
     inset-inline-start: 0;
     opacity: var(--ruler-y);
     width: var(--ruler2-h);
+    margin-top: var(--ruler-margin-top);
 }
 .extract-colors-devtool .ruler-x-ul:hover {
     cursor: row-resize;
@@ -162,9 +184,15 @@ if (!window['rulerLoaded']) {
 
 .extract-colors-devtool .ruler-x-ul li,
 .extract-colors-devtool .ruler-y-ul li {
-    counter-increment: d var(--ruler2-space);
     flex: 0 0 calc(var(--ruler-unit) * var(--ruler2-space));
     box-sizing: initial;
+}
+
+.extract-colors-devtool .ruler-x-ul li {
+    counter-increment: counter-x var(--ruler2-space);
+}
+.extract-colors-devtool .ruler-y-ul li {
+    counter-increment: counter-y var(--ruler2-space);
 }
 
 .extract-colors-devtool .ruler-y-ul li {
@@ -172,19 +200,19 @@ if (!window['rulerLoaded']) {
 }
 
 .extract-colors-devtool .ruler-x-ul li::after {
-    content: counter(d) '';
+    content: counter(counter-x) '';
     line-height: 1;
     padding-inline-start: var(--ruler-num-padding-line-start);
 }
 
 .extract-colors-devtool .ruler-y-ul li::after {
-    content: counter(d) '';
+    content: counter(counter-y) '';
     display: block;
     padding-inline-end: var(--ruler-num-padding-line-start);
-    transform: rotate(-90deg) translateY(-13px);
+    transform: rotate(-90deg) translateY(-44px);
     transform-origin: 100% 0;
     text-align: end;
-    width: fit-content;
+    width: 47px;
 }
 
 .extract-colors-devtool .ruler-free-horizontal-line {
@@ -289,6 +317,8 @@ if (!window['rulerLoaded']) {
     'CHANGE_WIDTH': (value) => setLineWidth(value)
   };
 
+  let scrollY = 0;
+
   let rulerLineElement = null;
   let clickedX = false;
   let clickedY = false;
@@ -298,8 +328,8 @@ if (!window['rulerLoaded']) {
   let rulerMainElement;
   let rulerContainerX;
   let rulerContainerY;
-  let rulerElementX;
-  let rulerElementY;
+  let rulerUlX;
+  let rulerUlY;
 
   let _snapLinesVisible = true;
   let snapLineTopDiv;
@@ -336,7 +366,7 @@ if (!window['rulerLoaded']) {
   function createListItemsX(rulerElementX, innerWidth) {
     appendElements({
       parent: rulerElementX,
-      elementCount: innerWidth / 50,
+      elementCount: innerWidth / counterIncrement,
       createElement: createListItem
     });
   }
@@ -344,7 +374,7 @@ if (!window['rulerLoaded']) {
   function createListItemsY(rulerElementY, innerHeight) {
     appendElements({
       parent: rulerElementY,
-      elementCount: innerHeight / 50,
+      elementCount: innerHeight / counterIncrement,
       createElement: createListItem
     });
   }
@@ -352,10 +382,10 @@ if (!window['rulerLoaded']) {
   function createListItemsXandY(event) {
     const {innerWidth, innerHeight} = event.currentTarget;
 
-    rulerElementX.innerHTML = "";
-    rulerElementY.innerHTML = "";
-    createListItemsX(rulerElementX, innerWidth);
-    createListItemsY(rulerElementY, innerHeight);
+    rulerUlX.innerHTML = "";
+    rulerUlY.innerHTML = "";
+    createListItemsX(rulerUlX, innerWidth);
+    createListItemsY(rulerUlY, innerHeight);
   }
 
   function applyStyle(element, style) {
@@ -589,7 +619,7 @@ if (!window['rulerLoaded']) {
     if (targetElement) {
       if (clickedX) {
         updatePositionInPixel(targetElement, 'top', mouse.y);
-        updateRulerMarkerValue(targetElement, mouse.y + RULER_SIZE/4);
+        updateRulerMarkerValue(targetElement, mouse.y + scrollY + + RULER_SIZE/4);
 
       } else if (clickedY) {
         updatePositionInPixel(targetElement, 'left', mouse.x);
@@ -616,11 +646,24 @@ if (!window['rulerLoaded']) {
     }
   }
 
-  function initMouseAndKeyListener() {
+
+
+  function initDocumentListener() {
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener("scroll", (event) => {
+      scrollY = window.scrollY;
+      const modY = (scrollY % counterIncrement);
+      const startY = Math.floor(scrollY / counterIncrement);
+      const marginTop =  - modY + 1;
+
+      console.log(scrollY + ', modY:' + modY + ',  startY:' + startY,  marginTop);
+
+      rulerMainElement.style.setProperty("--counter-y-start", startY * counterIncrement);
+      rulerMainElement.style.setProperty("--ruler-margin-top", marginTop + "px");
+    });
   }
 
 
@@ -695,7 +738,7 @@ if (!window['rulerLoaded']) {
     applyStyle(rulerLineElement, {
       width: '100%',
       height: '10px',
-      background: 'transparent',
+      background: 'transparent', // TODO --> .ruler-free-horizontal-line
       position: 'fixed',
       zIndex: MAX_Z_INDEX,
       cursor: 'row-resize',
@@ -835,29 +878,35 @@ if (!window['rulerLoaded']) {
       classList: ['ruler-content-x-top single-ruler-div'],
     });
 
+    const rulerContainerOuterY = createElement({
+      elementTag: 'div',
+      classList: ['ruler-content-y-left-outer-div'],
+    });
     rulerContainerY = createElement({
       elementTag: 'div',
       classList: ['ruler-content-y-left single-ruler-div'],
     });
 
-    rulerElementX = createElement({
+    rulerUlX = createElement({
       elementTag: 'ul',
       classList: ['ruler-x-ul'],
     });
 
-    rulerElementY = createElement({
+    rulerUlY = createElement({
       elementTag: 'ul',
       classList: ['ruler-y-ul'],
     });
 
-    createListItemsX(rulerElementX, innerWidth);
-    createListItemsY(rulerElementY, innerHeight);
+    createListItemsX(rulerUlX, innerWidth);
+    createListItemsY(rulerUlY, innerHeight);
 
-    rulerContainerY.append(rulerElementY);
-    rulerContainerX.append(rulerElementX);
+    rulerContainerY.append(rulerUlY);
+    rulerContainerX.append(rulerUlX);
 
     rulerMainElement.append(rulerContainerX);
-    rulerMainElement.append(rulerContainerY);
+
+    rulerMainElement.append(rulerContainerOuterY);
+    rulerContainerOuterY.append(rulerContainerY);
 
     document.body.appendChild(rulerMainElement);
 
@@ -879,7 +928,7 @@ if (!window['rulerLoaded']) {
       value: true
     }, rulerMainElement);
 
-    initMouseAndKeyListener();
+    initDocumentListener();
     createSnapperLines();
   }
 
