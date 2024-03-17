@@ -3,7 +3,13 @@
 chrome.runtime.onMessage
   .addListener((_msg, _sender, _response) => {});
 
+/*
 
+rulerContainerY
+ruler-container-vertical-left single-ruler-div
+top: var(--ruler-margin-top);
+
+ */
 
 if (!window['rulerLoaded']) {
 
@@ -15,6 +21,8 @@ if (!window['rulerLoaded']) {
   const CSS_TO_INJECT = `
  <style>     
 .extract-colors-devtool {
+    --ruler-container-horizontal-top-pos: 0px;
+
     --ruler-border-color: rgba(0,0,0,0.1);
     --rulerNumbers: #000;
     --ruler-num-fontsize: 10px;
@@ -58,6 +66,7 @@ if (!window['rulerLoaded']) {
     display: block;
 }
 
+
 .extract-colors-devtool .hidden{
     display: none !important;
 }
@@ -90,9 +99,9 @@ if (!window['rulerLoaded']) {
     box-sizing: initial;
 }
 
-.extract-colors-devtool .ruler-content-x-top {
-    position: fixed;
-    top: 0;
+.extract-colors-devtool .ruler-container-horizontal-top {
+    position: absolute;
+    top: var(--ruler-container-horizontal-top-pos);
     right: 0;
     width: 100%;
     height: 20px;
@@ -104,7 +113,7 @@ if (!window['rulerLoaded']) {
     calc(var(--ruler-unit) * var(--ruler2-space) * var(--ruler-x)) var(--ruler2-h);
 }
 
-.extract-colors-devtool .ruler-content-y-left-outer-div {
+.extract-colors-devtool .ruler-container-vertical-left-outer-div {
     position: fixed;
     top: 0;
     left: 0;
@@ -112,7 +121,7 @@ if (!window['rulerLoaded']) {
     height: 100vh;
     overflow: clip;
 }
-.extract-colors-devtool .ruler-content-y-left {
+.extract-colors-devtool .ruler-container-vertical-left {
     overflow: clip;
     position: relative;
     top: var(--ruler-margin-top);
@@ -221,7 +230,7 @@ if (!window['rulerLoaded']) {
     width: 100%;
     height: 10px;
     background: transparent;
-    position: fixed;
+    position: absolute;
     cursor: row-resize;
     z-index: 2147483647;
 }
@@ -312,7 +321,6 @@ if (!window['rulerLoaded']) {
 </style>
 `;
 
-  const MAX_Z_INDEX = '2147483647';
   const FREELINE_SIZE = 10;
   const RULER_SIZE = 20;
 
@@ -337,14 +345,16 @@ if (!window['rulerLoaded']) {
   let scrollY = 0;
 
   let rulerLineElement = null;
-  let clickedX = false;
-  let clickedY = false;
+  let clickedOnTopRuler = false;
+  let clickedOnLeftRuler = false;
   let mouseDown = false;
   let targetElement = null;
 
+  let mainElement;
   let rulerMainElement;
-  let rulerContainerX;
-  let rulerContainerY;
+  let linesMainElement;
+  let rulerContainerHorizontalTop;
+  let rulerContainerVerticalLeft;
   let rulerUlX;
   let rulerUlY;
 
@@ -592,7 +602,7 @@ if (!window['rulerLoaded']) {
   function saveMousePosition(ev) {
     const {clientX, clientY} = ev
     mouse.x = clientX;
-    mouse.y = clientY;
+    mouse.y = Math.round(clientY);
   }
 
 
@@ -608,17 +618,18 @@ if (!window['rulerLoaded']) {
     createVerticalRulerFreeLine(mouse.x);
   }
 
-  function onRulerXMouseMove(event) {
+  function onMouseMoveAfterTopRulerClicked(event) {
     saveMousePosition(event);
-    if (clickedX && rulerLineElement !== null) {
+    console.log(mouse.y, event);
+    if (clickedOnTopRuler && rulerLineElement !== null) {
       updatePositionInPixel(rulerLineElement, 'top', mouse.y);
-      updateRulerMarkerValue(targetElement, mouse.y + RULER_SIZE/4);
+      updateRulerMarkerValue(targetElement, mouse.y + RULER_SIZE/4 - 1);
     }
   }
 
-  function onRulerYMouseMove(event) {
+  function onMouseMoveAfterLeftRulerClicked(event) {
     saveMousePosition(event);
-    if (clickedY && rulerLineElement !== null) {
+    if (clickedOnLeftRuler && rulerLineElement !== null) {
       updatePositionInPixel(rulerLineElement, 'left', mouse.x);
       updateRulerMarkerValue(targetElement, mouse.x + RULER_SIZE/4);
     }
@@ -634,11 +645,13 @@ if (!window['rulerLoaded']) {
   function moveTargetElement(event) {
     saveMousePosition(event);
     if (targetElement) {
-      if (clickedX) {
-        updatePositionInPixel(targetElement, 'top', mouse.y);
-        updateRulerMarkerValue(targetElement, mouse.y + scrollY + + RULER_SIZE/4);
+      if (clickedOnTopRuler) {
+        // Free horizontal line is dragged:
+        const y = Math.round(mouse.y + scrollY);
+        updatePositionInPixel(targetElement, 'top', y);
+        updateRulerMarkerValue(targetElement, 1 + y + + RULER_SIZE/4);
 
-      } else if (clickedY) {
+      } else if (clickedOnLeftRuler) {
         updatePositionInPixel(targetElement, 'left', mouse.x);
         updateRulerMarkerValue(targetElement, mouse.x + RULER_SIZE/4);
       }
@@ -651,11 +664,11 @@ if (!window['rulerLoaded']) {
     saveMousePosition(e);
 
     if (isTopRulerArea(clientY)) {
-      clickedX = true;
+      clickedOnTopRuler = true;
       onRulerXClick(e);
 
     } else if (isLeftRulerArea(clientX)) {
-      clickedY = true;
+      clickedOnLeftRuler = true;
       onRulerYClick(e);
 
     } else if (isSnapperVisible()){
@@ -663,24 +676,30 @@ if (!window['rulerLoaded']) {
     }
   }
 
+  function onSrollend(event) {
+    onScroll(event);
+  }
+  function onScroll(event) {
+    scrollY =  window.scrollY;
 
+    const modY = (scrollY % counterIncrement);
+    const startY = Math.floor(scrollY / counterIncrement);
+    const marginTop = -modY;
+
+    // console.log(scrollY + ", modY:" + modY + ",  startY:" + startY, marginTop);
+
+    rulerMainElement.style.setProperty("--ruler-container-horizontal-top-pos", `${scrollY}px`);
+    rulerMainElement.style.setProperty("--counter-y-start", startY * counterIncrement);
+    rulerMainElement.style.setProperty("--ruler-margin-top", `${marginTop}px`);
+  }
 
   function initDocumentListener() {
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('mousedown', onMouseDown);
-    document.addEventListener("scroll", (event) => {
-      scrollY = window.scrollY;
-      const modY = (scrollY % counterIncrement);
-      const startY = Math.floor(scrollY / counterIncrement);
-      const marginTop =  - modY + 1;
-
-      console.log(scrollY + ', modY:' + modY + ',  startY:' + startY,  marginTop);
-
-      rulerMainElement.style.setProperty("--counter-y-start", startY * counterIncrement);
-      rulerMainElement.style.setProperty("--ruler-margin-top", marginTop + "px");
-    });
+    document.addEventListener("scroll", onScroll);
+    document.addEventListener("scrollend", onSrollend);
   }
 
 
@@ -726,7 +745,7 @@ if (!window['rulerLoaded']) {
 
     rulerLineElement.addEventListener('mousedown', (event) => {
       targetElement = event.target
-      clickedY = true
+      clickedOnLeftRuler = true
     });
 
     createLineMarkerWithDeleteButton({
@@ -737,7 +756,8 @@ if (!window['rulerLoaded']) {
       target: rulerLineElement,
     });
 
-    rulerMainElement.append(rulerLineElement);
+    //rulerMainElement.append(rulerLineElement);
+    linesMainElement.append(rulerLineElement);
   }
 
   function createHorizontalRulerFreeLine(y) {
@@ -751,10 +771,11 @@ if (!window['rulerLoaded']) {
     targetElement = rulerLineElement
     rulerLineElement.addEventListener('mousedown', (event) => {
       targetElement = event.target;
-      clickedX = true;
+      clickedOnTopRuler = true;
     });
 
-    rulerMainElement.append(rulerLineElement);
+    //rulerMainElement.append(rulerLineElement);
+    linesMainElement.append(rulerLineElement);
 
     createLineMarkerWithDeleteButton({
       targetClassName: 'ruler-free-horizontal-line',
@@ -767,22 +788,26 @@ if (!window['rulerLoaded']) {
 
 
   function onMouseMove(evt) {
+    document.title = evt.clientY; // TODO
     const target = evt.target;
+    //console.log({targetElement, clickedOnTopRuler, clickedOnLeftRuler});
 
     if (targetElement) {
+      // we are dragging a line:
       moveTargetElement(evt);
-    } else if (clickedX) {
-      onRulerXMouseMove(evt);
-    } else if (clickedY) {
-      onRulerYMouseMove(evt);
+
+    } else if (clickedOnTopRuler) {
+      onMouseMoveAfterTopRulerClicked(evt);
+    } else if (clickedOnLeftRuler) {
+      onMouseMoveAfterLeftRulerClicked(evt);
     } else {
       moveSnapLines(target);
     }
   }
 
   function onMouseUp(_evt) {
-    clickedX = false;
-    clickedY = false;
+    clickedOnTopRuler = false;
+    clickedOnLeftRuler = false;
     mouseDown = false;
     targetElement = null;
     document.body.style.userSelect = 'auto';
@@ -866,28 +891,40 @@ if (!window['rulerLoaded']) {
   function init(document) {
     const {innerWidth, innerHeight} = window;
 
-    rulerMainElement = createElement({
+    mainElement = createElement({
       elementTag: 'div',
-      classList: ['extract-colors-devtool', 'ruler-main-div'],
+      classList: ['extract-colors-devtool', 'main-div'],
       innerHTML: CSS_TO_INJECT
     });
+    rulerMainElement = createElement({
+      elementTag: 'div',
+      classList: [ 'ruler-main-div'],
+      //innerHTML: CSS_TO_INJECT
+    });
+    linesMainElement = createElement({
+      elementTag: 'div',
+      classList: [ 'lines-main-div'],
+      //innerHTML: CSS_TO_INJECT
+    });
+    mainElement.appendChild(rulerMainElement);
+    mainElement.appendChild(linesMainElement);
 
     applyStyle(rulerMainElement, {
       display: determineRulersMode(),
     });
 
-    rulerContainerX = createElement({
+    rulerContainerHorizontalTop = createElement({
       elementTag: 'div',
-      classList: ['ruler-content-x-top single-ruler-div'],
+      classList: ['ruler-container-horizontal-top single-ruler-div'],
     });
 
     const rulerContainerOuterY = createElement({
       elementTag: 'div',
-      classList: ['ruler-content-y-left-outer-div'],
+      classList: ['ruler-container-vertical-left-outer-div'],
     });
-    rulerContainerY = createElement({
+    rulerContainerVerticalLeft = createElement({
       elementTag: 'div',
-      classList: ['ruler-content-y-left single-ruler-div'],
+      classList: ['ruler-container-vertical-left single-ruler-div'],
     });
 
     rulerUlX = createElement({
@@ -903,15 +940,15 @@ if (!window['rulerLoaded']) {
     createListItemsX(rulerUlX, innerWidth);
     createListItemsY(rulerUlY, innerHeight);
 
-    rulerContainerY.append(rulerUlY);
-    rulerContainerX.append(rulerUlX);
+    rulerContainerVerticalLeft.append(rulerUlY);
+    rulerContainerHorizontalTop.append(rulerUlX);
 
-    rulerMainElement.append(rulerContainerX);
-
+    rulerMainElement.append(rulerContainerHorizontalTop);
     rulerMainElement.append(rulerContainerOuterY);
-    rulerContainerOuterY.append(rulerContainerY);
+    rulerContainerOuterY.append(rulerContainerVerticalLeft);
 
-    document.body.appendChild(rulerMainElement);
+    document.body.appendChild(mainElement);
+    //document.body.appendChild(rulerMainElement);
 
     window.addEventListener('resize', createListItemsXandY);
 
@@ -933,6 +970,9 @@ if (!window['rulerLoaded']) {
 
     initDocumentListener();
     createSnapperLines();
+    if (debugging) {
+      setSnapperVisible(false);
+    }
   }
 
   if (document) {
