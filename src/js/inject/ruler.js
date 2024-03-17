@@ -217,6 +217,22 @@ if (!window['rulerLoaded']) {
 
 .extract-colors-devtool .ruler-free-horizontal-line {
     left: 0;
+    width: 100%;
+    height: 10px;
+    background: transparent;
+    position: fixed;
+    cursor: row-resize;
+    z-index: 2147483647;
+}
+
+.ruler-free-vertical-line {
+    width: 10px;
+    height: 100%;
+    background: transparent;
+    position: fixed;
+    z-index: 2147483647;
+    cursor: col-resize;
+    top: 0;
 }
 
 .extract-colors-devtool .ruler-free-horizontal-line::after {
@@ -703,13 +719,6 @@ if (!window['rulerLoaded']) {
     });
 
     applyStyle(rulerLineElement, {
-      width: '10px',
-      height: '100%',
-      background: 'transparent',
-      position: 'fixed',
-      zIndex: MAX_Z_INDEX,
-      cursor: 'col-resize',
-      top: '0',
       left: x + 'px',
     });
     targetElement = rulerLineElement;
@@ -736,14 +745,7 @@ if (!window['rulerLoaded']) {
       classList: ['ruler-free-horizontal-line'],
     });
     applyStyle(rulerLineElement, {
-      width: '100%',
-      height: '10px',
-      background: 'transparent', // TODO --> .ruler-free-horizontal-line
-      position: 'fixed',
-      zIndex: MAX_Z_INDEX,
-      cursor: 'row-resize',
       top: y + 'px',
-      left: '0',
     });
     targetElement = rulerLineElement
     rulerLineElement.addEventListener('mousedown', (event) => {
