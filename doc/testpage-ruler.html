@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Div Containers</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      background-color: #fff;
+    }
+    .container {
+      width: 50px;
+      height: 50px;
+      background-color: lightyellow;
+      position: absolute;
+    }
+    .point {
+      width: 1px;
+      height: 1px;
+      background-color: #000;
+      position: absolute;
+    }
+  </style>
+</head>
+<body>
+<script>
+  for (let i = 0; i < 50; i++) {
+    for (let j = 0; j < 50; j++) {
+      if ((i+j)%2===0) {
+        const div = document.createElement("div");
+        div.className = 'container';
+        div.style.top = `${j * 50}px`;
+        div.style.left = `${i * 50}px`;
+        document.body.appendChild(div);
+      }
+    }
+  }
+  for (let i = 0; i < 50; i++) {
+    for (let j = 0; j < 50; j++) {
+      const div = document.createElement("div");
+      div.className = 'point';
+      div.style.top = `${j * 50}px`;
+      div.style.left = `${i * 50}px`;
+      document.body.appendChild(div);
+    }
+  }
+</script>
+</body>
+</html>

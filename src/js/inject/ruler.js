@@ -33,7 +33,8 @@ if (!window['rulerLoaded']) {
     --ruler2-h: 20px;
     --ruler2-space: ${counterIncrement};
 
-    --lineColor: rgba(0, 255, 255, 0.83);
+    --lineColor: rgba(0, 0, 255, 0.3);
+    /*--lineColor: rgba(0, 255, 255, 0.83);  TODO */
     --lineWidth: 1px;
 
     --line-marker-bg: rgba(0,0,0,0.9);
