@@ -258,15 +258,11 @@ if (!window['rulerLoaded']) {
     color: var(--line-marker-delete-btn-hover-color);
 }
 
-.extract-colors-devtool .ruler-free-horizontal-line:hover .line-marker {
-    display: flex;
-}
-
+.marker-always-visible .ruler-free-horizontal-line .line-marker,
+.marker-always-visible .ruler-free-vertical-line .line-marker,
+.extract-colors-devtool .ruler-free-horizontal-line:hover .line-marker,
 .extract-colors-devtool .ruler-free-vertical-line:hover .line-marker {
     display: flex;
-        /*display: grid;*/
-        /*grid-template-columns: 1fr 20px;*/
-        /*user-select: none;*/
 }
 </style>
 `;
@@ -773,6 +769,19 @@ if (!window['rulerLoaded']) {
     } else if (mouseDown && key === 'v') {
       createVerticalRulerFreeLine(mouse.x);
       evt.stopPropagation();
+
+    } else if (key === 'm') {
+      toggleMarkerVisibility();
+      evt.stopPropagation();
+    }
+  }
+
+  function toggleMarkerVisibility(){
+    const classList = rulerMainElement.classList;
+    if (classList.contains('marker-always-visible')) {
+      classList.remove('marker-always-visible');
+    } else {
+      classList.add('marker-always-visible');
     }
   }
 
