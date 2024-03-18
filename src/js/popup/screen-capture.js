@@ -393,13 +393,14 @@ export const CaptureUtil = (() => {
     if (!index) {
       index = 0;
     }
+    let indexStr = (index + 1).toString().padStart(2, '0');
     if (filename.includes('.')) {
       const sp = filename.split('.');
       const ext = sp.pop();
-      return sp.join('.') + '-' + (index + 1) + '.' + ext;
+      return `${sp.join('.')}-${indexStr}.${ext}`;
     }
 
-    return filename + '-' + (index + 1)
+    return `${filename}-${indexStr}`
   }
 
 
@@ -577,6 +578,7 @@ export const CaptureUtil = (() => {
     setProgressbarVisible(false);
     if (!filenames.length) {
       console.error('Error: no screen captured!');
+      onCompleted([], 0);
       return;
     }
     index = index || 0;
