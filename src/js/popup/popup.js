@@ -559,6 +559,18 @@ function initListener() {
   btnCopyHtml.addEventListener("click", onCopyHtmlButtonClicked);
   btnCopyImage.addEventListener("click", onCopyImageButtonClicked);
   btnEyeDropper.addEventListener("click", onEyeDropperButtonClicked);
+
+  document
+    .querySelectorAll('.activable')
+    .forEach(ele => {
+      ele.addEventListener("click", evt => {
+        document.querySelectorAll('.activable').forEach(
+          e => e.classList.remove('active')
+        );
+        ele.classList.add('active');
+      });
+    });
+
 }
 
 /**

@@ -116,6 +116,16 @@ svg path {
     padding: 4px 8px;
     cursor: pointer;
 }
+.btn.active {
+    background-color: var(--ge-body-color); /* invers */
+    color: var(--ge-body-bg);
+}
+.btn.active svg {
+    color: var(--ge-body-bg);
+}
+.btn.active svg path {
+    fill: var(--ge-body-bg);
+}
 .color-label,
 .tools-label{
     position: absolute;
