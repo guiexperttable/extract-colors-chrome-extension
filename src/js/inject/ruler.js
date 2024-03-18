@@ -271,8 +271,13 @@ if (!window['rulerLoaded']) {
     gap: 0.4em;
     justify-content: center;
     align-items: center;
-    user-select: none;
 }
+
+.extract-colors-devtool .line-marker,
+.extract-colors-devtool .line-marker > * {
+  user-select: none;
+}
+
 .extract-colors-devtool .ruler-free-horizontal-line .line-marker {
     margin: 9px 0 0 20px;
     position: relative;
