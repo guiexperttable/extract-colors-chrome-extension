@@ -6,6 +6,64 @@ if (!window['screenCaptureLoaded']) {
   const TIMEOUT = 2000;
   const CAPTURE_MSG_KEY = 'capture';
 
+  let scrollYSource = window;
+  let elementWithScrollToFn = document.documentElement;
+
+  function scrollToXY(x, y) {
+    console.log("scrollToXY " + x + ',' + y, elementWithScrollToFn);
+    elementWithScrollToFn.scrollTo(x, y);
+  }
+
+
+
+  /**
+   * Retrieves the vertical scroll position of the given element.
+   *
+   * @param {Element} ele - The element to retrieve the scroll position from.
+   * @return {number} - The vertical scroll position of the element.
+   */
+  function getScrollY() {
+    if ("scrollTop" in scrollYSource) {
+      let ret = scrollYSource.scrollTop;
+      if (ret !== undefined && ret !== null) {
+        return ret;
+      }
+    }
+    return scrollYSource.scrollY;
+  }
+
+
+  /**
+   * Retrieves the horizontal scroll offset of an element.
+   *
+   * @param {HTMLElement} ele - The element from which to retrieve the scroll offset.
+   * @return {number} - The horizontal scroll offset of the element.
+   */
+  function getScrollX() {
+    if ("scrollLeft" in scrollYSource) {
+      let ret = scrollYSource.scrollLeft;
+      if (ret !== undefined && ret !== null) {
+        return ret;
+      }
+    }
+    return scrollYSource.scrollX;
+  }
+
+  function findHighestElement() {
+    let largestElement = document.documentElement;
+    let largestHeight = document.documentElement.clientHeight;
+
+    document.querySelectorAll('*').forEach(element => {
+      const { offsetHeight } = element;
+      if (offsetHeight > largestHeight) {
+        largestHeight = offsetHeight;
+        largestElement = element;
+      }
+    });
+
+    return largestElement;
+  }
+
   /**
    * @function onMessage
    * @description Handles incoming messages
@@ -67,15 +125,29 @@ if (!window['screenCaptureLoaded']) {
    */
   function getPositions(callback) {
 
-    const body = document.body;
-    const originalBodyOverflowYStyle = body ? body.style.overflowY : '';
-    const originalX = window.scrollX;
-    const originalY = window.scrollY;
-    const originalOverflowStyle = document.documentElement.style.overflow;
+    const he = findHighestElement();
+    console.log('he', he);// TODO delete
+    console.log('he.clientHeight', he.clientHeight);// TODO delete
+    elementWithScrollToFn = he === document.documentElement ? document.documentElement : he.parentElement;
+    scrollYSource = he === document.documentElement ? window : he;
 
-    if (body) {
-      body.style.overflowY = 'visible';
-    }
+    // TODO delete:
+    console.log('scrollYSource', scrollYSource);
+    console.log('scrollYSource.scrollTop', scrollYSource.scrollTop);
+    console.log('scrollYSource.scrollY', scrollYSource.scrollY);
+    console.log('elementWithScrollToFn', elementWithScrollToFn);
+    console.log('elementWithScrollToFn.clientHeight', elementWithScrollToFn.clientHeight);
+    console.log('getScrollY()', getScrollY());
+
+    const body = document.body;
+    const originalX = getScrollX();
+    const originalY = getScrollY();
+    //const originalBodyOverflowYStyle = body ? body.style.overflowY : '';
+    //const originalOverflowStyle = document.documentElement.style.overflow;
+
+    //if (body) {
+    //  body.style.overflowY = 'visible';
+    //}
 
     const widths = getDimensions('Width');
     const heights = getDimensions('Height');
@@ -98,7 +170,12 @@ if (!window['screenCaptureLoaded']) {
       totalWidth = dx;
     }
 
-    document.documentElement.style.overflow = 'hidden';
+    //document.documentElement.style.overflow = 'hidden';
+
+    // TODO DELETE
+    console.log({
+      originalY, windowHeight, arrangements, dy, y, totalHeight
+    });
 
     while (y > -dy) {
       x = 0;
@@ -111,13 +188,15 @@ if (!window['screenCaptureLoaded']) {
 
 
     numArrangements = arrangements.length;
+    scrollToXY(0, 0);
 
     function cleanUp() {
-      document.documentElement.style.overflow = originalOverflowStyle;
-      if (body) {
-        body.style.overflowY = originalBodyOverflowYStyle;
-      }
-      window.scrollTo(originalX, originalY);
+      //document.documentElement.style.overflow = originalOverflowStyle;
+      //if (body) {
+      //  body.style.overflowY = originalBodyOverflowYStyle;
+      //}
+      // window.scrollTo(originalX, originalY);
+      scrollToXY(originalX, originalY);
     }
 
     (function processArrangements() {
@@ -130,22 +209,25 @@ if (!window['screenCaptureLoaded']) {
       }
 
       const next = arrangements.shift();
+      console.log({next}); // TODO delete
       const x = next[0];
       const y = next[1];
 
-      window.scrollTo(x, y);
+      scrollToXY(x, y);
+      // window.scrollTo(x, y);
 
 
       const data = {
         msg: CAPTURE_MSG_KEY,
-        x: window.scrollX,
-        y: window.scrollY,
+        x: getScrollX(),
+        y: getScrollY(),
         complete: (numArrangements - arrangements.length) / numArrangements,
         windowWidth,
         totalWidth,
         totalHeight,
         devicePixelRatio: window.devicePixelRatio
       };
+      console.log(data); // TODO delete
 
       window.setTimeout(() => {
         const cleanUpTimeout = window.setTimeout(cleanUp, TIMEOUT);
