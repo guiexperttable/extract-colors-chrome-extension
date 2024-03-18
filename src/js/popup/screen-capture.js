@@ -2,21 +2,23 @@ export const CaptureUtil = (() => {
 
   const CAPTURE_MSG_KEY = 'capture';
   const CAPTURE_STEP_DELAY = 500;
-  const MAXIMUM_HEIGHT = 2 * 10240;
-  const MAXIMUM_WIDTH = 4320;
+  const MAXIMUM_HEIGHT = 8192;
+  const MAXIMUM_WIDTH = 4096;
   const MAXIMUM_AREA = MAXIMUM_HEIGHT * MAXIMUM_WIDTH;
   const ALLOWED_URL_PATTERNS = ['http://*/*', 'https://*/*', 'ftp://*/*', 'file://*/*'];
   const DISALLOWED_URL_REGEX = [/^https?:\/\/chrome.google.com\/.*$/];
 
   const progressbar = document.querySelector("progress");
   const progressNumberFormat = new Intl.NumberFormat('en-EN', {maximumSignificantDigits: 1});
-  const screenshotFileName = 'page-screenshot';
+
+  const screenshotFileName = `page-screenshot.png`;
 
   const divText = document.querySelector(".text-div");
-  const listener = {onCompleted, onError, onProgress, onSplitting: console.log};
+  const listener = {onCompleted, onError, onProgress, onSplitting: ()=> imageIndex++};
 
   let currentTab;
   let resultWindowId;
+  let imageIndex = 0;
 
   /**
    * Checks if a given URL is allowed based on a set of patterns.
@@ -41,15 +43,17 @@ export const CaptureUtil = (() => {
     return false;
   }
 
+
   /**
-   * Starts capturing a web page.
+   * Starts capturing the content of a specified tab.
    *
-   * @param {chrome.tabs.Tab} tab - The tab of the web page to capture.
-   * @param {function} captureCompleteCallback - The callback function to call when capturing is complete.
+   * @param {number} tabId - The ID of the tab to capture.
+   * @param {function} captureCompleteCallback - The callback function to be called when the capture is complete.
    * @return {void}
    */
-  function startCapture(tab, captureCompleteCallback) {
-    chrome.tabs.sendMessage(tab.id, {msg: 'scrollPage'}, () => {
+  function startCapture(tabId, captureCompleteCallback) {
+    imageIndex = 0;
+    chrome.tabs.sendMessage(tabId, {msg: 'scrollPage'}, () => {
       captureCompleteCallback();
     });
   }
@@ -151,7 +155,7 @@ export const CaptureUtil = (() => {
    */
   async function capture(data, screenshots, sendResponse, splitnotifier) {
     await wait(CAPTURE_STEP_DELAY);
-    const dataURI = await chrome.tabs.captureVisibleTab(null, {format: 'png'});
+    const dataURI = await chrome.tabs.captureVisibleTab(null, {format:'png'});
 
     if (dataURI) {
       let image = await loadImage(dataURI);
@@ -387,11 +391,15 @@ export const CaptureUtil = (() => {
    */
   function addFilenameSuffix(filename, index) {
     if (!index) {
-      return filename;
+      index = 0;
     }
-    const sp = filename.split('.');
-    const ext = sp.pop();
-    return sp.join('.') + '-' + (index + 1) + '.' + ext;
+    if (filename.includes('.')) {
+      const sp = filename.split('.');
+      const ext = sp.pop();
+      return sp.join('.') + '-' + (index + 1) + '.' + ext;
+    }
+
+    return filename + '-' + (index + 1)
   }
 
 
@@ -413,6 +421,7 @@ export const CaptureUtil = (() => {
     let loaded = false;
     const screenshots = [];
     const SINGLE_CAPTURE_TIMEOUT = 3000;
+    const tabId = tab.id;
 
     if (!isUrlAllowed(tab.url)) {
       onError('Oops! It seems that this page is not allowed to be analyzed.');
@@ -423,6 +432,7 @@ export const CaptureUtil = (() => {
         onProgress(request.complete);
         capture(request, screenshots, sendResponse, onSplitting);
         return true;
+
       } else {
         console.error('Unknown message received from content script: ' + request.msg);
         onError('internal error');
@@ -438,14 +448,14 @@ export const CaptureUtil = (() => {
       } else {
         const now = Date.now();
         return chrome.scripting.executeScript({
-          target: {tabId: tab.id}, files: ['js/inject/screen-capture-page.js']
+          target: {tabId}, files: ['js/inject/screen-capture-page.js']
         })
           .then((_res) => {
             if (!loaded && Date.now() - now > SINGLE_CAPTURE_TIMEOUT) {
               console.error('Timed out too early while waiting for ' + 'chrome.tabs.executeScript. Try increasing the timeout.');
             } else {
               loaded = true;
-              startCaptering(tab, screenshots, onCompleted);
+              startCaptering(tabId, screenshots, onCompleted);
             }
           });
       }
@@ -459,15 +469,15 @@ export const CaptureUtil = (() => {
   /**
    * Starts capturing screenshots from a given tab.
    *
-   * @param {string} tab - The tab to capture the screenshots from.
+   * @param {string} tabId - The tab id to capture the screenshots from.
    * @param {Array} screenshots - Array of screenshots to capture.
    * @param {function} onCompleted - A callback function to be called when capturing is completed. Accepts an array of blobs representing captured screenshots as an argument.
    *
    * @return {void}
    */
-  function startCaptering(tab, screenshots, onCompleted){
+  function startCaptering(tabId, screenshots, onCompleted){
     onProgress(0);
-    startCapture(tab, () => {
+    startCapture(tabId, () => {
       onCompleted(getBlobsFromScreenshots(screenshots));
     });
   }
@@ -509,7 +519,7 @@ export const CaptureUtil = (() => {
       ...listener,
       onCompleted: async blobs => {
         const filenames = await saveBlobs(blobs, screenshotFileName);
-        onCompleted(filenames);
+        onCompleted(filenames, undefined);
       }
     });
   }

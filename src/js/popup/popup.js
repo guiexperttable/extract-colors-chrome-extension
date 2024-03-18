@@ -418,7 +418,7 @@ async function onCopyCustomPropertiesClicked() {
   const s = renderCSSCustomPropertyMap();
   showDiv(divDummy);
   divDummy.innerHTML = `
-    <div>
+    <div class="overflow-x-clip">
       <pre>${s}</pre>
     </div>
     `;

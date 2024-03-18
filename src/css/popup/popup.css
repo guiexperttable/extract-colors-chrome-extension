@@ -56,9 +56,13 @@ body {
     min-height: 120px;
     display: grid;
     grid-template-rows: 46px 16px 32px 1fr;
-    padding: 16px;
+    padding: 16px 0  16px  16px;
     background-color: var(--ge-body-bg);
     color: var(--ge-body-color);
+}
+
+.margin-right {
+    margin-right: 16px;
 }
 
 .progress-bar-div {
@@ -262,3 +266,6 @@ a {
     display: block;
 }
 
+.overflow-x-clip {
+    overflow-x: clip;
+}

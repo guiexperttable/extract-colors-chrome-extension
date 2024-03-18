@@ -1,6 +1,6 @@
 {
   "name": "extract-colors-extension",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "Extract Colors is a powerful developer tool designed to simplify the process of extracting color palettes from any webpage.",
   "scripts": {
     "build": "zip -r publish/extract-colors-extension.zip src/*"
