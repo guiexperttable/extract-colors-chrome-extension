@@ -5,12 +5,18 @@ if (!window['screenCaptureLoaded']) {
   const SCREEN_CAPTURE_DELAY = 500;
   const TIMEOUT = 2000;
   const CAPTURE_MSG_KEY = 'capture';
+  const LOGGING_MSG_KEY = 'logging';
 
   let scrollYSource = window;
   let elementWithScrollToFn = document.documentElement;
 
+
+
+
+
+
   function scrollToXY(x, y) {
-    console.log("scrollToXY " + x + ',' + y, elementWithScrollToFn);
+    //console.log("scrollToXY " + x + ',' + y, elementWithScrollToFn);
     elementWithScrollToFn.scrollTo(x, y);
   }
 
@@ -19,16 +25,25 @@ if (!window['screenCaptureLoaded']) {
   /**
    * Retrieves the vertical scroll position of the given element.
    *
-   * @param {Element} ele - The element to retrieve the scroll position from.
    * @return {number} - The vertical scroll position of the element.
    */
   function getScrollY() {
-    if ("scrollTop" in scrollYSource) {
-      let ret = scrollYSource.scrollTop;
+    // console.log('üü', elementWithScrollToFn.scrollTop);
+    if ("scrollTop" in elementWithScrollToFn) {
+      let ret = elementWithScrollToFn.scrollTop;
       if (ret !== undefined && ret !== null) {
+        console.log('getScrollY() c)', ret);
         return ret;
       }
     }
+    if ("scrollTop" in scrollYSource) {
+      let ret = scrollYSource.scrollTop;
+      if (ret !== undefined && ret !== null) {
+        console.log('getScrollY() a)', ret);
+        return ret;
+      }
+    }
+    console.log('getScrollY() b)', scrollYSource.scrollY);
     return scrollYSource.scrollY;
   }
 
@@ -40,6 +55,13 @@ if (!window['screenCaptureLoaded']) {
    * @return {number} - The horizontal scroll offset of the element.
    */
   function getScrollX() {
+    if ("scrollLeft" in elementWithScrollToFn) {
+      let ret = elementWithScrollToFn.scrollLeft;
+      if (ret !== undefined && ret !== null) {
+        console.log('getScrollX() c)', ret);
+        return ret;
+      }
+    }
     if ("scrollLeft" in scrollYSource) {
       let ret = scrollYSource.scrollLeft;
       if (ret !== undefined && ret !== null) {
@@ -75,8 +97,13 @@ if (!window['screenCaptureLoaded']) {
    * @return {boolean} - Returns true if the message is known and processed successfully, false otherwise
    */
   function onMessage(data, sender, callback) {
+    console.info('onMessage',data);
     if (data.msg === 'scrollPage') {
       getPositions(callback);
+      return true;
+    }
+    if (data.msg === LOGGING_MSG_KEY) {
+      console.log('from popup', data);
       return true;
     }
     return false;
@@ -126,20 +153,20 @@ if (!window['screenCaptureLoaded']) {
   function getPositions(callback) {
 
     const he = findHighestElement();
-    console.log('he', he);// TODO delete
-    console.log('he.clientHeight', he.clientHeight);// TODO delete
+    //console.log('he', he);// TODO delete
+    //console.log('he.clientHeight', he.clientHeight);// TODO delete
     elementWithScrollToFn = he === document.documentElement ? document.documentElement : he.parentElement;
     scrollYSource = he === document.documentElement ? window : he;
 
     // TODO delete:
-    console.log('scrollYSource', scrollYSource);
-    console.log('scrollYSource.scrollTop', scrollYSource.scrollTop);
-    console.log('scrollYSource.scrollY', scrollYSource.scrollY);
-    console.log('elementWithScrollToFn', elementWithScrollToFn);
-    console.log('elementWithScrollToFn.clientHeight', elementWithScrollToFn.clientHeight);
+    //console.log('scrollYSource', scrollYSource);
+    //console.log('scrollYSource.scrollTop', scrollYSource.scrollTop);
+    //console.log('scrollYSource.scrollY', scrollYSource.scrollY);
+    //console.log('elementWithScrollToFn', elementWithScrollToFn);
+    //console.log('elementWithScrollToFn.clientHeight', elementWithScrollToFn.clientHeight);
     console.log('getScrollY()', getScrollY());
 
-    const body = document.body;
+    //const body = document.body;
     const originalX = getScrollX();
     const originalY = getScrollY();
     //const originalBodyOverflowYStyle = body ? body.style.overflowY : '';
@@ -149,8 +176,10 @@ if (!window['screenCaptureLoaded']) {
     //  body.style.overflowY = 'visible';
     //}
 
-    const widths = getDimensions('Width');
-    const heights = getDimensions('Height');
+    const widths = [he.clientWidth, ...getDimensions('Width')];
+    const heights = [he.clientHeight, ...getDimensions('Height')];
+    console.log('he.clientHeight', he.clientHeight);
+    console.log('heights', heights);
 
     let totalWidth = getMaxNonEmpty(widths);
     const totalHeight = getMaxNonEmpty(heights);
@@ -177,6 +206,7 @@ if (!window['screenCaptureLoaded']) {
       originalY, windowHeight, arrangements, dy, y, totalHeight
     });
 
+    console.log('##########################');
     while (y > -dy) {
       x = 0;
       while (x < totalWidth) {
@@ -185,10 +215,14 @@ if (!window['screenCaptureLoaded']) {
       }
       y -= dy;
     }
+    console.log('-----------------------');
 
 
     numArrangements = arrangements.length;
     scrollToXY(0, 0);
+    console.log('aa) arrangements', JSON.stringify(arrangements, null, 0));  // TODO delete
+
+    let count = 0;
 
     function cleanUp() {
       //document.documentElement.style.overflow = originalOverflowStyle;
@@ -208,10 +242,15 @@ if (!window['screenCaptureLoaded']) {
         return;
       }
 
+      count++;
+
+      //console.log('--------------------------------------------');  // TODO delete
+      console.log(count +') arrangements', JSON.stringify(arrangements, null, 0));  // TODO delete
       const next = arrangements.shift();
-      console.log({next}); // TODO delete
+
       const x = next[0];
       const y = next[1];
+      // console.log({x, y}); // TODO delete
 
       scrollToXY(x, y);
       // window.scrollTo(x, y);
@@ -227,20 +266,26 @@ if (!window['screenCaptureLoaded']) {
         totalHeight,
         devicePixelRatio: window.devicePixelRatio
       };
-      console.log(data); // TODO delete
 
-      window.setTimeout(() => {
-        const cleanUpTimeout = window.setTimeout(cleanUp, TIMEOUT);
-        chrome.runtime.sendMessage(data, captured => {
-          window.clearTimeout(cleanUpTimeout);
-          if (captured) {
-            processArrangements();
-          } else {
-            cleanUp();
-          }
-        });
 
-      }, SCREEN_CAPTURE_DELAY);
+      // console.log(data); // TODO delete
+
+      if (count<50) {
+        window.setTimeout(() => {
+          const cleanUpTimeout = window.setTimeout(cleanUp, TIMEOUT);
+
+          chrome.runtime.sendMessage(data, captured => {
+            window.clearTimeout(cleanUpTimeout);
+            if (captured) {
+              processArrangements();
+            } else {
+              cleanUp();
+            }
+          });
+          //processArrangements();
+
+        }, SCREEN_CAPTURE_DELAY);
+      }
     })();
   }
 
