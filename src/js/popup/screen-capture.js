@@ -33,13 +33,11 @@ export const CaptureUtil = (() => {
    * @return {void}
    */
   function logging(data){
-    if (debugging) {
-      chrome.tabs.sendMessage(currentTab.id, {
-        messageType: MSG_TYPE_LOGGING,
-        data
-      }, () => {
-      });
-    }
+    chrome.tabs.sendMessage(currentTab.id, {
+      messageType: MSG_TYPE_LOGGING,
+      data
+    }, () => {
+    });
   }
 
 
@@ -553,9 +551,56 @@ export const CaptureUtil = (() => {
       ...listener,
       onCompleted: async blobs => {
         const filenames = await saveBlobs(blobs, screenshotFileName);
-        onCompleted(filenames, undefined);
+        const htmlFileName = await saveShowImagesHtml(filenames);
+        // onCompleted([htmlFileName, ...filenames], undefined);
+        onCompleted([htmlFileName], undefined);
       }
     });
+  }
+
+  async function saveShowImagesHtml(filenames) {
+    let html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Screenshot Images</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      color: #fff;
+      min-width: 100%;
+      height: 100%;
+    }
+    .images-div {
+      min-width: 100vw;
+      height: 100vh;
+      display: flex;
+      float: left;
+      justify-content: center;
+      padding: 16px;
+    }
+    .images-div img {
+      margin-right: 16px;
+    }
+  </style>
+</head>
+<body>
+<div class="images-div">
+  XXX
+</div>
+</body>
+</html>  
+
+`;
+
+    const s = filenames.map(n=> `<img alt="screenshot" src=${n}>`);
+    html = html.replace(/XXX/g, s);
+
+    const filename = screenshotFileName.replace(/png/, 'html');
+    const blob = new Blob([html], { type: 'text/html' });
+    return await requestFileSystemAndWrite(blob, filename);
   }
 
 
