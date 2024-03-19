@@ -350,7 +350,7 @@ export const CaptureUtil = (() => {
   async function requestFileSystemAndWrite(blob, filename) {
     return new Promise(async (resolve, reject) => {
       try {
-        const bufferSize = blob.size + (1024 / 2);
+        const bufferSize = blob.size; // + (1024 / 2);
         const fs = await requestFileSystem(window.TEMPORARY, bufferSize);
         const fileEntry = await getRootFile(fs.root, filename, {create: true})
         await writeToFile(fileEntry, blob);
@@ -594,7 +594,7 @@ export const CaptureUtil = (() => {
 
 `;
 
-    const s = filenames.map(n=> `<img alt="screenshot" src=${n}>`);
+    const s = filenames.map(n=> `<img alt="screenshot" src=${n}>`).join('\n  ');
     html = html.replace(/XXX/g, s);
 
     const filename = screenshotFileName.replace(/png/, 'html');

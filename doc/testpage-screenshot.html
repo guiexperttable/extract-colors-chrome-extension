@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0">
+  <title>Div Containers</title>
+  <style>
+    body, html, main {
+      margin: 0;
+      padding: 0;
+      background-color: #e3e3e3;
+    }
+
+    .container {
+      width: 50px;
+      height: 50px;
+      background-color: rgba(178, 200, 255, 0.6);
+      position: absolute;
+      display: grid;
+      place-items: center;
+    }
+    .bg-yellow {
+      background-color: yellow;
+    }
+
+    .point {
+      width: 1px;
+      height: 1px;
+      background-color: #000;
+      position: absolute;
+    }
+
+  </style>
+</head>
+<body>
+<div class="main"></div>
+<script>
+  const main = document.querySelector(".main");
+  const maxY = 488;
+  const leftPadding = window.innerWidth/2 - 100;
+
+  let div = document.createElement("div");
+  div.className = "container bg-yellow";
+  div.style.top = `0px`;
+  div.style.left = `0px`;
+  div.innerText = `A`;
+  main.appendChild(div);
+
+  div = document.createElement("div");
+  div.className = "container bg-yellow";
+  div.style.top = `0px`;
+  div.style.right = `0px`;
+  div.innerText = `B`;
+  main.appendChild(div);
+
+
+
+
+  for (let y = 0; y < maxY; y++) {
+    for (let x = 0; x < 4; x++) {
+      if ((y + x) % 2 === 0) {
+        const div = document.createElement("div");
+        div.className = "container";
+        div.style.top = `${y * 50}px`;
+        div.style.left = `${leftPadding + x * 50}px`;
+        div.innerText = `${y}`;
+        main.appendChild(div);
+      }
+    }
+  }
+  for (let y = 0; y < maxY; y++) {
+    for (let x = 0; x < 4; x++) {
+      if ((y + x) % 2 === 0) {
+        const div = document.createElement("div");
+        div.className = "point";
+        div.style.top = `${y * 50}px`;
+        div.style.left = `${leftPadding + x * 50}px`;
+        main.appendChild(div);
+      }
+    }
+  }
+
+  div = document.createElement("div");
+  div.className = "container bg-yellow";
+  div.style.top = `${50 * maxY - 50}px`;
+  div.style.left = `0px`;
+  div.innerText = `D`;
+  main.appendChild(div);
+
+  div = document.createElement("div");
+  div.className = "container bg-yellow";
+  div.style.top = `${50 * maxY - 50}px`;
+  div.style.right = `0px`;
+  div.innerText = `C`;
+  main.appendChild(div);
+</script>
+</body>
+</html>
