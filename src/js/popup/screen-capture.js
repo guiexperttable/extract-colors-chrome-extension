@@ -25,7 +25,6 @@ export const CaptureUtil = (() => {
   let imageIndex = 0;
 
 
-
   /**
    * Sends a logging message to the current tab using Chrome extension's `sendMessage` method.
    *
