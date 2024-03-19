@@ -147,7 +147,7 @@ if (!window['screenCaptureLoaded']) {
    * @param {function} callback - Optional callback function to execute after capturing positions.
    * @returns {void}
    */
-  function getPositions(callback) {
+  async function getPositions(callback) {
     const he = findHighestElement();
     elementWithScrollToFn = he === document.documentElement ? document.documentElement : he.parentElement;
 
@@ -169,8 +169,6 @@ if (!window['screenCaptureLoaded']) {
 
     let y = totalHeight - windowHeight;
     let x;
-    let numArrangements;
-
     if (totalWidth <= dx + 1) {
       totalWidth = dx;
     }
@@ -184,55 +182,55 @@ if (!window['screenCaptureLoaded']) {
       y -= dy;
     }
 
-    numArrangements = arrangements.length;
     scrollToXY(0, 0);
-
-    let count = 0;
 
     function cleanUp() {
       scrollToXY(originalX, originalY);
     }
 
-    (function processArrangements() {
-      if (!arrangements.length) {
-        cleanUp();
-        if (callback) {
-          callback();
-        }
-        return;
-      }
+    const fns = arrangements.map( (a, idx) => {
+      return async () => nextCapture(a[0], a[1], idx / arrangements.length, windowWidth, totalWidth, totalHeight)
+    });
+    for (const fn of fns) {
+      await fn();
+    }
 
-      count++;
-      const next = arrangements.shift();
-      const x = next[0];
-      const y = next[1];
+    cleanUp();
+    if (callback) {
+      callback();
+    }
+  }
+
+  function nextCapture(
+    x, y, complete,
+    windowWidth,
+    totalWidth,
+    totalHeight) {
+
+    return new Promise((resolve, reject) => {
       scrollToXY(x, y);
 
       const data = {
         messageType: MSG_TYPE_CAPTURE,
         x: getScrollX(),
         y: getScrollY(),
-        complete: (numArrangements - arrangements.length) / numArrangements,
+        complete,
         windowWidth,
         totalWidth,
         totalHeight,
         devicePixelRatio: window.devicePixelRatio
       };
 
-      if (count<50) {
-        window.setTimeout(() => {
-          const cleanUpTimeout = window.setTimeout(cleanUp, TIMEOUT);
-          chrome.runtime.sendMessage(data, captured => {
-            window.clearTimeout(cleanUpTimeout);
-            if (captured) {
-              processArrangements();
-            } else {
-              cleanUp();
-            }
-          });
-        }, SCREEN_CAPTURE_DELAY);
-      }
-    })();
+      window.setTimeout(() => {
+        chrome.runtime.sendMessage(data, captured => {
+          if (captured) {
+            resolve();
+          } else {
+            reject();
+          }
+        });
+      }, SCREEN_CAPTURE_DELAY);
+    });
   }
 
 
