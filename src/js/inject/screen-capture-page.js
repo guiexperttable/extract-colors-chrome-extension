@@ -6,7 +6,7 @@ if (!window['screenCaptureLoaded']) {
   const MSG_TYPE_LOGGING = 'logging';
   const MSG_TYPE_SCROLLPAGE = 'scrollPage';
 
-  let scrollYSource = window;
+  const scrollYSource = window;
   let elementWithScrollToFn = document.documentElement;
 
 
@@ -40,7 +40,7 @@ if (!window['screenCaptureLoaded']) {
     }
     for (const ele of [elementWithScrollToFn, scrollYSource]) {
       if (elementProperty in ele) {
-        let position = ele[elementProperty];
+        const position = ele[elementProperty];
         if (position !== undefined && position !== null) {
           return position;
         }
@@ -141,28 +141,18 @@ if (!window['screenCaptureLoaded']) {
 
 
   /**
-   * Retrieves the positions of elements on the page in a specific arrangement.
-   * @param {function} callback - Optional callback function to execute after capturing positions.
-   * @returns {void}
+   * Calculates the arrangements of windows within a given total width and height.
+   *
+   * @param {number} totalWidth - The total width available for window arrangements.
+   * @param {number} totalHeight - The total height available for window arrangements.
+   * @param {number} windowWidth - The width of each window.
+   * @param {number} windowHeight - The height of each window.
+   * @param {number} dy - The vertical distance between each row of windows.
+   *
+   * @return {Array<Array<number>>} - An array of window coordinates representing the arrangements.
    */
-  async function getPositions(callback) {
-    const he = findHighestElement();
-    elementWithScrollToFn = he === document.documentElement ? document.documentElement : he.parentElement;
-
-    const originalX = getScrollX();
-    const originalY = getScrollY();
-
-    const widths = [he.clientWidth, ...getDimensions('Width')];
-    const heights = [he.clientHeight, ...getDimensions('Height')];
-
-    let totalWidth = getMaxNonEmpty(widths);
-    const totalHeight = getMaxNonEmpty(heights);
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
+  function calculateArrangements(totalWidth, totalHeight, windowWidth, windowHeight, dy) {
     const arrangements = [];
-
-    const scrollPad = 200;
-    const dy = windowHeight - (windowHeight > scrollPad ? scrollPad : 0);
     const dx = windowWidth;
 
     let y = totalHeight - windowHeight;
@@ -180,11 +170,35 @@ if (!window['screenCaptureLoaded']) {
       y -= dy;
     }
 
-    scrollToXY(0, 0);
+    return arrangements;
+  }
 
-    function cleanUp() {
-      scrollToXY(originalX, originalY);
-    }
+
+  /**
+   * Retrieves the positions of elements on the page in a specific arrangement.
+   * @param {function} callback - Optional callback function to execute after capturing positions.
+   * @returns {void}
+   */
+  async function getPositions(callback) {
+    const he = findHighestElement();
+    elementWithScrollToFn = he === document.documentElement ? document.documentElement : he.parentElement;
+
+    const originalX = getScrollX();
+    const originalY = getScrollY();
+
+    const widths = [he.clientWidth, ...getDimensions('Width')];
+    const heights = [he.clientHeight, ...getDimensions('Height')];
+
+    const totalWidth = getMaxNonEmpty(widths);
+    const totalHeight = getMaxNonEmpty(heights);
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    const scrollPad = 200;
+    const dy = windowHeight - (windowHeight > scrollPad ? scrollPad : 0);
+    const arrangements = calculateArrangements(totalWidth, totalHeight, windowWidth, windowHeight, dy);
+
+    scrollToXY(0, 0);
 
     const fns = arrangements.map( (a, idx) => {
       return async () => nextCapture(a[0], a[1], idx / arrangements.length, windowWidth, totalWidth, totalHeight)
@@ -193,7 +207,7 @@ if (!window['screenCaptureLoaded']) {
       await fn();
     }
 
-    cleanUp();
+    scrollToXY(originalX, originalY);
     if (callback) {
       callback();
     }
