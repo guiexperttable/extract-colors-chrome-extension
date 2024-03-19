@@ -766,8 +766,6 @@ if (!window['rulerLoaded']) {
       targetElement = event.target;
       clickedOnTopRuler = true;
     });
-
-    //rulerMainElement.append(rulerLineElement);
     linesMainElement.append(rulerLineElement);
 
     createLineMarkerWithDeleteButton({
@@ -948,8 +946,6 @@ if (!window['rulerLoaded']) {
     rulerContainerOuterY.append(rulerContainerVerticalLeft);
 
     document.body.appendChild(mainElement);
-    //document.body.appendChild(rulerMainElement);
-
     window.addEventListener('resize', createListItemsXandY);
 
     applyLineColor();

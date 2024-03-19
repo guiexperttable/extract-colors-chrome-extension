@@ -1,9 +1,11 @@
 export const CaptureUtil = (() => {
 
-  const CAPTURE_MSG_KEY = 'capture';
-  const LOGGING_MSG_KEY = 'logging';
+  const MSG_TYPE_CAPTURE = 'capture';
+  const MSG_TYPE_LOGGING = 'logging';
+  const MSG_TYPE_SCROLLPAGE = 'scrollPage';
+
   const CAPTURE_STEP_DELAY = 500;
-  const MAXIMUM_HEIGHT = 8192;
+  const MAXIMUM_HEIGHT = 2*8192;
   const MAXIMUM_WIDTH = 4096;
   const MAXIMUM_AREA = MAXIMUM_HEIGHT * MAXIMUM_WIDTH;
   const ALLOWED_URL_PATTERNS = ['http://*/*', 'https://*/*', 'ftp://*/*', 'file://*/*'];
@@ -11,7 +13,6 @@ export const CaptureUtil = (() => {
 
   const progressbar = document.querySelector("progress");
   const progressNumberFormat = new Intl.NumberFormat('en-EN', {maximumSignificantDigits: 1});
-
   const screenshotFileName = `page-screenshot.png`;
 
   const divText = document.querySelector(".text-div");
@@ -32,7 +33,7 @@ export const CaptureUtil = (() => {
    */
   function logging(data){
     chrome.tabs.sendMessage(currentTab.id, {
-      msg: LOGGING_MSG_KEY,
+      messageType: MSG_TYPE_LOGGING,
       data
     }, () => {});
   }
@@ -71,7 +72,7 @@ export const CaptureUtil = (() => {
    */
   function startCapture(tabId, captureCompleteCallback) {
     imageIndex = 0;
-    chrome.tabs.sendMessage(tabId, {msg: 'scrollPage'}, () => {
+    chrome.tabs.sendMessage(tabId, {messageType: MSG_TYPE_SCROLLPAGE}, () => {
       captureCompleteCallback();
     });
   }
@@ -174,17 +175,12 @@ export const CaptureUtil = (() => {
    * @param {Array} screenshots - Existing screenshots to compare with the captured image.
    * @param {Function} onSendResponse - Callback function to send processed data to the caller.
    * @param {Function} onSplitting - Callback function to notify when the captured image is split.
-   * @returns {Promise} A Promise that resolves when the capturing, processing, and actions are completed.
    */
   async function capture(data, screenshots, onSendResponse, onSplitting) {
     logging(`x:${data.x}, y:${data.y}`); // TODO delete
     await wait(CAPTURE_STEP_DELAY);
     const dataURI = await chrome.tabs.captureVisibleTab(null, {format:'png'});
-    // logging(dataURI); // TODO delete
 
-    //console.log({
-    //  data, screenshots,
-    //}); // TODO delete
     if (dataURI) {
       let image = await loadImage(dataURI);
 
@@ -458,19 +454,19 @@ export const CaptureUtil = (() => {
 
     chrome.runtime
       .onMessage
-      .addListener((request, sender, onSendResponse) => {
-        if (request.msg === CAPTURE_MSG_KEY) {
-          onProgress(request.complete);
-          capture(request, screenshots, onSendResponse, onSplitting);
+      .addListener((message, sender, onSendResponse) => {
+        if (message.messageType === MSG_TYPE_CAPTURE) {
+          onProgress(message.complete);
+          capture(message, screenshots, onSendResponse, onSplitting);
           return true;
         }
 
-        if (request.msg.msgType === LOGGING_MSG_KEY) {
-          console.log(request.msg.data);
+        if (message.messageType === MSG_TYPE_LOGGING) {
+          console.log(message.data);
           return true;
         }
 
-        console.error("Unknown message received from content script: " + request.msg);
+        console.info("Unknown message received from content script: " + message.msg);
         onError("internal error");
         return false;
       });
@@ -486,9 +482,7 @@ export const CaptureUtil = (() => {
           target: {tabId}, files: ['js/inject/screen-capture-page.js']
         })
           .then((_res) => {
-            console.log('executeScript then->', _res); // TODO
             if (!loaded && Date.now() - now > SINGLE_CAPTURE_TIMEOUT) {
-              // console.error('Timed out too early while waiting for ' + 'chrome.tabs.executeScript. Try increasing the timeout.');
             } else {
               loaded = true;
               startCaptering(tabId, screenshots, onCompleted);
@@ -613,7 +607,6 @@ export const CaptureUtil = (() => {
     setProgressbarVisible(false);
     if (!filenames.length) {
       console.info('Error: no screen captured!');
-      // onCompleted([], 0);
       return;
     }
     index = index || 0;

@@ -67,8 +67,6 @@ let currentColors = [];
 /**
  * Stores data in Chrome Sync Storage.
  *
- * @param {any} data - The data to be stored.
- *
  * @return {void}
  */
 function storeData() {
@@ -398,8 +396,6 @@ async function onCopyValuesButtonClicked() {
     showDiv(divPalette);
   }
   const colorArr = isPalleteDivVisible() ? currentColors : pickerHistory;
-  console.log("currentColors", currentColors);
-  console.log("pickerHistory", pickerHistory);
   const buf = [];
   for (const color of colorArr) {
     buf.push(`${color.rgba}`);
@@ -598,7 +594,6 @@ function initDivResizer(maxWidth, maxHeight) {
 
   for (const ws of sizes) {
     if (ws.width <= maxWidth && ws.height <= maxHeight) {
-      console.log(ws)
       buf.push(`
     <div class="resolution-div" data-width="${ws.width}" data-height="${ws.height}">
         <div class="resolution">${ws.width} × ${ws.height}</div>
