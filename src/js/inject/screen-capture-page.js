@@ -196,7 +196,7 @@ if (!window['screenCaptureLoaded']) {
 
     const scrollPad = 200;
     const dy = windowHeight - (windowHeight > scrollPad ? scrollPad : 0);
-    const arrangements = calculateArrangements(totalWidth, totalHeight, windowWidth, windowHeight, dy);
+    const arrangements = calculateArrangements(totalWidth, totalHeight, windowWidth, windowHeight, dy).reverse();
 
     scrollToXY(0, 0);
 
