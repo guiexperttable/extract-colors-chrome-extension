@@ -30,29 +30,35 @@ if (!window['screenCaptureLoaded']) {
 
 
   /**
+   * Helper function to get the scroll position.
+   *
+   * @param {property} windowProperty - Property from window (scrollY, scrollX)
+   * @param {property} elementProperty - Property from the element (scrollTop, scrollLeft)
+   * @return {number} - The scroll position.
+   */
+  function getScroll(windowProperty, elementProperty) {
+    if (window[windowProperty] > 0) {
+      return window[windowProperty];
+    }
+    for (const ele of [elementWithScrollToFn, scrollYSource]) {
+      if (elementProperty in ele) {
+        let position = ele[elementProperty];
+        if (position !== undefined && position !== null) {
+          return position;
+        }
+      }
+    }
+    return scrollYSource[windowProperty];
+  }
+
+  /**
    * Retrieves the vertical scroll position of the given element.
    *
    * @return {number} - The vertical scroll position of the element.
    */
   function getScrollY() {
-    if (window.scrollY > 0) {
-      return window.scrollY;
-    }
-    if ("scrollTop" in elementWithScrollToFn) {
-      let ret = elementWithScrollToFn.scrollTop;
-      if (ret !== undefined && ret !== null) {
-        return ret;
-      }
-    }
-    if ("scrollTop" in scrollYSource) {
-      let ret = scrollYSource.scrollTop;
-      if (ret !== undefined && ret !== null) {
-        return ret;
-      }
-    }
-    return scrollYSource.scrollY;
+    return getScroll('scrollY', 'scrollTop');
   }
-
 
   /**
    * Retrieves the horizontal scroll offset of an element.
@@ -60,22 +66,7 @@ if (!window['screenCaptureLoaded']) {
    * @return {number} - The horizontal scroll offset of the element.
    */
   function getScrollX() {
-    if (window.scrollLeft > 0) {
-      return window.scrollLeft;
-    }
-    if ("scrollLeft" in elementWithScrollToFn) {
-      let ret = elementWithScrollToFn.scrollLeft;
-      if (ret !== undefined && ret !== null) {
-        return ret;
-      }
-    }
-    if ("scrollLeft" in scrollYSource) {
-      let ret = scrollYSource.scrollLeft;
-      if (ret !== undefined && ret !== null) {
-        return ret;
-      }
-    }
-    return scrollYSource.scrollX;
+    return getScroll('scrollX', 'scrollLeft');
   }
 
   function findHighestElement() {
