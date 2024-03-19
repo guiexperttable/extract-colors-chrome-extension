@@ -1,5 +1,7 @@
 export const CaptureUtil = (() => {
 
+  const debugging = window.location.href.includes('debug=1');
+
   const MSG_TYPE_CAPTURE = 'capture';
   const MSG_TYPE_LOGGING = 'logging';
   const MSG_TYPE_SCROLLPAGE = 'scrollPage';
@@ -32,10 +34,13 @@ export const CaptureUtil = (() => {
    * @return {void}
    */
   function logging(data){
-    chrome.tabs.sendMessage(currentTab.id, {
-      messageType: MSG_TYPE_LOGGING,
-      data
-    }, () => {});
+    if (debugging) {
+      chrome.tabs.sendMessage(currentTab.id, {
+        messageType: MSG_TYPE_LOGGING,
+        data
+      }, () => {
+      });
+    }
   }
 
 

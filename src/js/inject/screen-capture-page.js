@@ -1,10 +1,7 @@
 
 if (!window['screenCaptureLoaded']) {
 
-
   const SCREEN_CAPTURE_DELAY = 500;
-  const TIMEOUT = 2000;
-
   const MSG_TYPE_CAPTURE = 'capture';
   const MSG_TYPE_LOGGING = 'logging';
   const MSG_TYPE_SCROLLPAGE = 'scrollPage';
@@ -29,12 +26,13 @@ if (!window['screenCaptureLoaded']) {
 
 
 
+
   /**
-   * Helper function to get the scroll position.
+   * Retrieves the scroll position of the window or element based on the given properties.
    *
-   * @param {property} windowProperty - Property from window (scrollY, scrollX)
-   * @param {property} elementProperty - Property from the element (scrollTop, scrollLeft)
-   * @return {number} - The scroll position.
+   * @param {string} windowProperty - The property name representing the scroll position of the window.
+   * @param {string} elementProperty - The property name representing the scroll position of the element.
+   * @returns {number} The scroll position of the window or element.
    */
   function getScroll(windowProperty, elementProperty) {
     if (window[windowProperty] > 0) {
