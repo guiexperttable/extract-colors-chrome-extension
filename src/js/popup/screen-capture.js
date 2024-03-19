@@ -579,7 +579,6 @@ export const CaptureUtil = (() => {
       display: flex;
       float: left;
       justify-content: center;
-      padding: 16px;
     }
     .images-div img {
       margin-right: 16px;
