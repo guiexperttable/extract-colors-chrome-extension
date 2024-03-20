@@ -117,18 +117,12 @@ svg path {
     cursor: pointer;
 }
 .btn:hover {
-    border-color: var(--ge-btn-border);
+    border-color: var(--ge-btn-border-hover);
 }
 .btn.active {
-    background-color: var(--ge-body-color); /* invers */
-    color: var(--ge-body-bg);
+    border-color: var(--ge-btn-border);
 }
-.btn.active svg {
-    color: var(--ge-body-bg);
-}
-.btn.active svg path {
-    fill: var(--ge-body-bg);
-}
+
 .color-label,
 .tools-label{
     position: relative;

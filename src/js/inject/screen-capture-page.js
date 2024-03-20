@@ -211,6 +211,7 @@ if (!window['screenCaptureLoaded']) {
     if (callback) {
       callback();
     }
+    return true;
   }
 
   function nextCapture(
