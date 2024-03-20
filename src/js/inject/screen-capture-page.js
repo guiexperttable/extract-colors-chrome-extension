@@ -173,6 +173,12 @@ if (!window['screenCaptureLoaded']) {
     return arrangements;
   }
 
+  function wait(ms) {
+    return new Promise((resolve, _reject) => {
+      setTimeout(resolve, ms);
+    });
+  }
+
 
   /**
    * Retrieves the positions of elements on the page in a specific arrangement.
@@ -186,6 +192,9 @@ if (!window['screenCaptureLoaded']) {
     const originalX = getScrollX();
     const originalY = getScrollY();
 
+    scrollToXY(0, 0);
+    await wait(SCREEN_CAPTURE_DELAY);
+
     const widths = [he.clientWidth, ...getDimensions('Width')];
     const heights = [he.clientHeight, ...getDimensions('Height')];
 
@@ -198,7 +207,13 @@ if (!window['screenCaptureLoaded']) {
     const dy = windowHeight - (windowHeight > scrollPad ? scrollPad : 0);
     const arrangements = calculateArrangements(totalWidth, totalHeight, windowWidth, windowHeight, dy).reverse();
 
-    scrollToXY(0, 0);
+    // -------------------------------
+    console.log({
+      widths, heights, totalWidth, totalHeight, windowWidth, windowHeight, dy
+    });
+    console.log(arrangements); // TODO del
+    if (1===2-1) return true;
+    // -------------------------------
 
     const fns = arrangements.map( (a, idx) => {
       return async () => nextCapture(a[0], a[1], idx / arrangements.length, windowWidth, totalWidth, totalHeight)
