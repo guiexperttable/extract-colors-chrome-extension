@@ -55,8 +55,8 @@ body {
     width: calc(var(--ge-box-div-width) * var(--column-count) + var(--ge-palette-div-gap) * calc(var(--column-count) - 1) + 2 * var(--ge-padding));
     min-height: 120px;
     display: grid;
-    grid-template-rows: 46px 16px 32px 1fr;
-    padding: 16px 0  16px  16px;
+    grid-template-rows: 46px 32px auto 1fr;
+    padding: 8px 0  16px  16px;
     background-color: var(--ge-body-bg);
     color: var(--ge-body-color);
 }
@@ -109,12 +109,15 @@ svg path {
     fill:  var(--ge-body-color);
 }
 .btn {
-    border: 1px solid var(--ge-btn-border);
-    border-radius: 6px;
+    border: 1px solid transparent;
+    border-radius: 50%;
     display: grid;
     align-content: center;
-    padding: 4px 8px;
+    padding: 8px 8px;
     cursor: pointer;
+}
+.btn:hover {
+    border-color: var(--ge-btn-border);
 }
 .btn.active {
     background-color: var(--ge-body-color); /* invers */
@@ -128,12 +131,20 @@ svg path {
 }
 .color-label,
 .tools-label{
-    position: absolute;
-    top: -10px;
+    position: relative;
+    left: 0;
+    top: -22px;
     z-index: 9999;
+    width: 0;
+    height: 0;
+    overflow: visible;
+    font-weight: bold;
 }
 .btn.secondary {
-    border: 1px solid var(--ge-btn-border-secondary);
+    border: 1px solid transparent;
+}
+.btn.secondary:hover {
+    border-color:var(--ge-btn-border-secondary);
 }
 .btn:hover {
     border: 1px solid var(--ge-btn-border-hover);
@@ -162,9 +173,9 @@ a {
     color: var(--ge-btn-border);
 }
 .text-div {
-    padding: 8px 0 16px 0;
+    padding: 4px 0;
     color: var(--ge-message-color);
-    font-size: 16px;
+    font-size: 18px;
 }
 .palette-div,
 .picker-div {
