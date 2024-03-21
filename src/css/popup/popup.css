@@ -56,12 +56,21 @@ body {
     min-height: 120px;
     display: grid;
     grid-template-rows: 46px 32px auto 1fr;
-    padding: 8px 0  16px  16px;
+    padding: 8px 0  16px  0;
     background-color: var(--ge-body-bg);
     color: var(--ge-body-color);
 }
 
-.margin-right {
+
+.progress-bar-div,
+.text-div,
+.ruler-dic,
+.resizer-div,
+.palette-div,
+.dummy-div,
+.picker-div,
+.ruler-div  {
+    margin-left: 16px;
     margin-right: 16px;
 }
 
@@ -150,12 +159,17 @@ svg path {
     display: inline;
 }
 .actions-div {
+    margin-left: 6px;
+    margin-right: 6px;
     padding-top: 16px;
     display: flex;
     align-items: center;
     justify-content: flex-start;
     gap: 10px;
     position: relative;
+}
+.toggle-theme-btn {
+    margin-left: auto;
 }
 .tools-label {
     color: var(--ge-btn-border);
@@ -169,7 +183,10 @@ a {
 .text-div {
     padding: 4px 0;
     color: var(--ge-message-color);
-    font-size: 18px;
+    font-size: 16px;
+}
+.margin-left {
+    margin-left: 16px;
 }
 .palette-div,
 .picker-div {

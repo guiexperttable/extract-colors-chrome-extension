@@ -559,6 +559,8 @@ export const CaptureUtil = (() => {
   }
 
   async function saveShowImagesHtml(filenames) {
+    if (!filenames?.length) return; // skip
+
     let html = `<!DOCTYPE html>
 <html lang="en">
 <head>

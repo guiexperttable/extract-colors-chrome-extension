@@ -164,7 +164,7 @@ if (!window['screenCaptureLoaded']) {
     while (y > -dy) {
       x = 0;
       while (x < totalWidth) {
-        arrangements.push([x, y]);
+        arrangements.push({x, y, width: dx, height: dy});
         x += dx;
       }
       y -= dy;
@@ -205,7 +205,7 @@ if (!window['screenCaptureLoaded']) {
 
     const scrollPad = 200;
     const dy = windowHeight - (windowHeight > scrollPad ? scrollPad : 0);
-    const arrangements = calculateArrangements(totalWidth, totalHeight, windowWidth, windowHeight, dy).reverse();
+    const arrangements = calculateArrangements(totalWidth, totalHeight, windowWidth, windowHeight, dy);
 
     // -------------------------------
     console.log({
@@ -216,7 +216,7 @@ if (!window['screenCaptureLoaded']) {
     // -------------------------------
 
     const fns = arrangements.map( (a, idx) => {
-      return async () => nextCapture(a[0], a[1], idx / arrangements.length, windowWidth, totalWidth, totalHeight)
+      return async () => nextCapture(a, idx / arrangements.length, windowWidth, totalWidth, totalHeight)
     });
     for (const fn of fns) {
       await fn();
@@ -230,12 +230,14 @@ if (!window['screenCaptureLoaded']) {
   }
 
   function nextCapture(
-    x, y, complete,
+    range,
+    complete,
     windowWidth,
     totalWidth,
     totalHeight) {
 
     return new Promise((resolve, reject) => {
+      const {x, y} = range;
       scrollToXY(x, y);
 
       const data = {
