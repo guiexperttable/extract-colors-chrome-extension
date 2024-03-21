@@ -69,6 +69,7 @@ body {
 .palette-div,
 .dummy-div,
 .picker-div,
+.clear-cache-div,
 .ruler-div  {
     margin-left: 16px;
     margin-right: 16px;
@@ -163,7 +164,7 @@ svg path {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 10px;
+    gap: 6px;
     position: relative;
 }
 .toggle-theme-btn {
@@ -214,6 +215,16 @@ a {
     display: grid;
     grid-gap: var(--ge-palette-div-gap);
     grid-template-columns: repeat(auto-fit, 128px);
+}
+.clear-cache-div {
+    /*min-height: 400px;*/
+}
+.clear-cache-div .checkboxes-div {
+    display: grid;
+    grid-template-rows: repeat(4, 26px);
+    grid-template-columns: repeat(4, 25%);
+    justify-content: start;
+    align-items: center;
 }
 .resolution-div {
     display: grid;
@@ -298,4 +309,24 @@ a {
 
 .overflow-x-clip {
     overflow-x: clip;
+}
+.clear-cache-div .clear-cache-btn {
+    font-size: 16px;
+    padding: 10px 20px;
+    color: white;
+    background-color: #007BFF;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    text-decoration: none;
+}
+.clear-cache-div .clear-cache-btn:hover {
+    background-color: #0056b3;
+}
+.clear-cache-div .right {
+    display: grid;
+    justify-content: end;
+}
+.clear-cache-div .right > *{
+    margin-left: auto;
 }

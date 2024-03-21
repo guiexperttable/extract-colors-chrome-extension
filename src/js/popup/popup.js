@@ -11,6 +11,7 @@ import {cleanPage} from "./cleaner.js";
 import {toggleDesignMode} from "./design-mode.js";
 import {updateWindow, windowSizes} from "./resizer.js";
 import {CaptureUtil} from "./screen-capture.js";
+import {prepareClearCachePanel} from "./clean-cache.js";
 
 // main actions:
 const btnRescan = document.querySelector(".rescan-btn");
@@ -21,6 +22,7 @@ const btnCaptureScreen = document.querySelector(".capture-screen-btn");
 const btnCleaner = document.querySelector(".cleaner-btn");
 const btnToggleDesignMode = document.querySelector(".toggle-designmode-btn");
 const btnResizer = document.querySelector(".resizer-btn");
+const btnShowClearCache = document.querySelector(".show-clear-cache-btn");
 
 // light / dark
 const btnToggleTheme = document.querySelector(".toggle-theme-btn");
@@ -38,10 +40,11 @@ const divText = document.querySelector(".text-div");
 const divActions = document.querySelector(".actions-div");
 const divPalette = document.querySelector(".palette-div");
 const divResizer = document.querySelector(".resizer-div");
+const divClearCache = document.querySelector(".clear-cache-div");
 const divPickerHistory = document.querySelector(".picker-div");
 const divRuler = document.querySelector(".ruler-div");
 const divDummy = document.querySelector(".dummy-div");
-const mainDivs = [divPalette, divResizer, divPickerHistory, divDummy, divRuler];
+const mainDivs = [divPalette, divResizer, divPickerHistory, divDummy, divRuler, divClearCache];
 const downLoadImgLink = document.querySelector(".download-img-a");
 
 
@@ -345,6 +348,11 @@ async function onResizerButtonClicked() {
   showDiv(divResizer);
 }
 
+function onShowClearCacheButtonClicked(){
+  prepareClearCachePanel();
+  showDiv(divClearCache);
+}
+
 /**
  * Handles the click event of the "Cleaner" button.
  * It shows a specified div, cleans the current page, and sets the label text with the number of items removed.
@@ -547,6 +555,7 @@ function initListener() {
   btnRuler.addEventListener("click", onRulerButtonClicked);
   btnToggleDesignMode.addEventListener("click", onToggleDesignModeButtonClicked);
   btnResizer.addEventListener("click", onResizerButtonClicked);
+  btnShowClearCache.addEventListener("click", onShowClearCacheButtonClicked);
   btnCleaner.addEventListener("click", onCleanerButtonClicked);
   btnCaptureScreen.addEventListener("click", onCaptureScreenButtonClicked);
   btnToggleTheme.addEventListener("click", onToggleThemeButtonClicked);

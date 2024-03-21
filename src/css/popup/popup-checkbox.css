@@ -10,6 +10,7 @@ html {
     position: relative;
     display: grid;
     place-items: center;
+    justify-content: start;
     padding-left: calc(var(--ge-checkbox-size) + var(--ge-label-gap));
     cursor: pointer;
     -webkit-user-select: none;
