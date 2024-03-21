@@ -53,7 +53,7 @@ html {
 
 body {
     width: calc(var(--ge-box-div-width) * var(--column-count) + var(--ge-palette-div-gap) * calc(var(--column-count) - 1) + 2 * var(--ge-padding));
-    min-height: 120px;
+    min-height: 80px;
     display: grid;
     grid-template-rows: 46px 32px auto 1fr;
     padding: 8px 0  16px  0;
@@ -62,7 +62,7 @@ body {
 }
 
 
-.progress-bar-div,
+.progress-bar,
 .text-div,
 .ruler-dic,
 .resizer-div,
@@ -74,9 +74,7 @@ body {
     margin-right: 16px;
 }
 
-.progress-bar-div {
-    overflow: clip;
-}
+
 progress {
     appearance: auto;
     box-sizing: border-box;
@@ -84,7 +82,7 @@ progress {
     block-size: 0.5em;
     inline-size: 5em;
     vertical-align: -0.2em;
-    width: 100%;
+    width: calc(100% - 32px);
 }
 progress[value] {
     --color: var(--ge-btn-border); /* the progress color */
@@ -93,7 +91,7 @@ progress[value] {
     -moz-appearance: none;
     appearance: none;
     border: none;
-    margin: 0;
+    margin: 0 16px;
     border-radius: 10em;
     background: var(--background);
 }

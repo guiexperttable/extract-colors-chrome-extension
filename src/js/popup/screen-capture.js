@@ -555,9 +555,10 @@ export const CaptureUtil = (() => {
       onCompleted: async blobs => {
         const filenames = await saveBlobs(blobs, screenshotFileName);
         const htmlFileName = await saveShowImagesHtml(filenames);
-        // onCompleted([htmlFileName, ...filenames], undefined);
+
         if (htmlFileName) {
-          onCompleted([htmlFileName], undefined);
+          onCompleted([htmlFileName, ...filenames], undefined);
+          // onCompleted([htmlFileName], undefined);
         }
       }
     });
