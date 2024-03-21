@@ -169,9 +169,9 @@ if (!window['screenCaptureLoaded']) {
     const topShot = {x:0, y:0, width: dx, height: (windowHeight - scrollPads.bottom)};
     const bottomShot = {x:0, y:(totalHeight - windowHeight + scrollPads.top), width: dx, height: (windowHeight - scrollPads.top)};
 
-    console.log({
-      dx,  dy, totalWidth, totalHeight, windowWidth, windowHeight, topShot, bottomShot
-    });
+    //console.log({
+    //  dx,  dy, totalWidth, totalHeight, windowWidth, windowHeight, topShot, bottomShot
+    //});
 
     let y = topShot.height;
 
@@ -225,7 +225,7 @@ if (!window['screenCaptureLoaded']) {
 
     // -------------------------------
 
-    console.log(arrangements); // TODO del
+    //console.log(arrangements); // TODO del
     //if (1===2-1) return true;
     // -------------------------------
 
