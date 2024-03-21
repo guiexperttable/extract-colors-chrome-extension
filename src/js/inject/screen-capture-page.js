@@ -140,35 +140,51 @@ if (!window['screenCaptureLoaded']) {
   }
 
 
+
   /**
-   * Calculates the arrangements of windows within a given total width and height.
+   * Calculates the arrangements of windows within a given total area.
    *
-   * @param {number} totalWidth - The total width available for window arrangements.
-   * @param {number} totalHeight - The total height available for window arrangements.
+   * @param {number} totalWidth - The total width of the area.
+   * @param {number} totalHeight - The total height of the area.
    * @param {number} windowWidth - The width of each window.
    * @param {number} windowHeight - The height of each window.
-   * @param {number} dy - The vertical distance between each row of windows.
+   * @param {object} scrollPads - The padding for scrolling within the area.
+   * @param {number} scrollPads.top - The top padding for scrolling.
+   * @param {number} scrollPads.bottom - The bottom padding for scrolling.
    *
-   * @return {Array<Array<number>>} - An array of window coordinates representing the arrangements.
+   * @return {Array} - An array of window arrangements with their positions and dimensions.
    */
-  function calculateArrangements(totalWidth, totalHeight, windowWidth, windowHeight, dy) {
+  function calculateArrangements(totalWidth, totalHeight, windowWidth, windowHeight, scrollPads) {
+
+    if (totalWidth <= windowWidth && totalHeight <= windowHeight) {
+      return [{x: 0, y: 0, width: totalWidth, height: totalHeight}];
+    }
+
+    const sumPad = scrollPads.top + scrollPads.bottom;
+    const dy = windowHeight <= sumPad ? windowHeight : (windowHeight - sumPad);
+
     const arrangements = [];
     const dx = windowWidth;
 
-    let y = totalHeight - windowHeight;
-    let x;
-    if (totalWidth <= dx + 1) {
-      totalWidth = dx;
-    }
+    const topShot = {x:0, y:0, width: dx, height: (windowHeight - scrollPads.bottom)};
+    const bottomShot = {x:0, y:(totalHeight - windowHeight + scrollPads.top), width: dx, height: (windowHeight - scrollPads.top)};
 
-    while (y > -dy) {
-      x = 0;
+    console.log({
+      dx,  dy, totalWidth, totalHeight, windowWidth, windowHeight, topShot, bottomShot
+    });
+
+    let y = topShot.height;
+
+    while (y < bottomShot.y) {
+      let x = 0;
       while (x < totalWidth) {
         arrangements.push({x, y, width: dx, height: dy});
         x += dx;
       }
-      y -= dy;
+      y += dy;
     }
+    arrangements.push(bottomShot);
+    arrangements.push(topShot);
 
     return arrangements;
   }
@@ -203,16 +219,14 @@ if (!window['screenCaptureLoaded']) {
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
-    const scrollPad = 200;
-    const dy = windowHeight - (windowHeight > scrollPad ? scrollPad : 0);
-    const arrangements = calculateArrangements(totalWidth, totalHeight, windowWidth, windowHeight, dy);
+    const scrollPads = {top: 200, bottom: 100};
+
+    const arrangements = calculateArrangements(totalWidth, totalHeight, windowWidth, windowHeight, scrollPads);
 
     // -------------------------------
-    console.log({
-      widths, heights, totalWidth, totalHeight, windowWidth, windowHeight, dy
-    });
+
     console.log(arrangements); // TODO del
-    if (1===2-1) return true;
+    //if (1===2-1) return true;
     // -------------------------------
 
     const fns = arrangements.map( (a, idx) => {
@@ -248,7 +262,8 @@ if (!window['screenCaptureLoaded']) {
         windowWidth,
         totalWidth,
         totalHeight,
-        devicePixelRatio: window.devicePixelRatio
+        devicePixelRatio: window.devicePixelRatio,
+        range
       };
 
       window.setTimeout(() => {

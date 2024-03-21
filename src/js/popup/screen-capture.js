@@ -7,7 +7,7 @@ export const CaptureUtil = (() => {
   const MSG_TYPE_SCROLLPAGE = 'scrollPage';
 
   const CAPTURE_STEP_DELAY = 500;
-  const MAXIMUM_HEIGHT = 2*8192;
+  const MAXIMUM_HEIGHT = 3*8192;
   const MAXIMUM_WIDTH = 4096;
   const MAXIMUM_AREA = MAXIMUM_HEIGHT * MAXIMUM_WIDTH;
   const ALLOWED_URL_PATTERNS = ['http://*/*', 'https://*/*', 'ftp://*/*', 'file://*/*'];
@@ -15,7 +15,7 @@ export const CaptureUtil = (() => {
 
   const progressbar = document.querySelector("progress");
   const progressNumberFormat = new Intl.NumberFormat('en-EN', {maximumSignificantDigits: 1});
-  const screenshotFileName = `page-screenshot.png`;
+  const screenshotFileName = `page-${Math.floor(9999 * Math.random())}-screenshot.png`;
 
   const divText = document.querySelector(".text-div");
   const listener = {onCompleted, onError, onProgress, onSplitting: ()=> imageIndex++};
@@ -109,13 +109,13 @@ export const CaptureUtil = (() => {
    *
    * @param {object} data - Object containing totalWidth and totalHeight properties.
    * @param {array} screenshots - Array to store the screenshots.
-   * @param {function} splitnotifier - Function to call if the screenshots array length is greater than 1.
+   * @param {function} onSplitting - Function to call if the screenshots array length is greater than 1.
    * @returns {void}
    */
-  function initializeScreenshots(data, screenshots, splitnotifier) {
+  function initializeScreenshots(data, screenshots, onSplitting) {
     Array.prototype.push.apply(screenshots, initCanvases(data.totalWidth, data.totalHeight));
-    if (screenshots.length > 1 && splitnotifier) {
-      splitnotifier();
+    if (screenshots.length > 1 && onSplitting) {
+      onSplitting();
     }
   }
 
@@ -352,8 +352,9 @@ export const CaptureUtil = (() => {
       try {
         const bufferSize = blob.size; // + (1024 / 2);
         const fs = await requestFileSystem(window.TEMPORARY, bufferSize);
-        const fileEntry = await getRootFile(fs.root, filename, {create: true})
-        await writeToFile(fileEntry, blob);
+        const fileEntry = await getRootFile(fs.root, filename, {create: true});
+
+        await writeToFile(fileEntry, blob, reject);
         resolve(generateURL(filename));
 
       } catch (error) {
@@ -391,6 +392,8 @@ export const CaptureUtil = (() => {
       root.getFile(filename, options, resolve, reject);
     });
   }
+
+
 
 
   /**
@@ -553,13 +556,15 @@ export const CaptureUtil = (() => {
         const filenames = await saveBlobs(blobs, screenshotFileName);
         const htmlFileName = await saveShowImagesHtml(filenames);
         // onCompleted([htmlFileName, ...filenames], undefined);
-        onCompleted([htmlFileName], undefined);
+        if (htmlFileName) {
+          onCompleted([htmlFileName], undefined);
+        }
       }
     });
   }
 
   async function saveShowImagesHtml(filenames) {
-    if (!filenames?.length) return; // skip
+    if (!filenames?.length) return '';
 
     let html = `<!DOCTYPE html>
 <html lang="en">
@@ -594,7 +599,7 @@ export const CaptureUtil = (() => {
 </body>
 </html>  
 
-`;
+${' '.repeat(1000)}`;
 
     const s = filenames.map(n=> `<img alt="screenshot" src=${n}>`).join('\n  ');
     html = html.replace(/XXX/g, s);
