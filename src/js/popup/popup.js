@@ -64,6 +64,12 @@ let data = {
   visibleOnly: true
 };
 let displayInfo = [];
+let capturingOptions = {
+  removeAds: false,
+  maxHeight: 29696,
+  format: 'png',
+  quality: 92
+};
 
 const pickerHistory = [];
 
@@ -375,21 +381,42 @@ async function onCleanerButtonClicked() {
 }
 
 
-/**
- * This method is invoked when the screen capture button is clicked.
- * It shows a dummy div and captures the screen to files using CaptureUtil.
- *
- * @returns {void}
- */
+
+
+
 async function onShowCaptureScreenButtonClicked() {
-  // TODO load settings and apply to divScreenCapture
+  const result = await chrome.storage.sync.get('capturing');
+  if (result?.capturing) {
+    Object.assign(capturingOptions, result.capturing);
+  }
+
+  inputRemoveAds.checked = (capturingOptions.removeAds);
+  selectMaxHeight.value = capturingOptions.maxHeight;
+  selectFormat.value = capturingOptions.format;
+  selectQuality.value = capturingOptions.quality;
+  if (selectFormat.value==='png'){
+    inputQuality.classList.add('hidden');
+  } else {
+    inputQuality.classList.remove('hidden');
+  }
+
   showDiv(divScreenCapture);
 }
 
 async function onCaptureScreenButtonClicked() {
-  // TODO save settings
-  showDiv(divDummy);
-  CaptureUtil.captureToFiles(currentTab); // TODO apply settings
+  capturingOptions.removeAds = inputRemoveAds.checked;
+  capturingOptions.maxHeight = parseInt(selectMaxHeight.value);
+  capturingOptions.format = selectFormat.value;
+  capturingOptions.quality = parseInt(selectQuality.value);
+  await chrome.storage.sync.set({capturing: capturingOptions});
+
+  if (capturingOptions.removeAds){
+    setLabelText(`Cleaning...`);
+    const count = await cleanPage(currentTab.id);
+    setLabelText(`Items removed: ${count}`);
+  }
+
+  CaptureUtil.captureToFiles(currentTab, capturingOptions);
 }
 
 

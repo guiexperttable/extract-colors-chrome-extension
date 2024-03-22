@@ -7,15 +7,15 @@ export const CaptureUtil = (() => {
   const MSG_TYPE_SCROLLPAGE = 'scrollPage';
 
   const CAPTURE_STEP_DELAY = 500;
-  const MAXIMUM_HEIGHT = 29900;
+  let maximumHeight = 29900;
   const MAXIMUM_WIDTH = 4096;
-  const MAXIMUM_AREA = MAXIMUM_HEIGHT * MAXIMUM_WIDTH;
+
   const ALLOWED_URL_PATTERNS = ['http://*/*', 'https://*/*', 'ftp://*/*', 'file://*/*'];
   const DISALLOWED_URL_REGEX = [/^https?:\/\/chrome.google.com\/.*$/];
 
   const progressbar = document.querySelector("progress");
   const progressNumberFormat = new Intl.NumberFormat('en-EN', {maximumSignificantDigits: 1});
-  const screenshotFileName = `page-${Math.floor(9999 * Math.random())}-screenshot.png`;
+  const screenshotFileName = `page-${Math.floor(9999 * Math.random())}-screenshot`;
 
   const divText = document.querySelector(".text-div");
   const listener = {onCompleted, onError, onProgress, onSplitting: ()=> imageIndex++};
@@ -168,18 +168,14 @@ export const CaptureUtil = (() => {
     });
   }
 
-  /**
-   * Asynchronously captures the currently visible tab as an image, processes it, and performs actions based on the processed data.
-   *
-   * @param {Object} data - Additional data for processing the captured image.
-   * @param {Array} screenshots - Existing screenshots to compare with the captured image.
-   * @param {Function} onSendResponse - Callback function to send processed data to the caller.
-   * @param {Function} onSplitting - Callback function to notify when the captured image is split.
-   */
-  async function capture(data, screenshots, onSendResponse, onSplitting) {
+
+  async function capture(data, capturingOptions, screenshots, onSendResponse, onSplitting) {
 
     await wait(CAPTURE_STEP_DELAY);
-    const dataURI = await chrome.tabs.captureVisibleTab(null, {format:'png'});
+    const dataURI = await chrome.tabs.captureVisibleTab(null, {
+      format:capturingOptions.format,
+      quality: capturingOptions.quality
+    });
 
     if (dataURI) {
       let image = await loadImage(dataURI);
@@ -199,11 +195,12 @@ export const CaptureUtil = (() => {
    * @return {Object[]} - An array of split canvases representing the screenshots.
    */
   function initCanvases(totalWidth, totalHeight) {
-    const badSize = (totalHeight > MAXIMUM_HEIGHT || totalWidth > MAXIMUM_HEIGHT || totalHeight * totalWidth > MAXIMUM_AREA);
+    const maximumArea = maximumHeight * MAXIMUM_WIDTH
+    const badSize = (totalHeight > maximumHeight || totalWidth > maximumHeight || totalHeight * totalWidth > maximumArea);
     const biggerWidth = totalWidth > totalHeight;
 
-    const maxWidth = (!badSize ? totalWidth : (biggerWidth ? MAXIMUM_HEIGHT : MAXIMUM_WIDTH));
-    const maxHeight = (!badSize ? totalHeight : (biggerWidth ? MAXIMUM_WIDTH : MAXIMUM_HEIGHT));
+    const maxWidth = (!badSize ? totalWidth : (biggerWidth ? maximumHeight : MAXIMUM_WIDTH));
+    const maxHeight = (!badSize ? totalHeight : (biggerWidth ? MAXIMUM_WIDTH : maximumHeight));
 
     const numCols = Math.ceil(totalWidth / maxWidth);
     const numRows = Math.ceil(totalHeight / maxHeight);
@@ -438,18 +435,8 @@ export const CaptureUtil = (() => {
 
 
 
-  /**
-   * Captures screenshots of a web page and saves them as blobs.
-   *
-   * @param {Object} tab - The tab object representing the web page.
-   * @param {Object} listener - The listener object containing event callbacks.
-   *
-   * @param {Function} listener.onCompleted - The callback function called when capturing is completed.
-   * @param {Function} listener.onError - The callback function called when an error occurs.
-   * @param {Function} listener.onProgress - The callback function called to report the progress of capturing.
-   * @param {Function} listener.onSplitting - The callback function called when the page is being split.
-   */
-  function captureToBlobs(tab, listener) {
+
+  function captureToBlobs(tab, capturingOptions, listener) {
     const {onCompleted, onError, onProgress, onSplitting} = listener;
     let loaded = false;
     const screenshots = [];
@@ -465,7 +452,7 @@ export const CaptureUtil = (() => {
       .addListener((message, sender, onSendResponse) => {
         if (message.messageType === MSG_TYPE_CAPTURE) {
           onProgress(message.complete);
-          capture(message, screenshots, onSendResponse, onSplitting);
+          capture(message, capturingOptions, screenshots, onSendResponse, onSplitting);
           return true;
         }
 
@@ -540,23 +527,22 @@ export const CaptureUtil = (() => {
 
 
 
-  /**
-   * Captures the contents of a tab and saves them to files.
-   *
-   * @param {object} tab - The tab object to capture.
-   *
-   * @return {void}
-   */
-  function captureToFiles(tab) {
+
+  function captureToFiles(tab, capturingOptions) {
     currentTab = tab;
+    maximumHeight = capturingOptions.maxHeight;
+
     const {onCompleted} = listener;
 
     setProgressbarVisible(true);
 
-    captureToBlobs(tab, {
+    captureToBlobs(
+      tab,
+      capturingOptions,
+      {
       ...listener,
       onCompleted: async blobs => {
-        const filenames = await saveBlobs(blobs, screenshotFileName);
+        const filenames = await saveBlobs(blobs, screenshotFileName + '.' + capturingOptions.format);
         const htmlFileName = await saveShowImagesHtml(filenames);
 
         if (htmlFileName) {
@@ -608,7 +594,7 @@ ${' '.repeat(1000)}`;
     const s = filenames.map(n=> `<img alt="screenshot" src=${n}>`).join('\n  ');
     html = html.replace(/XXX/g, s);
 
-    const filename = screenshotFileName.replace(/png/, 'html');
+    const filename = screenshotFileName+'.html';
     const blob = new Blob([html], { type: 'text/html' });
     return await requestFileSystemAndWrite(blob, filename);
   }
