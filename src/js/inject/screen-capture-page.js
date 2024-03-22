@@ -206,10 +206,6 @@ if (!window['screenCaptureLoaded']) {
 
     let y = dy;
 
-    console.log({
-      totalWidth, totalHeight, windowWidth, windowHeight, scrollPads, dx, dy, y
-    });
-
     while (y <= totalHeight - dy) {
       let x = 0;
       while (x <= totalWidth - dx) {
@@ -217,7 +213,7 @@ if (!window['screenCaptureLoaded']) {
           scrollToX:x,
           scrollToY:y,
           sx: 0,
-          sy: 0,
+          sy: scrollPads.top,
           sw: dx,
           sh: dy,
           dx: x,
@@ -229,7 +225,6 @@ if (!window['screenCaptureLoaded']) {
       }
       y += dy;
     }
-    arrangements.length = 0; // TODO delete!!!
     arrangements.push(bottomShot);
     arrangements.push(topShot);
 
@@ -263,17 +258,12 @@ if (!window['screenCaptureLoaded']) {
 
     const totalWidth = getMaxNonEmpty(widths);
     const totalHeight = getMaxNonEmpty(heights);
+
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
     const scrollPads = {top: 200, bottom: 100};
-
     const arrangements = calculateArrangements(totalWidth, totalHeight, windowWidth, windowHeight, scrollPads);
-
-    // -------------------------------
-    console.log(arrangements); // TODO del
-    //if (1===2-1) return true;
-    // -------------------------------
 
     const fns = arrangements.map(
       (a, idx) => {

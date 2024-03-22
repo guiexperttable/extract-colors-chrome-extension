@@ -129,26 +129,11 @@ export const CaptureUtil = (() => {
 
     if (data.windowWidth !== image.width) {
       const scale = image.width / data.windowWidth;
-      //dw *= scale;
-      //dh *= scale;
-      //dx *= scale;
-      //dy *= scale;
       sw *= scale;
       sh *= scale;
       sx *= scale;
       sy *= scale;
-      logging({scale})
     }
-
-    logging({
-      data,
-      arrangement,
-      screenshots,
-      ddd:{
-        sx, sy, sw, sh,
-        dx, dy, dw, dh}
-    });
-
 
     if (!screenshots.length) {
       initializeScreenshots(data, screenshots, onSplitting);
@@ -156,8 +141,6 @@ export const CaptureUtil = (() => {
 
     filterScreenshots(dx, dy, dw, dh, screenshots)
       .forEach(screenshot => {
-        logging(data); // TODO
-        logging(arrangement); // TODO
         screenshot.ctx.drawImage(
           image,
           sx, sy, sw, sh,
@@ -200,8 +183,6 @@ export const CaptureUtil = (() => {
 
     if (dataURI) {
       let image = await loadImage(dataURI);
-      // logging(dataURI); // TODO del
-
       if (image) {
         processImage(data, image, screenshots, onSplitting, onSendResponse);
         image = null;
@@ -260,15 +241,6 @@ export const CaptureUtil = (() => {
           top: top,
           bottom: top + canvas.height
         });
-        // TODO del
-        logging({
-          canvas: canvas,
-          index: canvasIndex,
-          left: left,
-          right: left + canvas.width,
-          top: top,
-          bottom: top + canvas.height
-        });
         canvasIndex++;
       }
     }
@@ -288,13 +260,6 @@ export const CaptureUtil = (() => {
    */
   function filterScreenshots(imgLeft, imgTop, imgWidth, imgHeight, screenshots) {
     const imgRight = imgLeft + imgWidth, imgBottom = imgTop + imgHeight;
-    logging({
-      title:'filterScreenshots',
-      arg: {
-        imgLeft, imgTop, imgWidth, imgHeight
-      },
-      screenshots
-    })
     return screenshots.filter(screenshot =>
       (imgLeft < screenshot.right
         && imgRight > screenshot.left

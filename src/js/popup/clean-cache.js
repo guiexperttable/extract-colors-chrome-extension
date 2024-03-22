@@ -41,7 +41,6 @@ export async function prepareClearCachePanel() {
   const result = await chrome.storage.sync.get('clearCache');
   if (result?.clearCache) {
     Object.assign(dataToRemove, result.clearCache);
-    console.log(result);
   }
 
   const data = dataToRemove;
@@ -70,8 +69,6 @@ export async function prepareClearCachePanel() {
 
 
 export function doClear() {
-  console.log(JSON.stringify(dataToRemove, null, 4)); // TODO del
-
   btnClearCache.disabled = true;
   chrome.browsingData.remove({
     "since": 0
