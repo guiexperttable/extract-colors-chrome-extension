@@ -24,6 +24,34 @@
     .bg-yellow {
       background-color: yellow;
     }
+    .bg-green {
+      background-color: #00e004;
+    }
+    .bg-blue {
+      background-color: #2abefd;
+    }
+    header,
+    footer {
+      display: grid;
+      grid-template-columns: 66px auto;
+      align-items: center;
+      position: fixed;
+      left: 0;
+      width: 100vw;
+      height: 50px;
+      background-color: rgba(0, 200, 255, 0.2);
+    }
+
+    header {
+      top: 0;
+    }
+    footer {
+      bottom: 0;
+    }
+
+    .fixed {
+      position: fixed;
+    }
 
     .point {
       width: 1px;
@@ -35,14 +63,23 @@
   </style>
 </head>
 <body>
-<div class="main"></div>
+<div class="main">
+  <header>
+    <div></div>
+    <div>This is a header</div>
+  </header>
+  <footer>
+    <div></div>
+    <div>This is a footer: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</div>
+  </footer>
+</div>
 <script>
   const main = document.querySelector(".main");
   const maxY = 488;
   const leftPadding = window.innerWidth/2 - 100;
 
   let div = document.createElement("div");
-  div.className = "container bg-yellow";
+  div.className = "container bg-green fixed";
   div.style.top = `0px`;
   div.style.left = `0px`;
   div.innerText = `A`;
@@ -90,8 +127,8 @@
   main.appendChild(div);
 
   div = document.createElement("div");
-  div.className = "container bg-yellow";
-  div.style.top = `${50 * maxY - 50}px`;
+  div.className = "container bg-blue";
+  div.style.top = `calc(100vh - 50px)`;
   div.style.right = `0px`;
   div.innerText = `C`;
   main.appendChild(div);
