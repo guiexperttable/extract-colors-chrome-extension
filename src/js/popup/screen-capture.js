@@ -90,19 +90,6 @@ export const CaptureUtil = (() => {
     return new Promise((resolve, _reject) => setTimeout(resolve, ms));
   }
 
-  /**
-   * Adjusts the data object to fit the scale of an image.
-   *
-   * @param {object} data - The data object to adjust.
-   * @param {object} image - The image object.
-   */
-  function adjustToScale(data, image) {
-    const scale = image.width / data.windowWidth;
-    data.x *= scale;
-    data.y *= scale;
-    data.totalWidth *= scale;
-    data.totalHeight *= scale;
-  }
 
   /**
    * Initializes the screenshots array by pushing new screenshots into it.
@@ -132,23 +119,51 @@ export const CaptureUtil = (() => {
    * @return {void}
    */
   function processImage(data, image, screenshots, onSplitting, onSendResponse) {
-    data.image = {width: image.width, height: image.height};
+    const arrangement = data.arrangement;
+    arrangement.image = {width: image.width, height: image.height};
+
+    let {
+      sx, sy, sw, sh,
+      dx, dy, dw, dh} = arrangement;
+
 
     if (data.windowWidth !== image.width) {
-      adjustToScale(data, image);
+      const scale = image.width / data.windowWidth;
+      //dw *= scale;
+      //dh *= scale;
+      //dx *= scale;
+      //dy *= scale;
+      sw *= scale;
+      sh *= scale;
+      sx *= scale;
+      sy *= scale;
+      logging({scale})
     }
+
+    logging({
+      data,
+      arrangement,
+      screenshots,
+      ddd:{
+        sx, sy, sw, sh,
+        dx, dy, dw, dh}
+    });
+
 
     if (!screenshots.length) {
       initializeScreenshots(data, screenshots, onSplitting);
     }
-    logging({title:'processImage()', ...data}); // TODO del
 
-
-
-    filterScreenshots(data.x, data.y, image.width, image.height, screenshots)
+    filterScreenshots(dx, dy, dw, dh, screenshots)
       .forEach(screenshot => {
-      screenshot.ctx.drawImage(image, data.x - screenshot.left, data.y - screenshot.top);
-    });
+        logging(data); // TODO
+        logging(arrangement); // TODO
+        screenshot.ctx.drawImage(
+          image,
+          sx, sy, sw, sh,
+          dx, dy, dw, dh);
+      }
+    );
 
     onSendResponse(JSON.stringify(data, null, 4) || true);
   }
@@ -179,12 +194,13 @@ export const CaptureUtil = (() => {
    * @param {Function} onSplitting - Callback function to notify when the captured image is split.
    */
   async function capture(data, screenshots, onSendResponse, onSplitting) {
-    logging(`x:${data.x}, y:${data.y}`); // TODO delete
+
     await wait(CAPTURE_STEP_DELAY);
     const dataURI = await chrome.tabs.captureVisibleTab(null, {format:'png'});
 
     if (dataURI) {
       let image = await loadImage(dataURI);
+      // logging(dataURI); // TODO del
 
       if (image) {
         processImage(data, image, screenshots, onSplitting, onSendResponse);
@@ -244,11 +260,21 @@ export const CaptureUtil = (() => {
           top: top,
           bottom: top + canvas.height
         });
+        // TODO del
+        logging({
+          canvas: canvas,
+          index: canvasIndex,
+          left: left,
+          right: left + canvas.width,
+          top: top,
+          bottom: top + canvas.height
+        });
         canvasIndex++;
       }
     }
     return result;
   }
+
 
 
   /**
@@ -262,7 +288,19 @@ export const CaptureUtil = (() => {
    */
   function filterScreenshots(imgLeft, imgTop, imgWidth, imgHeight, screenshots) {
     const imgRight = imgLeft + imgWidth, imgBottom = imgTop + imgHeight;
-    return screenshots.filter(screenshot => (imgLeft < screenshot.right && imgRight > screenshot.left && imgTop < screenshot.bottom && imgBottom > screenshot.top));
+    logging({
+      title:'filterScreenshots',
+      arg: {
+        imgLeft, imgTop, imgWidth, imgHeight
+      },
+      screenshots
+    })
+    return screenshots.filter(screenshot =>
+      (imgLeft < screenshot.right
+        && imgRight > screenshot.left
+        && imgTop < screenshot.bottom
+        && imgBottom > screenshot.top
+      ));
   }
 
 

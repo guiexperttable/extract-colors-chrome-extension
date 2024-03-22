@@ -157,7 +157,18 @@ if (!window['screenCaptureLoaded']) {
   function calculateArrangements(totalWidth, totalHeight, windowWidth, windowHeight, scrollPads) {
 
     if (totalWidth <= windowWidth && totalHeight <= windowHeight) {
-      return [{x: 0, y: 0, width: totalWidth, height: totalHeight}];
+      return [{
+        scrollToX:0,
+        scrollToY:0,
+        sx: 0,
+        sy: 0,
+        sw: windowWidth,
+        sh: windowHeight,
+        dx: 0,
+        dy: 0,
+        dw: windowWidth,
+        dh: windowHeight
+      }];
     }
 
     const sumPad = scrollPads.top + scrollPads.bottom;
@@ -166,23 +177,59 @@ if (!window['screenCaptureLoaded']) {
     const arrangements = [];
     const dx = windowWidth;
 
-    const topShot = {x:0, y:0, width: dx, height: (windowHeight - scrollPads.bottom)};
-    const bottomShot = {x:0, y:(totalHeight - windowHeight + scrollPads.top), width: dx, height: (windowHeight - scrollPads.top)};
+    // See: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
+    const topShot = {
+      scrollToX:0,
+      scrollToY:0,
+      sx: 0,
+      sy: 0,
+      sw: windowWidth,
+      sh: (windowHeight - scrollPads.bottom),
+      dx: 0,
+      dy: 0,
+      dw: windowWidth,
+      dh: (windowHeight - scrollPads.bottom)
 
-    //console.log({
-    //  dx,  dy, totalWidth, totalHeight, windowWidth, windowHeight, topShot, bottomShot
-    //});
+    };
+    const bottomShot = {
+      scrollToX:0,
+      scrollToY:(totalHeight - windowHeight),
+      sx: 0,
+      sy: scrollPads.top,
+      sw: windowWidth,
+      sh: (windowHeight - scrollPads.bottom),
+      dx: 0,
+      dy: totalHeight - windowHeight + scrollPads.top,
+      dw: windowWidth,
+      dh: (windowHeight - scrollPads.bottom)
+    };
 
-    let y = topShot.height;
+    let y = dy;
 
-    while (y < bottomShot.y) {
+    console.log({
+      totalWidth, totalHeight, windowWidth, windowHeight, scrollPads, dx, dy, y
+    });
+
+    while (y <= totalHeight - dy) {
       let x = 0;
-      while (x < totalWidth) {
-        arrangements.push({x, y, width: dx, height: dy});
+      while (x <= totalWidth - dx) {
+        arrangements.push({
+          scrollToX:x,
+          scrollToY:y,
+          sx: 0,
+          sy: 0,
+          sw: dx,
+          sh: dy,
+          dx: x,
+          dy: y,
+          dw: dx,
+          dh: dy
+        });
         x += dx;
       }
       y += dy;
     }
+    arrangements.length = 0; // TODO delete!!!
     arrangements.push(bottomShot);
     arrangements.push(topShot);
 
@@ -224,14 +271,15 @@ if (!window['screenCaptureLoaded']) {
     const arrangements = calculateArrangements(totalWidth, totalHeight, windowWidth, windowHeight, scrollPads);
 
     // -------------------------------
-
-    //console.log(arrangements); // TODO del
+    console.log(arrangements); // TODO del
     //if (1===2-1) return true;
     // -------------------------------
 
-    const fns = arrangements.map( (a, idx) => {
-      return async () => nextCapture(a, idx / arrangements.length, windowWidth, totalWidth, totalHeight)
-    });
+    const fns = arrangements.map(
+      (a, idx) => {
+        return async () => nextCapture(a, idx / arrangements.length, windowWidth, totalWidth, totalHeight)
+      }
+    );
     for (const fn of fns) {
       await fn();
     }
@@ -244,26 +292,26 @@ if (!window['screenCaptureLoaded']) {
   }
 
   function nextCapture(
-    range,
+    arrangement,
     complete,
     windowWidth,
     totalWidth,
     totalHeight) {
 
     return new Promise((resolve, reject) => {
-      const {x, y} = range;
-      scrollToXY(x, y);
+
+      scrollToXY(arrangement.scrollToX, arrangement.scrollToY);
 
       const data = {
         messageType: MSG_TYPE_CAPTURE,
-        x: getScrollX(),
-        y: getScrollY(),
+        arrangement,
+        x: arrangement.scrollToX,
+        y: arrangement.scrollToY,
         complete,
         windowWidth,
         totalWidth,
         totalHeight,
-        devicePixelRatio: window.devicePixelRatio,
-        range
+        devicePixelRatio: window.devicePixelRatio
       };
 
       window.setTimeout(() => {
