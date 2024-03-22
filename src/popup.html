@@ -3,6 +3,7 @@
 <head>
   <link rel="stylesheet" href="css/popup/popup-reset.css">
   <link rel="stylesheet" href="css/popup/popup-checkbox.css">
+  <link rel="stylesheet" href="css/popup/popup-selectbox.css">
   <link rel="stylesheet" href="css/popup/popup-animation.css">
   <link rel="stylesheet" href="css/popup/popup.css">
   <meta charset="UTF-8">
@@ -39,7 +40,7 @@
     <span popover>Ruler</span>
   </button>
 
-  <button class="btn activable capture-screen-btn">
+  <button class="btn activable show-capture-screen-btn">
     <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-260q75 0 127.5-52.5T660-440q0-75-52.5-127.5T480-620q-75 0-127.5 52.5T300-440q0 75 52.5 127.5T480-260Zm0-80q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29ZM160-120q-33 0-56.5-23.5T80-200v-480q0-33 23.5-56.5T160-760h126l74-80h240l74 80h126q33 0 56.5 23.5T880-680v480q0 33-23.5 56.5T800-120H160Zm0-80h640v-480H638l-73-80H395l-73 80H160v480Zm320-240Z"/></svg>
     <span popover>Capture full screen</span>
   </button>
@@ -132,8 +133,50 @@
   <p>Clear Cache</p>
   <p>&nbsp;</p>
   <div class="checkboxes-div"></div>
-  <div class="right">
-    <button class="clear-cache-btn">Clear</button>
+  <div class="btn-right-div">
+    <button class="clear-cache-btn text-button">Clear</button>
+  </div>
+</div>
+
+<div class="screen-capture-div hidden">
+  <p>Capture Screen</p>
+  <p>&nbsp;</p>
+  <div class="inputs-div">
+
+    <label class="container">Remove ads
+      <input type="checkbox" name="removeAds" class="visible-only-input">
+      <span class="checkmark"></span>
+    </label>
+
+    <label>Maximal height
+      <select name="maxHeight">
+        <option value="4096">4096</option>
+        <option value="8192">8192</option>
+        <option value="16384">16384</option>
+        <option value="29696">29696</option>
+      </select>
+    </label>
+
+
+    <label>Image format
+      <select name="format">
+        <option value="png">png</option>
+        <option value="jpeg">jpeg</option>
+      </select>
+    </label>
+
+
+    <label class="hidden input-quality">JPEG quality
+      <select name="quality">
+        <option value="92">92</option>
+        <option value="80">80</option>
+        <option value="60">60</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="btn-right-div">
+    <button class="do-capture-btn text-button">Capture screen</button>
   </div>
 </div>
 

@@ -7,7 +7,7 @@ export const CaptureUtil = (() => {
   const MSG_TYPE_SCROLLPAGE = 'scrollPage';
 
   const CAPTURE_STEP_DELAY = 500;
-  const MAXIMUM_HEIGHT = 3*8192;
+  const MAXIMUM_HEIGHT = 29900;
   const MAXIMUM_WIDTH = 4096;
   const MAXIMUM_AREA = MAXIMUM_HEIGHT * MAXIMUM_WIDTH;
   const ALLOWED_URL_PATTERNS = ['http://*/*', 'https://*/*', 'ftp://*/*', 'file://*/*'];

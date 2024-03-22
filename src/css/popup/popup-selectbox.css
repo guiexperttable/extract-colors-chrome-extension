@@ -1,0 +1,25 @@
+
+.select-box {
+    position: relative;
+}
+
+
+label > select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+label > select:focus {
+    outline: none;
+}
+
+label > select option {
+    background-color: #f9f9f9;
+}
+
+label > select:hover {
+    background-color: #f0f0f0;
+}

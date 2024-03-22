@@ -18,7 +18,8 @@ const btnRescan = document.querySelector(".rescan-btn");
 const btnEyeDropper = document.querySelector(".eyedropper-btn");
 const btnCopyCustomProperties = document.querySelector(".copy-custom-properties-btn");
 const btnRuler = document.querySelector(".ruler-btn");
-const btnCaptureScreen = document.querySelector(".capture-screen-btn");
+const btnShowCaptureScreen = document.querySelector(".show-capture-screen-btn");
+
 const btnCleaner = document.querySelector(".cleaner-btn");
 const btnToggleDesignMode = document.querySelector(".toggle-designmode-btn");
 const btnResizer = document.querySelector(".resizer-btn");
@@ -43,9 +44,17 @@ const divResizer = document.querySelector(".resizer-div");
 const divClearCache = document.querySelector(".clear-cache-div");
 const divPickerHistory = document.querySelector(".picker-div");
 const divRuler = document.querySelector(".ruler-div");
+const divScreenCapture = document.querySelector(".screen-capture-div");
 const divDummy = document.querySelector(".dummy-div");
-const mainDivs = [divPalette, divResizer, divPickerHistory, divDummy, divRuler, divClearCache];
+const mainDivs = [divPalette, divResizer, divPickerHistory, divDummy, divRuler, divClearCache, divScreenCapture];
 const downLoadImgLink = document.querySelector(".download-img-a");
+
+const inputRemoveAds = document.querySelector('input[name="removeAds"]');
+const selectMaxHeight = document.querySelector('select[name="maxHeight"]');
+const selectFormat = document.querySelector('select[name="format"]');
+const selectQuality = document.querySelector('select[name="quality"]');
+const inputQuality = document.querySelector('.input-quality');
+const btnCaptureScreen = document.querySelector(".do-capture-btn");
 
 
 
@@ -372,9 +381,15 @@ async function onCleanerButtonClicked() {
  *
  * @returns {void}
  */
+async function onShowCaptureScreenButtonClicked() {
+  // TODO load settings and apply to divScreenCapture
+  showDiv(divScreenCapture);
+}
+
 async function onCaptureScreenButtonClicked() {
+  // TODO save settings
   showDiv(divDummy);
-  CaptureUtil.captureToFiles(currentTab);
+  CaptureUtil.captureToFiles(currentTab); // TODO apply settings
 }
 
 
@@ -557,7 +572,9 @@ function initListener() {
   btnResizer.addEventListener("click", onResizerButtonClicked);
   btnShowClearCache.addEventListener("click", onShowClearCacheButtonClicked);
   btnCleaner.addEventListener("click", onCleanerButtonClicked);
+  btnShowCaptureScreen.addEventListener("click", onShowCaptureScreenButtonClicked);
   btnCaptureScreen.addEventListener("click", onCaptureScreenButtonClicked);
+
   btnToggleTheme.addEventListener("click", onToggleThemeButtonClicked);
   btnCopyValues.addEventListener("click", onCopyValuesButtonClicked);
   btnCopyCustomProperties.addEventListener("click", onCopyCustomPropertiesClicked);
@@ -576,6 +593,13 @@ function initListener() {
       });
     });
 
+  selectFormat.addEventListener("change", evt => {
+    if (selectFormat.value === "png") {
+      inputQuality.classList.add("hidden");
+    } else {
+      inputQuality.classList.remove("hidden");
+    }
+  });
 }
 
 /**
