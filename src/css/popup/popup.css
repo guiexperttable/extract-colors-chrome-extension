@@ -329,6 +329,9 @@ a {
 .text-button:hover {
     background-color: #0056b3;
 }
+.text-button:disabled {
+    background-color: #007BFF44;
+}
 .btn-right-div {
     display: grid;
     justify-content: end;

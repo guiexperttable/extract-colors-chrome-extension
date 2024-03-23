@@ -71,7 +71,6 @@ export const CaptureUtil = (() => {
   function initializeScreenshots(dims, screenshots, splitCallback) {
     const createdCanvases = initCanvases(dims.totalWidth, dims.totalHeight);
     screenshots.push(...createdCanvases);
-    logging({screenshots}); // TODO del
 
     const hasMultipleScreenshots = screenshots.length > 1;
     if (hasMultipleScreenshots && splitCallback) {
@@ -100,12 +99,14 @@ export const CaptureUtil = (() => {
       initializeScreenshots(data, screenshots, onSplitting);
     }
 
-    filterScreenshots(dx, dy, dw, dh, screenshots)
-      .forEach(screenshot => {
+    const screenshotsInBounds = getScreenshotsInBounds(dx, dy, dw, dh, screenshots);
+    screenshotsInBounds.forEach(screenshot => {
+        const offsetLeft = screenshot.left;
+        const offsetTop = screenshot.top;
         screenshot.ctx.drawImage(
           image,
           sx, sy, sw, sh,
-          dx, dy, dw, dh);
+          dx - offsetLeft, dy - offsetTop, dw, dh);
       }
     );
 
@@ -193,8 +194,7 @@ export const CaptureUtil = (() => {
 
 
 
-
-  function filterScreenshots(imgLeft, imgTop, imgWidth, imgHeight, screenshots) {
+  function getScreenshotsInBounds(imgLeft, imgTop, imgWidth, imgHeight, screenshots) {
     const imgRight = imgLeft + imgWidth, imgBottom = imgTop + imgHeight;
     return screenshots.filter(screenshot =>
       (imgLeft < screenshot.right
@@ -203,6 +203,7 @@ export const CaptureUtil = (() => {
         && imgBottom > screenshot.top
       ));
   }
+
 
 
   function createByteBufferFromDataURI(dataURI) {
@@ -377,6 +378,7 @@ export const CaptureUtil = (() => {
 
 
   function captureToFiles(tab, capturingOptions) {
+    document.querySelector(".do-capture-btn").disabled = true;
     currentTab = tab;
     maximumHeight = capturingOptions.maxHeight;
 
@@ -470,10 +472,12 @@ export const CaptureUtil = (() => {
 
   function onError(err) {
     divText.innerHTML = `<span class="ge-error-color">${err}</span>`;
+    document.querySelector(".do-capture-btn").disabled = false;
   }
 
 
   function onCompleted(filenames, index) {
+    document.querySelector(".do-capture-btn").disabled = false;
     setProgressbarVisible(false);
     if (!filenames.length) {
       console.info('Error: no screen captured!');
