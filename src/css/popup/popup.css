@@ -77,9 +77,9 @@ body {
 }
 
 .screen-capture-div .inputs-div {
-    min-height: 100px;
+    min-height: 50px;
     display: grid;
-    grid-template-rows: repeat(4, 26px);
+    grid-template-rows: repeat(2, 26px);
     grid-template-columns: repeat(4, 25%);
     justify-content: start;
     align-items: center;

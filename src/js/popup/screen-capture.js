@@ -367,9 +367,9 @@ export const CaptureUtil = (() => {
   async function saveBlobsToNumeratedFile(blobs, filename) {
     const filenames = [];
     for (const [index, blob] of blobs.entries()) {
-      filename = appendIndexToFilename(filename, index);
-      const fn = await writeBlobToFile(blob, filename);
-      filenames.push(fn);
+      const f = appendIndexToFilename(filename, index);
+      const url = await writeBlobToFile(blob, f);
+      filenames.push(url);
     }
     return filenames;
   }
@@ -396,8 +396,8 @@ export const CaptureUtil = (() => {
         const htmlFileName = await saveShowImagesHtml(filenames);
 
         if (htmlFileName) {
-          onCompleted([htmlFileName, ...filenames], undefined);
-          // onCompleted([htmlFileName], undefined);
+          //onCompleted([htmlFileName, ...filenames], undefined);
+           onCompleted([htmlFileName], undefined);
         }
       }
     });
@@ -429,6 +429,8 @@ export const CaptureUtil = (() => {
     }
     .images-div img {
       margin-right: 16px;
+      object-fit: contain;
+      max-width: 25%;
     }
   </style>
 </head>
