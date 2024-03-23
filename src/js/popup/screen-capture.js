@@ -1,7 +1,5 @@
 export const CaptureUtil = (() => {
 
-  const debugging = window.location.href.includes('debug=1');
-
   const MSG_TYPE_CAPTURE = 'capture';
   const MSG_TYPE_LOGGING = 'logging';
   const MSG_TYPE_SCROLLPAGE = 'scrollPage';
@@ -25,29 +23,19 @@ export const CaptureUtil = (() => {
   let imageIndex = 0;
 
 
-  /**
-   * Sends a logging message to the current tab using Chrome extension's `sendMessage` method.
-   *
-   * @param {any} data - The data to be logged.
-   *
-   * @return {void}
-   */
-  function logging(data){
-    chrome.tabs.sendMessage(currentTab.id, {
-      messageType: MSG_TYPE_LOGGING,
-      data
-    }, () => {
-    });
+  function logging(data) {
+    chrome.tabs.sendMessage(
+      currentTab.id,
+      {
+        messageType: MSG_TYPE_LOGGING,
+        data
+      },
+      () => {}
+    );
   }
 
 
-  /**
-   * Checks if a given URL is allowed based on a set of patterns.
-   *
-   * @param {string} url - The URL to be checked.
-   *
-   * @return {boolean} - Returns true if the URL is allowed, otherwise false.
-   */
+
   function isUrlAllowed(url) {
     let regExp, index;
     for (index = DISALLOWED_URL_REGEX.length - 1; index >= 0; index--) {
@@ -65,13 +53,7 @@ export const CaptureUtil = (() => {
   }
 
 
-  /**
-   * Starts capturing the content of a specified tab.
-   *
-   * @param {number} tabId - The ID of the tab to capture.
-   * @param {function} captureCompleteCallback - The callback function to be called when the capture is complete.
-   * @return {void}
-   */
+
   function startCapture(tabId, captureCompleteCallback) {
     imageIndex = 0;
     chrome.tabs.sendMessage(tabId, {messageType: MSG_TYPE_SCROLLPAGE}, () => {
@@ -79,45 +61,25 @@ export const CaptureUtil = (() => {
     });
   }
 
-  /**
-   * Suspends the execution for a specified amount of time.
-   *
-   * @param {number} ms - The number of milliseconds to wait.
-   *
-   * @return {Promise} - A Promise that resolves after the specified time has passed.
-   */
+
   async function wait(ms) {
     return new Promise((resolve, _reject) => setTimeout(resolve, ms));
   }
 
 
-  /**
-   * Initializes the screenshots array by pushing new screenshots into it.
-   *
-   * @param {object} data - Object containing totalWidth and totalHeight properties.
-   * @param {array} screenshots - Array to store the screenshots.
-   * @param {function} onSplitting - Function to call if the screenshots array length is greater than 1.
-   * @returns {void}
-   */
-  function initializeScreenshots(data, screenshots, onSplitting) {
-    Array.prototype.push.apply(screenshots, initCanvases(data.totalWidth, data.totalHeight));
-    if (screenshots.length > 1 && onSplitting) {
-      onSplitting();
+
+  function initializeScreenshots(dims, screenshots, splitCallback) {
+    const createdCanvases = initCanvases(dims.totalWidth, dims.totalHeight);
+    screenshots.push(...createdCanvases);
+    logging({screenshots}); // TODO del
+
+    const hasMultipleScreenshots = screenshots.length > 1;
+    if (hasMultipleScreenshots && splitCallback) {
+      splitCallback();
     }
   }
 
-  /**
-   * Processes an image by adjusting its scale, initializing screenshots, filtering
-   * the screenshots based on given parameters, and sending the processed data as a response.
-   *
-   * @param {object} data - The data object to be processed.
-   * @param {CanvasImageSource} image - The image object.
-   * @param {array} screenshots - The array of screenshots.
-   * @param {object} onSplitting - The splitnotifier object.
-   * @param {function} onSendResponse - The function used to send the response.
-   *
-   * @return {void}
-   */
+
   function processImage(data, image, screenshots, onSplitting, onSendResponse) {
     const arrangement = data.arrangement;
     arrangement.image = {width: image.width, height: image.height};
@@ -125,7 +87,6 @@ export const CaptureUtil = (() => {
     let {
       sx, sy, sw, sh,
       dx, dy, dw, dh} = arrangement;
-
 
     if (data.windowWidth !== image.width) {
       const scale = image.width / data.windowWidth;
@@ -153,12 +114,7 @@ export const CaptureUtil = (() => {
 
 
 
-  /**
-   * Loads an image asynchronously from the provided URL.
-   *
-   * @param {string} url - The URL of the image to load.
-   * @returns {Promise} A promise that resolves with the loaded image or rejects with an error.
-   */
+
   async function loadImage(url) {
     return new Promise((resolve, reject) => {
       const image = new Image();
@@ -208,18 +164,9 @@ export const CaptureUtil = (() => {
     return createSplitCanvases(numRows, numCols, maxWidth, maxHeight, totalWidth, totalHeight);
   }
 
-  /**
-   * Creates an array of split canvases based on the given parameters.
-   * @param {number} numRows - The number of rows for the split canvases.
-   * @param {number} numCols - The number of columns for the split canvases.
-   * @param {number} maxWidth - The maximum width for each split canvas.
-   * @param {number} maxHeight - The maximum height for each split canvas.
-   * @param {number} totalWidth - The total width of the split canvases.
-   * @param {number} totalHeight - The total height of the split canvases.
-   * @return {Array} - An array of split canvases with their associated properties.
-   */
+
   function createSplitCanvases(numRows, numCols, maxWidth, maxHeight, totalWidth, totalHeight) {
-    const result = [];
+    const splitCanvases = [];
     let canvasIndex = 0;
 
     for (let row = 0; row < numRows; row++) {
@@ -229,7 +176,7 @@ export const CaptureUtil = (() => {
         canvas.height = (row === numRows - 1 ? totalHeight % maxHeight || maxHeight : maxHeight);
         const left = col * maxWidth;
         const top = row * maxHeight;
-        result.push({
+        splitCanvases.push({
           canvas: canvas,
           ctx: canvas.getContext('2d'),
           index: canvasIndex,
@@ -241,20 +188,12 @@ export const CaptureUtil = (() => {
         canvasIndex++;
       }
     }
-    return result;
+    return splitCanvases;
   }
 
 
 
-  /**
-   * This function filters screenshots based on the specified image dimensions and position.
-   * @param {number} imgLeft - The left coordinate of the image.
-   * @param {number} imgTop - The top coordinate of the image.
-   * @param {number} imgWidth - The width of the image.
-   * @param {number} imgHeight - The height of the image.
-   * @param {Array<object>} screenshots - An array of screenshot objects to be filtered.
-   * @returns {Array<object>} - The filtered array of screenshot objects.
-   */
+
   function filterScreenshots(imgLeft, imgTop, imgWidth, imgHeight, screenshots) {
     const imgRight = imgLeft + imgWidth, imgBottom = imgTop + imgHeight;
     return screenshots.filter(screenshot =>
@@ -266,12 +205,6 @@ export const CaptureUtil = (() => {
   }
 
 
-  /**
-   * Creates a byte buffer from a given data URI.
-   *
-   * @param {string} dataURI - The data URI to create the byte buffer from.
-   * @return {ArrayBuffer} - The byte buffer created from the data URI.
-   */
   function createByteBufferFromDataURI(dataURI) {
     const byteString = atob(dataURI.split(',')[1]);
     const byteBuffer = new ArrayBuffer(byteString.length);
@@ -283,22 +216,12 @@ export const CaptureUtil = (() => {
     return byteBuffer;
   }
 
-  /**
-   * Retrieves the MIME type from a given Data URI.
-   *
-   * @param {string} dataURI - The Data URI to extract the MIME type from.
-   * @return {string} The extracted MIME type.
-   */
+
   function getMimeType(dataURI) {
     return dataURI.split(',')[0].split(':')[1].split(';')[0];
   }
 
-  /**
-   * Returns an array of Blobs generated from the screenshots provided.
-   *
-   * @param {Array} screenshots - The array of screenshots to be converted into Blobs.
-   * @returns {Array} - An array of Blobs generated from the provided screenshots.
-   */
+
   function getBlobsFromScreenshots(screenshots) {
     return screenshots.map(screenshot => {
       const dataURI = screenshot.canvas.toDataURL();
@@ -309,15 +232,8 @@ export const CaptureUtil = (() => {
   }
 
 
-  /**
-   * Writes a blob to the given file entry.
-   *
-   * @param {FileEntry} fileEntry - The file entry to write to.
-   * @param {Blob} blob - The blob to write.
-   * @param {Function} onError - The error callback function.
-   * @return {void}
-   */
-  async function writeToFile(fileEntry, blob, onError) {
+
+  async function writeBlobToFileEntry(fileEntry, blob, onError) {
     try {
       const fileWriter = await new Promise((resolve, reject) => fileEntry.createWriter(resolve, reject));
       fileWriter.onwriteend = () => {};
@@ -328,34 +244,22 @@ export const CaptureUtil = (() => {
     }
   }
 
-  /**
-   * Generates a URL for a given filename.
-   *
-   * @param {string} filename - The filename to generate a URL for.
-   * @return {string} The generated URL.
-   */
-  function generateURL(filename) {
+
+  function getURLForFile(filename) {
     const extensionId = chrome.i18n.getMessage('@@extension_id');
     return `filesystem:chrome-extension://${extensionId}/temporary/${filename}`;
   }
 
-  /**
-   * Requests a file system using the requestFileSystem method and writes a Blob object to a file.
-   *
-   * @param {Blob} blob - The Blob object to write to the file.
-   * @param {string} filename - The name of the file to be created.
-   * @returns {Promise<string>} - A Promise that resolves to the generated URL of the file if successful,
-   *   or rejects with an error if there was a failure.
-   */
-  async function requestFileSystemAndWrite(blob, filename) {
+
+  async function writeBlobToFile(blob, filename) {
     return new Promise(async (resolve, reject) => {
       try {
         const bufferSize = blob.size; // + (1024 / 2);
         const fs = await requestFileSystem(window.TEMPORARY, bufferSize);
-        const fileEntry = await getRootFile(fs.root, filename, {create: true});
+        const fileEntry = await getFileFromRoot(fs.root, filename, {create: true});
 
-        await writeToFile(fileEntry, blob, reject);
-        resolve(generateURL(filename));
+        await writeBlobToFileEntry(fileEntry, blob, reject);
+        resolve(getURLForFile(filename));
 
       } catch (error) {
         reject(error);
@@ -363,14 +267,7 @@ export const CaptureUtil = (() => {
     });
   }
 
-  /**
-   * Requests a file system of the specified type and size.
-   *
-   * @param {number} type - The type of the file system to request. Can be either window.TEMPORARY or window.PERSISTENT.
-   * @param {number} size - The requested size of the file system, in bytes.
-   * @return {Promise<FileSystem>} A Promise that is resolved when the file system is successfully requested. The resolved value is the requested file system.
-   * @throws {DOMException} If an error occurs while requesting the file system, the Promise is rejected with a {@link DOMException}.
-   */
+
   function requestFileSystem(type, size) {
     return new Promise((resolve, reject) => {
       const fn = window.requestFileSystem || window.webkitRequestFileSystem;
@@ -378,47 +275,15 @@ export const CaptureUtil = (() => {
     });
   }
 
-  /**
-   * Retrieves the root file object with the given filename.
-   *
-   * @param {FileSystemDirectoryHandle} root - The root directory handle.
-   * @param {string} filename - The name of the file to retrieve.
-   * @param {object} [options] - Optional parameters to be passed during the retrieval.
-   * @returns {Promise<FileSystemFileHandle>} A promise that resolves with the file handle of the root file object.
-   *                                         If the file cannot be retrieved, the promise will be rejected.
-   */
-  function getRootFile(root, filename, options) {
+
+  function getFileFromRoot(root, filename, options) {
     return new Promise((resolve, reject) => {
       root.getFile(filename, options, resolve, reject);
     });
   }
 
 
-
-
-  /**
-   * Saves a blob to the filesystem with the given filename.
-   *
-   * @param {Blob} blob - The blob to be saved.
-   * @param {string} filename - The desired filename for the saved blob.
-   * @param {number} index - The index used to add a suffix to the filename.
-   * @return {Promise} - A promise that resolves or rejects depending on the success of the save operation.
-   */
-  function saveBlob(blob, filename, index) {
-    filename = addFilenameSuffix(filename, index);
-
-    return requestFileSystemAndWrite(blob, filename);
-  }
-
-
-  /**
-   * Adds a suffix to the filename at the specified index.
-   *
-   * @param {string} filename - The original filename.
-   * @param {number} index - The index to add the suffix at.
-   * @return {string} - The new filename with the suffix added.
-   */
-  function addFilenameSuffix(filename, index) {
+  function appendIndexToFilename(filename, index) {
     if (!index) {
       index = 0;
     }
@@ -431,8 +296,6 @@ export const CaptureUtil = (() => {
 
     return `${filename}-${indexStr}`
   }
-
-
 
 
 
@@ -491,15 +354,6 @@ export const CaptureUtil = (() => {
 
 
 
-  /**
-   * Starts capturing screenshots from a given tab.
-   *
-   * @param {string} tabId - The tab id to capture the screenshots from.
-   * @param {Array} screenshots - Array of screenshots to capture.
-   * @param {function} onCompleted - A callback function to be called when capturing is completed. Accepts an array of blobs representing captured screenshots as an argument.
-   *
-   * @return {void}
-   */
   function startCaptering(tabId, screenshots, onCompleted){
     onProgress(0);
     startCapture(tabId, () => {
@@ -508,18 +362,12 @@ export const CaptureUtil = (() => {
   }
 
 
-  /**
-   * Save multiple blobs with specified filenames.
-   *
-   * @param {Blob[]} blobs - Array of blobs to save.
-   * @param {string} filename - Filename to prefix the saved blobs.
-   *
-   * @return {Promise<string[]>} - Array of saved filenames.
-   */
-  async function saveBlobs(blobs, filename) {
+
+  async function saveBlobsToNumeratedFile(blobs, filename) {
     const filenames = [];
     for (const [index, blob] of blobs.entries()) {
-      const fn = await saveBlob(blob, filename, index);
+      filename = appendIndexToFilename(filename, index);
+      const fn = await writeBlobToFile(blob, filename);
       filenames.push(fn);
     }
     return filenames;
@@ -542,7 +390,7 @@ export const CaptureUtil = (() => {
       {
       ...listener,
       onCompleted: async blobs => {
-        const filenames = await saveBlobs(blobs, screenshotFileName + '.' + capturingOptions.format);
+        const filenames = await saveBlobsToNumeratedFile(blobs, screenshotFileName + '.' + capturingOptions.format);
         const htmlFileName = await saveShowImagesHtml(filenames);
 
         if (htmlFileName) {
@@ -587,25 +435,18 @@ export const CaptureUtil = (() => {
   XXX
 </div>
 </body>
-</html>  
-
-${' '.repeat(1000)}`;
+</html> ${' '.repeat(1000)}`;
 
     const s = filenames.map(n=> `<img alt="screenshot" src=${n}>`).join('\n  ');
     html = html.replace(/XXX/g, s);
 
     const filename = screenshotFileName+'.html';
     const blob = new Blob([html], { type: 'text/html' });
-    return await requestFileSystemAndWrite(blob, filename);
+    return await writeBlobToFile(blob, filename);
   }
 
 
-  /**
-   * Sets the visibility of the progress bar.
-   *
-   * @param {boolean} b - Specifies whether the progress bar should be visible or not.
-   * @return {undefined}
-   */
+
   function setProgressbarVisible(b) {
     progressbar.value = 0;
     if (b) {
@@ -615,13 +456,7 @@ ${' '.repeat(1000)}`;
     }
   }
 
-  /**
-   * Updates the progress of capturing
-   *
-   * @param {number} f - The progress of capturing, between 0 and 1
-   *
-   * @return {void}
-   */
+
   function onProgress(f) {
     if (f >= 1) {
       divText.innerText = `Capturing... done`;
@@ -632,22 +467,12 @@ ${' '.repeat(1000)}`;
     }
   }
 
-  /**
-   * Sets the error message in the palette element.
-   *
-   * @param {string} err - The error message to display.
-   */
+
   function onError(err) {
     divText.innerHTML = `<span class="ge-error-color">${err}</span>`;
   }
 
-  /**
-   * Function to handle the completion of the screen capture task.
-   *
-   * @param {Array} filenames - Array of filenames representing the captured screens.
-   * @param {number} index - Index indicating the current position in the filenames array. Defaults to 0.
-   * @returns {void}
-   */
+
   function onCompleted(filenames, index) {
     setProgressbarVisible(false);
     if (!filenames.length) {

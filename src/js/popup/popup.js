@@ -81,24 +81,11 @@ let currentColors = [];
 
 
 
-
-/**
- * Stores data in Chrome Sync Storage.
- *
- * @return {void}
- */
-function storeData() {
+function saveDataToSyncStorage() {
   chrome.storage.sync.set(data);
 }
 
 
-/**
- * Sets the text of a div element and applies an optional animation.
- *
- * @param {string} s - The text to set.
- * @param {string} [animation] - The animation class to apply (optional).
- * @return {void} - No return value.
- */
 function setLabelText(s, animation) {
   divText.innerText = s;
   if (s) {
@@ -116,12 +103,6 @@ function setLabelText(s, animation) {
 
 
 
-/**
- * Function to grab colors and update the UI.
- *
- * @function onGrabColorsButtonClicked
- * @returns {void}
- */
 const onGrabColorsButtonClicked = (tabId) => {
   setLabelText('');
   showDiv(divPalette);
@@ -163,11 +144,8 @@ function updateHtmlDataThemeAttributeAndToggleIcon() {
   document.querySelector('html').setAttribute('data-theme', data.currentTheme);
 }
 
-/**
- * Render the CSS custom property map.
- *
- * @return {string} The rendered CSS custom property map as a string.
- */
+
+
 function renderCSSCustomPropertyMap() {
   const buf = [];
   const map = grabbedData.cssCustomProperties;
@@ -187,13 +165,8 @@ function renderCSSCustomPropertyMap() {
 const ALLOWED_URL_PATTERNS = ['http://*/*', 'https://*/*', 'ftp://*/*', 'file://*/*'];
 const DISALLOWED_URL_REGEX = [/^https?:\/\/chrome.google.com\/.*$/];
 
-/**
- * Checks if a given URL is allowed based on a set of patterns.
- *
- * @param {string} url - The URL to be checked.
- *
- * @return {boolean} - Returns true if the URL is allowed, otherwise false.
- */
+
+
 function isUrlAllowed(url) {
   let regExp, index;
   for (index = DISALLOWED_URL_REGEX.length - 1; index >= 0; index--) {
@@ -225,11 +198,7 @@ function setColorActionsVisibility(div) {
 }
 
 /**
- * Show a specific div by removing the 'hidden' class and hiding all other divs.
- *
- * @param {HTMLElement} div - The div element to be shown.
- *
- * @return {void}
+ * Show a specific div by removing the 'hidden' class and hiding all other main divs.
  */
 function showDiv(div) {
   if (div===divDummy) {
@@ -240,45 +209,24 @@ function showDiv(div) {
   setColorActionsVisibility(div);
 }
 
-/**
- * Checks if the palette div is visible or hidden.
- *
- * @returns {boolean} - Whether the palette div is visible (false) or hidden (true).
- */
-function isPalleteDivVisible(){
+
+function isPaletteDivVisible(){
   return !divPalette.classList.contains('hidden');
 }
 
-/**
- * Checks if the picker history div is visible.
- *
- * @returns {boolean} - Indicates whether the picker history div is visible or not.
- */
+
 function isPickerHistoryDivVisible(){
   return !divPickerHistory.classList.contains('hidden');
 }
 
-/**
- * Checks if the palette or picker history div is currently visible.
- *
- * @returns {boolean} Returns true if either the palette div or the picker history div is visible, otherwise returns false.
- */
+
 function isPalleteOrPickerHistoryDivVisible(){
-  return isPalleteDivVisible() || isPickerHistoryDivVisible();
+  return isPaletteDivVisible() || isPickerHistoryDivVisible();
 }
 
 
 
-
-
-
-/**
- * Convert a hexadecimal color code to RGB/RGBA format.
- *
- * @param {string} hex - The hexadecimal color code to convert.
- * @return {string} The RGB or RGBA value converted from the hexadecimal color code.
- */
-function hexToRgb(hex)  {
+function convertHexToRGB(hex)  {
   if (!hex.includes('#')) {
     return hex;
   }
@@ -303,12 +251,7 @@ function hexToRgb(hex)  {
 }
 
 
-/**
- * Handles the click event on the ruler button.
- * Toggles the visibility of the ruler based on the current tab.
- *
- * @return {boolean} - Returns true if the ruler is currently visible, false otherwise.
- */
+
 function onRulerButtonClicked() {
   const vis = toogleRulerVisibility(currentTab.id);
   if (vis) {
@@ -321,12 +264,8 @@ function onRulerButtonClicked() {
   }
 }
 
-/**
- * Function for handling the click event of the toggle design mode button.
- * @async
- * @function onToggleDesignModeButtonClicked
- * @returns {Promise<void>} A promise that resolves once the design mode is toggled and the UI is updated.
- */
+
+
 async function onToggleDesignModeButtonClicked() {
   showDiv(divDummy);
   toggleDesignMode(currentTab.id).then(res => {
@@ -344,8 +283,6 @@ async function onToggleDesignModeButtonClicked() {
  * Sets the maximum width and height for the div resizer based on the active display's work area.
  * Initializes the div resizer with the maximum width and height.
  * Shows the div resizer on the screen.
- *
- * @return {Promise<void>} A Promise that resolves when the div resizer is displayed.
  */
 async function onResizerButtonClicked() {
   let maxWidth = 10240;
@@ -363,17 +300,12 @@ async function onResizerButtonClicked() {
   showDiv(divResizer);
 }
 
-function onShowClearCacheButtonClicked(){
-  prepareClearCachePanel();
+async function onShowClearCacheButtonClicked() {
+  await prepareClearCachePanel();
   showDiv(divClearCache);
 }
 
-/**
- * Handles the click event of the "Cleaner" button.
- * It shows a specified div, cleans the current page, and sets the label text with the number of items removed.
- *
- * @returns {Promise<number>} The number of items removed from the page.
- */
+
 async function onCleanerButtonClicked() {
   showDiv(divDummy);
   const count = await cleanPage(currentTab.id);
@@ -420,32 +352,20 @@ async function onCaptureScreenButtonClicked() {
 }
 
 
-/**
- * Toggles the theme and performs necessary actions when the theme toggle button is clicked.
- * Updates the current theme, updates HTML data-theme attribute, toggles the theme icon, and stores the updated data.
- *
- * @returns {void}
- */
+
 async function onToggleThemeButtonClicked() {
   data.currentTheme = data.currentTheme === "light" ? "dark" : "light";
   updateHtmlDataThemeAttributeAndToggleIcon();
-  storeData();
+  saveDataToSyncStorage();
 }
 
 
-/**
- * Executes when the user clicks on the "Copy Values" button.
- * Copies the color values to the clipboard.
- * If the palette or picker history div is not visible, it shows the palette div.
- *
- * @async
- * @returns {Promise<void>} Returns a promise that resolves when the operation is completed.
- */
+
 async function onCopyValuesButtonClicked() {
   if (!isPalleteOrPickerHistoryDivVisible()) {
     showDiv(divPalette);
   }
-  const colorArr = isPalleteDivVisible() ? currentColors : pickerHistory;
+  const colorArr = isPaletteDivVisible() ? currentColors : pickerHistory;
   const buf = [];
   for (const color of colorArr) {
     buf.push(`${color.rgba}`);
@@ -455,11 +375,7 @@ async function onCopyValuesButtonClicked() {
     .then(() => setLabelText(`Data copied to clipboard.`));
 }
 
-/**
- * Copies CSS color custom properties to clipboard and displays them on the page.
- *
- * @returns {Promise<void>} A promise that resolves when the custom properties are copied to clipboard.
- */
+
 async function onCopyCustomPropertiesClicked() {
   const s = renderCSSCustomPropertyMap();
   showDiv(divDummy);
@@ -478,18 +394,12 @@ async function onCopyCustomPropertiesClicked() {
 }
 
 
-/**
- * Copies the HTML content of a palette or picker history div to the clipboard.
- *
- * @async
- * @function onCopyHtmlButtonClicked
- * @returns {Promise<void>} Promise that resolves when the HTML is copied to the clipboard.
- */
+
 async function onCopyHtmlButtonClicked() {
   if (!isPalleteOrPickerHistoryDivVisible()) {
     showDiv(divPalette);
   }
-  const box = isPalleteDivVisible() ? divPalette.innerHTML : divPickerHistory.innerHTML;
+  const box = isPaletteDivVisible() ? divPalette.innerHTML : divPickerHistory.innerHTML;
   const html = `
   <html lang="en" data-theme="light">
     <style>
@@ -528,17 +438,12 @@ async function onCopyHtmlButtonClicked() {
 }
 
 
-/**
- * Handles the event when the "Copy Image" button is clicked.
- * If the palette or picker history div is not visible, it will be displayed.
- * Creates a canvas with the current colors or picker history.
- * Copies the canvas as an image to the clipboard.
- */
+
 async function onCopyImageButtonClicked() {
   if (!isPalleteOrPickerHistoryDivVisible()) {
     showDiv(divPalette);
   }
-  const colorArr = isPalleteDivVisible() ? currentColors : pickerHistory;
+  const colorArr = isPaletteDivVisible() ? currentColors : pickerHistory;
   const canvas = createColorImageCanvas(colorArr);
   // Copy canvas to blob
   canvas.toBlob(blob => {
@@ -553,14 +458,7 @@ async function onCopyImageButtonClicked() {
 }
 
 
-/**
- * Handle the click event of the eye dropper button.
- * Hide the palette, open the eye dropper, and perform actions based on the result.
- * @async
- * @function onEyeDropperButtonClicked
- *
- * @returns {Promise<void>} - A promise that resolves when all actions are completed.
- */
+
 async function onEyeDropperButtonClicked() {
   divPalette.classList.add("hidden");
   const eyeDropper = new EyeDropper();
@@ -571,7 +469,7 @@ async function onEyeDropperButtonClicked() {
       const color = result.sRGBHex;
       const alreadyPicked = pickerHistory.filter(c => c.hex === color).length;
       if (!alreadyPicked) {
-        pickerHistory.push({hex: color, rgba: hexToRgb(color)});
+        pickerHistory.push({hex: color, rgba: convertHexToRGB(color)});
       }
 
       navigator.clipboard
@@ -587,11 +485,7 @@ async function onEyeDropperButtonClicked() {
 }
 
 
-/**
- * Initializes the event listeners for various buttons.
- *
- * @return {void}
- */
+
 function initListener() {
   btnRescan.addEventListener("click", onGrabColorsButtonClicked);
   btnRuler.addEventListener("click", onRulerButtonClicked);

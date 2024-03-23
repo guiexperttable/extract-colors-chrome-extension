@@ -11,14 +11,7 @@ if (!window['screenCaptureLoaded']) {
 
 
 
-  /**
-   * Scrolls the window and the element with scrollTo method to the given X and Y coordinates.
-   *
-   * @param {number} x - The X coordinate to scroll to.
-   * @param {number} y - The Y coordinate to scroll to.
-   *
-   * @return {undefined}
-   */
+
   function scrollToXY(x, y) {
     window.scrollTo(x, y);
     elementWithScrollToFn.scrollTo(x, y);
@@ -26,15 +19,7 @@ if (!window['screenCaptureLoaded']) {
 
 
 
-
-  /**
-   * Retrieves the scroll position of the window or element based on the given properties.
-   *
-   * @param {string} windowProperty - The property name representing the scroll position of the window.
-   * @param {string} elementProperty - The property name representing the scroll position of the element.
-   * @returns {number} The scroll position of the window or element.
-   */
-  function getScroll(windowProperty, elementProperty) {
+  function getScrollPosition(windowProperty, elementProperty) {
     if (window[windowProperty] > 0) {
       return window[windowProperty];
     }
@@ -49,22 +34,14 @@ if (!window['screenCaptureLoaded']) {
     return scrollYSource[windowProperty];
   }
 
-  /**
-   * Retrieves the vertical scroll position of the given element.
-   *
-   * @return {number} - The vertical scroll position of the element.
-   */
+
   function getScrollY() {
-    return getScroll('scrollY', 'scrollTop');
+    return getScrollPosition('scrollY', 'scrollTop');
   }
 
-  /**
-   * Retrieves the horizontal scroll offset of an element.
-   *
-   * @return {number} - The horizontal scroll offset of the element.
-   */
+
   function getScrollX() {
-    return getScroll('scrollX', 'scrollLeft');
+    return getScrollPosition('scrollX', 'scrollLeft');
   }
 
   function findHighestElement() {
@@ -82,19 +59,10 @@ if (!window['screenCaptureLoaded']) {
     return largestElement;
   }
 
-  /**
-   * @function onMessage
-   * @description Handles incoming messages
-   *
-   * @param {Object} message - The message data
-   * @param {Object} sender - The sender of the message
-   * @param {Function} callback - The callback function to be called after processing the message
-   *
-   * @return {boolean} - Returns true if the message is known and processed successfully, false otherwise
-   */
+
   function onMessage(message, sender, callback) {
     if (message.messageType === MSG_TYPE_SCROLLPAGE) {
-      getPositions(callback);
+      takeFullPageScreenshot(callback);
       return true;
     }
     if (message.messageType === MSG_TYPE_LOGGING) {
@@ -105,13 +73,8 @@ if (!window['screenCaptureLoaded']) {
   }
 
 
-  /**
-   * Calculates the maximum value from a given array of non-empty numbers.
-   *
-   * @param {number[]} nums - An array containing non-empty numbers.
-   * @return {number} - The maximum value from the given array.
-   */
-  function getMaxNonEmpty(nums) {
+
+  function findMax(nums) {
     return Math.max(...nums.filter(Boolean));
   }
 
@@ -120,13 +83,6 @@ if (!window['screenCaptureLoaded']) {
    * Returns an array of dimensions based on the given dimension parameter.
    *
    * @param {string} dimension - The dimension ("Width" or "Height") to retrieve the dimensions for.
-   *
-   * @return {array} - An array containing the following dimensions in order:
-   * - The client dimension of the document element (document.documentElement).
-   * - The scroll dimension of the body element (document.body) or 0 if body is null.
-   * - The scroll dimension of the document element (document.documentElement).
-   * - The offset dimension of the body element (document.body) or 0 if body is null.
-   * - The offset dimension of the document element (document.documentElement).
    */
   function getDimensions(dimension) {
     const body = document.body;
@@ -141,20 +97,7 @@ if (!window['screenCaptureLoaded']) {
 
 
 
-  /**
-   * Calculates the arrangements of windows within a given total area.
-   *
-   * @param {number} totalWidth - The total width of the area.
-   * @param {number} totalHeight - The total height of the area.
-   * @param {number} windowWidth - The width of each window.
-   * @param {number} windowHeight - The height of each window.
-   * @param {object} scrollPads - The padding for scrolling within the area.
-   * @param {number} scrollPads.top - The top padding for scrolling.
-   * @param {number} scrollPads.bottom - The bottom padding for scrolling.
-   *
-   * @return {Array} - An array of window arrangements with their positions and dimensions.
-   */
-  function calculateArrangements(totalWidth, totalHeight, windowWidth, windowHeight, scrollPads) {
+  function calculateScrollArrangements(totalWidth, totalHeight, windowWidth, windowHeight, scrollPads) {
 
     if (totalWidth <= windowWidth && totalHeight <= windowHeight) {
       return [{
@@ -238,12 +181,8 @@ if (!window['screenCaptureLoaded']) {
   }
 
 
-  /**
-   * Retrieves the positions of elements on the page in a specific arrangement.
-   * @param {function} callback - Optional callback function to execute after capturing positions.
-   * @returns {void}
-   */
-  async function getPositions(callback) {
+
+  async function takeFullPageScreenshot(callback) {
     const he = findHighestElement();
     elementWithScrollToFn = he === document.documentElement ? document.documentElement : he.parentElement;
 
@@ -256,14 +195,14 @@ if (!window['screenCaptureLoaded']) {
     const widths = [he.clientWidth, ...getDimensions('Width')];
     const heights = [he.clientHeight, ...getDimensions('Height')];
 
-    const totalWidth = getMaxNonEmpty(widths);
-    const totalHeight = getMaxNonEmpty(heights);
+    const totalWidth = findMax(widths);
+    const totalHeight = findMax(heights);
 
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
     const scrollPads = {top: 200, bottom: 100};
-    const arrangements = calculateArrangements(totalWidth, totalHeight, windowWidth, windowHeight, scrollPads);
+    const arrangements = calculateScrollArrangements(totalWidth, totalHeight, windowWidth, windowHeight, scrollPads);
 
     const fns = arrangements.map(
       (a, idx) => {
