@@ -30,6 +30,8 @@
 
       --border-radius: 9px;
       --border-radius-plus-1: 10px;
+
+      --svg-tree: #22c55d;
     }
 
     body, html {
@@ -136,6 +138,19 @@
 
     .box.inactive .inner > :nth-child(2){color: var(--no-value-text)}
 
+    .svg-snow {
+      position: relative;
+      fill: var(--border-cyan);
+      top: -88px;
+      left: 2px;
+    }
+    .svg-tree {
+      position: relative;
+      fill: var(--svg-tree);
+      top: -88px;
+      left: 2px;
+    }
+
   </style>
 </head>
 <body>
@@ -144,11 +159,14 @@
 </div>
 <script>
 
+  const svgSnow = '<svg class="svg-snow" xmlns="http://www.w3.org/2000/svg" height="17" viewBox="0 -960 960 960" width="17"><path d="M440-80v-166L310-118l-56-56 186-186v-80h-80L174-254l-56-56 128-130H80v-80h166L118-650l56-56 186 186h80v-80L254-786l56-56 130 128v-166h80v166l130-128 56 56-186 186v80h80l186-186 56 56-128 130h166v80H714l128 130-56 56-186-186h-80v80l186 186-56 56-130-128v166h-80Z"/></svg>;'
+  const svgTree = '<svg class="svg-tree" xmlns="http://www.w3.org/2000/svg" height="17" viewBox="0 -960 960 960" width="17"><path d="M558-80H402v-160H120l160-240h-80l280-400 280 400h-80l160 240H558v160ZM270-320h160-76 252-76 160-420Zm0 0h420L530-560h76L480-740 354-560h76L270-320Z"/></svg>';
+
   const data = [
-    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, snow:true },
     { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
     { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, snow:true },
     { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
     { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
     { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
@@ -160,7 +178,7 @@
     { clazz: 'purple',  active: true, selected: true, values: {top: '101', bottom:'25', center:'ARRI S60'}},
     { clazz: 'purple',  active: true, selected: true, values: {top: '101', bottom:'25', center:'ARRI S60'}},
     { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, snow:true },
     { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
     { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
     { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
@@ -168,11 +186,11 @@
     { clazz: 'red',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
 
     { clazz: 'red',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, snow:true },
     { clazz: 'green',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, snow:true },
     { clazz: 'green',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, snow:true },
     { clazz: 'green',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
     { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
     { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
@@ -185,9 +203,9 @@
     { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
     { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
     { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
-    { clazz: 'green',  active: false, selected: false, values: {top: '101', bottom:'0', center:''}},
-    { clazz: 'green',  active: false, selected: false, values: {top: '101', bottom:'0', center:''}},
-    { clazz: 'green',  active: false, selected: false, values: {top: '101', bottom:'0', center:''}},
+    { clazz: 'green',  active: false, selected: false, values: {top: '101', bottom:'0', center:''}, tree:true },
+    { clazz: 'green',  active: false, selected: false, values: {top: '101', bottom:'0', center:''}, tree:true },
+    { clazz: 'green',  active: false, selected: false, values: {top: '101', bottom:'0', center:''}, tree:true },
   ];
 
   const main = document.querySelector(".main");
@@ -207,7 +225,7 @@
     div.className = classes.join(' ');
     let {top, center, bottom} = item.values;
     if (!center) center = '---';
-    div.innerHTML = `
+    let s = `
     <div class="inner-bg">
       <div class="inner">
         <div>${top}</div>
@@ -216,6 +234,13 @@
       </div>
     </div>
     `;
+    if (item.snow){
+      s = s + svgSnow;
+    }
+    if (item.tree){
+      s = s + svgTree;
+    }
+    div.innerHTML = s;
 
     selectionDiv.appendChild(div);
     main.appendChild(selectionDiv);
