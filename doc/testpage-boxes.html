@@ -280,7 +280,7 @@
     div.className = classes.join(' ');
     let {top, center, bottom} = item.values;
     if (!center) center = '━━━━';
-    let buf = `
+    let buf = [`
     <div class="inner-bg">
       <div class="inner">
         <div>${top}</div>
@@ -289,7 +289,7 @@
       </div>
     </div>
     <div class="relative">
-    `;
+    `];
     if (item.snow){
       buf.push(svgSnow);
     }
@@ -306,7 +306,7 @@
       buf.push('<div class="exclamation">!</div>');
     }
     buf.push('</div>');
-    div.innerHTML = buf;
+    div.innerHTML = buf.join('');
 
     selectionDiv.appendChild(div);
     main.appendChild(selectionDiv);
