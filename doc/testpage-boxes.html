@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0">
+  <title>Div Containers</title>
+  <style>
+    html {
+      --main-bg: #15151a;
+      --main-text: #f1f1f1;
+
+      --border-blue: #4c53ff;
+      --border-cyan: #2c96e3;
+      --border-purple: #8a3cc8;
+      --border-red: #ff6c4c;
+      --border-green: #3fc83c;
+
+
+      --border-inactive-blue: #07699b;
+      --border-inactive-cyan: #3c41c4;
+      --border-inactive-purple: #55257c;
+      --border-inactive-red: #9b422f;
+      --border-inactive-green: #348b35;
+
+      --border-selected: #fde047;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      border: 0;
+      padding: 0;
+      background-color: var(--main-bg);
+      color: var(--main-text);
+      display: block;
+    }
+
+    .content {
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      place-items: center;
+      background-color: transparent;
+    }
+
+
+    .main {
+      width: 850px;
+      height: 390px;
+      display: inline-flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      align-items: flex-start;
+    }
+
+    .selection-div {
+      width: 76px;
+      height: 91px;
+      border-bottom-width: 1px;
+      border-style: solid;
+      border-radius: 12px;
+      border-color: transparent;
+      padding: 1px;
+    }
+    .selection-div.selected {
+      border-color: var(--border-selected);
+      outline: 1px #fde04788 dotted;
+      outline-offset: -6px;
+    }
+
+    .box {
+      width: calc(100% - 3px);
+      height: calc(100% - 3px);
+      border-bottom-width: 1px;
+      border-style: solid;
+      border-radius: 10px;
+      display: grid;
+      grid-template-rows: 1fr 18px 1fr;
+    }
+    .box.blue {border-color: var(--border-blue)}
+    .box.cyan {border-color: var(--border-cyan)}
+    .box.purple {border-color: var(--border-purple)}
+    .box.red {border-color: var(--border-red)}
+    .box.green {border-color: var(--border-green)}
+
+    .box.inactive.blue {border-color: var(--border-inactive-blue)}
+    .box.inactive.green {border-color: var(--border-inactive-green)}
+
+    .box > div {
+      display: grid;
+      place-items: center;
+    }
+    .box > :nth-child(1),
+    .box > :nth-child(3) {font-size: 17px;font-weight: bold; font-family: monospace;}
+    .box > :nth-child(2){font-size: 13px;font-weight: normal;font-family: sans-serif;}
+
+    .box.blue > :nth-child(2){background-color: var(--border-blue)}
+    .box.cyan > :nth-child(2){background-color: var(--border-cyan)}
+    .box.purple > :nth-child(2){background-color: var(--border-purple)}
+    .box.red > :nth-child(2){background-color: var(--border-red)}
+    .box.green> :nth-child(2) {background-color: var(--border-green)}
+
+    .box.inactive > :nth-child(2) {background-color: transparent!important;}
+    .box.inactive.blue > :nth-child(2){color: var(--border-inactive-blue)}
+    .box.inactive.cyan > :nth-child(2){color: var(--border-inactive-cyan)}
+    .box.inactive.purple > :nth-child(2){color: var(--border-inactive-purple)}
+    .box.inactive.red > :nth-child(2){color: var(--border-inactive-red)}
+    .box.inactive.green> :nth-child(2) {color: var(--border-inactive-green)}
+
+  </style>
+</head>
+<body>
+<div class="content">
+  <div class="main"></div>
+</div>
+<script>
+
+  const data = [
+    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+
+    { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'purple',  active: true, selected: true, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'purple',  active: true, selected: true, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'red',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'red',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+
+    { clazz: 'red',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'green',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'green',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'green',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
+
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
+    { clazz: 'green',  active: false, selected: false, values: {top: '101', bottom:'0', center:''}},
+    { clazz: 'green',  active: false, selected: false, values: {top: '101', bottom:'0', center:''}},
+    { clazz: 'green',  active: false, selected: false, values: {top: '101', bottom:'0', center:''}},
+  ];
+
+  const main = document.querySelector(".main");
+
+  data.forEach(item => {
+    const selectionDiv = document.createElement("div");
+    selectionDiv.className = 'selection-div';
+    if (item.selected) {
+      selectionDiv.className = selectionDiv.className + ' selected';
+    }
+
+    const div = document.createElement("div");
+    const classes = ['box', item.clazz];
+    if (!item.active) {
+      classes.push('inactive');
+    }
+    div.className = classes.join(' ');
+    let {top, center, bottom} = item.values;
+    if (!center) center = '---';
+    div.innerHTML = `
+    <div>${top}</div>
+    <div>${center}</div>
+    <div>${bottom}</div>
+    `;
+
+    selectionDiv.appendChild(div);
+    main.appendChild(selectionDiv);
+  });
+
+
+</script>
+</body>
+</html>

@@ -234,20 +234,20 @@ function convertHexToRGB(hex)  {
   const length = hex.length;
   const hasAlpha = (length === 8 || length === 4);
 
-  let [r, g, b, a] = hasAlpha ? [
-    hex.substr(0, 2),
-    hex.substr(2, 2),
-    hex.substr(4, 2),
-    hex.substr(6, 2)
-  ] : [
-    hex.substr(0, 2),
-    hex.substr(2, 2),
-    hex.substr(4, 2),
-    'FF'
-  ];
-  [r, g, b, a] = [r, g, b, a].map(val => parseInt(val, 16));
+  let [r, g, b, a] = extractColorsFromHex(hex, hasAlpha);
+  [r, g, b, a] = parseHexToRGB([r, g, b, a]);
 
-  return  hasAlpha ? `rgba(${r}, ${g}, ${b}, ${a / 255})` : `rgb(${r}, ${g}, ${b})`;
+  return hasAlpha ? `rgba(${r}, ${g}, ${b}, ${a / 255})` : `rgb(${r}, ${g}, ${b})`;
+}
+
+function extractColorsFromHex(hex, hasAlpha) {
+  return hasAlpha ?
+    [hex.substring(0, 2), hex.substring(2, 4), hex.substring(4, 6), hex.substring(6, 8)] :
+    [hex.substring(0, 2), hex.substring(2, 4), hex.substring(4, 6), 'FF'];
+}
+
+function parseHexToRGB(colorArray){
+  return colorArray.map(val => parseInt(val, 16));
 }
 
 
