@@ -39,8 +39,8 @@
     }
 
     .content {
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       display: grid;
       place-items: center;
       background-color: transparent;
@@ -48,8 +48,8 @@
 
 
     .main {
-      width: 850px;
-      height: 390px;
+      width: 870px;
+      height: 400px;
       display: inline-flex;
       gap: 6px;
       flex-wrap: wrap;
@@ -68,7 +68,7 @@
     }
     .selection-div.selected {
       border-color: var(--border-selected);
-      outline: 1px #fde04788 dotted;
+      outline: 1px #fde04755 dotted;
       outline-offset: -6px;
     }
 
@@ -79,10 +79,10 @@
       border-style: solid;
       border-radius: 10px;
       display: grid;
-      grid-template-rows: 1fr 18px 1fr;
+      grid-template-rows: 1fr 16px 1fr;
     }
     .box.blue {border-color: var(--border-blue)}
-    .box.cyan {border-color: var(--border-cyan)}
+    .box.cyan {border-color: var(--border-cyan); background: linear-gradient(135deg, #2c96e355, #8884);}
     .box.purple {border-color: var(--border-purple)}
     .box.red {border-color: var(--border-red)}
     .box.green {border-color: var(--border-green)}
