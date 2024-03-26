@@ -24,6 +24,9 @@
       --border-inactive-purple: #55257c;
       --border-inactive-red: #9b422f;
       --border-inactive-green: #348b35;
+      --border-inactive-green-end: #b8ecba;
+      --inactive-green-start-bg: rgba(41, 112, 42, 0.4);
+      --inactive-green-end-bg: #fff2;
 
       --border-selected: #fde047;
       --border-selected-inner-dots: #fde04755;
@@ -108,7 +111,8 @@
 
 
     .box.inactive.blue {background-color: var(--border-inactive-blue)}
-    .box.inactive.green {background-color: var(--border-inactive-green)}
+    .box.inactive.green {background: linear-gradient(135deg, var(--border-inactive-green), var(--border-inactive-green-end)); }
+    .box.inactive.green .inner {background: linear-gradient(135deg, var(--inactive-green-start-bg), var(--inactive-green-end-bg));}
 
     .box .inner-bg {
       width: 100%;
