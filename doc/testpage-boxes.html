@@ -31,7 +31,15 @@
       --border-radius: 9px;
       --border-radius-plus-1: 10px;
 
+      --svg-snow: var(--border-cyan);
       --svg-tree: #22c55d;
+
+      --e1-bg: #ebb305;
+      --e1-color: #0b0b0d;
+      --f-bg: #ef4444;
+      --f-color: #000;
+      --exclamation-bg: #f97315;
+      --exclamation-color: #22150f;
     }
 
     body, html {
@@ -58,7 +66,8 @@
       width: 870px;
       height: 400px;
       display: inline-flex;
-      gap: 4px;
+      column-gap: 1px;
+      row-gap: 6px;
       flex-wrap: wrap;
       align-content: flex-start;
       align-items: flex-start;
@@ -138,17 +147,57 @@
 
     .box.inactive .inner > :nth-child(2){color: var(--no-value-text)}
 
-    .svg-snow {
+
+    .box .relative {
+      width: 0;
+      height: 0;
+      overflow: visible;
       position: relative;
-      fill: var(--border-cyan);
+      z-index: 1000;
+    }
+    .svg-snow {
+      position: absolute;
+      fill: var(--svg-snow);
       top: -88px;
       left: 2px;
     }
     .svg-tree {
-      position: relative;
+      position: absolute;
       fill: var(--svg-tree);
       top: -88px;
       left: 2px;
+    }
+
+    .exclamation, .e1, .f {
+      font-size: 10px;
+      font-weight: bold;
+      min-width: 12px;
+      width: auto;
+      display: inline-flex;
+      justify-content: center;
+      border-radius: 3px;
+      position: absolute;
+    }
+    .exclamation{
+      color: var(--exclamation-color);
+      background-color: var(--exclamation-bg);
+      top: -14px;
+      left: 6px;
+    }
+    .f {
+      color: var(--f-color);
+      background-color: var(--f-bg);
+      top: -88px;
+      left: 56px;
+    }
+    .e1 {
+      color: var(--e1-color);
+      background-color: var(--e1-bg);
+      font-size: 12px;
+      min-width: 18px;
+      min-height: 14px;
+      top: -16px;
+      left: 52px;
     }
 
   </style>
@@ -159,18 +208,18 @@
 </div>
 <script>
 
-  const svgSnow = '<svg class="svg-snow" xmlns="http://www.w3.org/2000/svg" height="17" viewBox="0 -960 960 960" width="17"><path d="M440-80v-166L310-118l-56-56 186-186v-80h-80L174-254l-56-56 128-130H80v-80h166L118-650l56-56 186 186h80v-80L254-786l56-56 130 128v-166h80v166l130-128 56 56-186 186v80h80l186-186 56 56-128 130h166v80H714l128 130-56 56-186-186h-80v80l186 186-56 56-130-128v166h-80Z"/></svg>;'
+  const svgSnow = '<svg class="svg-snow" xmlns="http://www.w3.org/2000/svg" height="17" viewBox="0 -960 960 960" width="17"><path d="M440-80v-166L310-118l-56-56 186-186v-80h-80L174-254l-56-56 128-130H80v-80h166L118-650l56-56 186 186h80v-80L254-786l56-56 130 128v-166h80v166l130-128 56 56-186 186v80h80l186-186 56 56-128 130h166v80H714l128 130-56 56-186-186h-80v80l186 186-56 56-130-128v166h-80Z"/></svg>';
   const svgTree = '<svg class="svg-tree" xmlns="http://www.w3.org/2000/svg" height="17" viewBox="0 -960 960 960" width="17"><path d="M558-80H402v-160H120l160-240h-80l280-400 280 400h-80l160 240H558v160ZM270-320h160-76 252-76 160-420Zm0 0h420L530-560h76L480-740 354-560h76L270-320Z"/></svg>';
 
   const data = [
     { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, snow:true },
     { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
     { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, snow:true },
-    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, e1: true, snow:true },
+    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, e1: true},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, e1: true},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, e1: true},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, exclamation: true},
     { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
     { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
 
@@ -193,16 +242,16 @@
     { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, snow:true },
     { clazz: 'green',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
     { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
 
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
     { clazz: 'green',  active: false, selected: false, values: {top: '101', bottom:'0', center:''}, tree:true },
     { clazz: 'green',  active: false, selected: false, values: {top: '101', bottom:'0', center:''}, tree:true },
     { clazz: 'green',  active: false, selected: false, values: {top: '101', bottom:'0', center:''}, tree:true },
@@ -233,6 +282,7 @@
         <div>${bottom}</div>
       </div>
     </div>
+    <div class="relative">
     `;
     if (item.snow){
       s = s + svgSnow;
@@ -240,6 +290,16 @@
     if (item.tree){
       s = s + svgTree;
     }
+    if (item.e1){
+      s = s + '<div class="e1">E1</div>';
+    }
+    if (item.f){
+      s = s + '<div class="f">F</div>';
+    }
+    if (item.exclamation){
+      s = s + '<div class="exclamation">!</div>';
+    }
+    s = s + '</div>';
     div.innerHTML = s;
 
     selectionDiv.appendChild(div);
