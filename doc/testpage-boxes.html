@@ -11,6 +11,7 @@
       --main-bg: #15151a;
       --main-text: #f1f1f1;
       --no-value-text: #38383c;
+      --no-value-text-green: #40b042;
 
       --border-blue: #4c53ff;
       --border-cyan: #2c96e3;
@@ -150,6 +151,7 @@
     /*.box.inactive.green .inner > :nth-child(2) {color: var(--border-inactive-green)}*/
 
     .box.inactive .inner > :nth-child(2){color: var(--no-value-text)}
+    .box.inactive.green .inner > :nth-child(2){color: var(--no-value-text-green)}
 
 
     .box .relative {
@@ -277,8 +279,8 @@
     }
     div.className = classes.join(' ');
     let {top, center, bottom} = item.values;
-    if (!center) center = '---';
-    let s = `
+    if (!center) center = '━━━━';
+    let buf = `
     <div class="inner-bg">
       <div class="inner">
         <div>${top}</div>
@@ -289,22 +291,22 @@
     <div class="relative">
     `;
     if (item.snow){
-      s = s + svgSnow;
+      buf.push(svgSnow);
     }
     if (item.tree){
-      s = s + svgTree;
+      buf.push(svgTree);
     }
     if (item.e1){
-      s = s + '<div class="e1">E1</div>';
+      buf.push('<div class="e1">E1</div>');
     }
     if (item.f){
-      s = s + '<div class="f">F</div>';
+      buf.push('<div class="f">F</div>');
     }
     if (item.exclamation){
-      s = s + '<div class="exclamation">!</div>';
+      buf.push('<div class="exclamation">!</div>');
     }
-    s = s + '</div>';
-    div.innerHTML = s;
+    buf.push('</div>');
+    div.innerHTML = buf;
 
     selectionDiv.appendChild(div);
     main.appendChild(selectionDiv);
