@@ -82,7 +82,7 @@
     .selection-div {
       width: 76px;
       height: 91px;
-      border-bottom-width: 1px;
+      border-width: 1px;
       border-style: solid;
       border-radius: 12px;
       border-color: transparent;
@@ -281,12 +281,13 @@
     selectionDiv.className = classNames.join(' ');
 
     if (item.active) {
-      selectionDiv.addEventListener('click', () => {
+      selectionDiv.addEventListener('click', (evt) => {
         if (selectionDiv.classList.contains('selected')) {
           selectionDiv.classList.remove('selected');
         } else {
           selectionDiv.classList.add('selected');
         }
+        evt.stopPropagation();
       });
     }
 
