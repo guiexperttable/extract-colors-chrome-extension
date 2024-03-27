@@ -14,14 +14,13 @@
       --no-value-text-green: #40b042;
 
       --border-blue: #4c53ff;
-      --border-cyan: #2c96e3;
+      --border-freezed: #2c96e3;
       --border-purple: #8a3cc8;
       --border-red: #ff6c4c;
       --border-green: #3fc83c;
 
 
       --border-inactive-blue: #07699b;
-      --border-inactive-cyan: #3c41c4;
       --border-inactive-purple: #55257c;
       --border-inactive-red: #9b422f;
       --border-inactive-green: #348b35;
@@ -35,7 +34,7 @@
       --border-radius: 9px;
       --border-radius-plus-1: 10px;
 
-      --svg-snow: var(--border-cyan);
+      --svg-snow: var(--border-freezed);
       --svg-tree: #22c55d;
 
       --e1-bg: #ebb305;
@@ -77,6 +76,9 @@
       align-items: flex-start;
     }
 
+    .pointer{
+      cursor: pointer;
+    }
     .selection-div {
       width: 76px;
       height: 91px;
@@ -104,11 +106,11 @@
 
 
     .box.blue {background: var(--border-blue)}
-    .box.cyan {background: linear-gradient(to bottom right, var(--border-cyan), #fff);}
-    .box.cyan  .inner {background: linear-gradient(135deg, #2c96e355, #8884);}
     .box.purple {background: var(--border-purple)}
     .box.red {background: var(--border-red)}
     .box.green {background: var(--border-green)}
+    .box.freezed {background: linear-gradient(to bottom right, var(--border-freezed), #fff) !important;}
+    .box.freezed  .inner {background: linear-gradient(135deg, #2c96e355, #8884) !important;}
 
 
     .box.inactive.blue {background-color: var(--border-inactive-blue)}
@@ -133,25 +135,28 @@
       display: grid;
       place-items: center;
     }
+
     .box .inner > :nth-child(1),
     .box .inner > :nth-child(3) {font-size: 17px; font-family: monospace;}
-    .box .inner > :nth-child(2){font-size: 12px;  font-family: sans-serif;}
+
+    .box .inner > :nth-child(2) {
+      font-size: 12px;
+      font-family: sans-serif;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
 
     .box.blue .inner > :nth-child(2){background-color: var(--border-blue);}
-    .box.cyan .inner > :nth-child(2){background-color: var(--border-cyan);}
     .box.purple .inner > :nth-child(2){background-color: var(--border-purple);}
     .box.red .inner > :nth-child(2){background-color: var(--border-red);color: #000;}
     .box.green .inner > :nth-child(2) {background-color: var(--border-green); color: #000;}
 
     .box.inactive .inner > :nth-child(2) {background-color: transparent!important;}
-    /*.box.inactive.blue .inner > :nth-child(2){color: var(--border-inactive-blue)}*/
-    /*.box.inactive.cyan .inner > :nth-child(2){color: var(--border-inactive-cyan)}*/
-    /*.box.inactive.purple .inner > :nth-child(2){color: var(--border-inactive-purple)}*/
-    /*.box.inactive.red .inner > :nth-child(2){color: var(--border-inactive-red)}*/
-    /*.box.inactive.green .inner > :nth-child(2) {color: var(--border-inactive-green)}*/
-
     .box.inactive .inner > :nth-child(2){color: var(--no-value-text)}
     .box.inactive.green .inner > :nth-child(2){color: var(--no-value-text-green)}
+
+
 
 
     .box .relative {
@@ -218,66 +223,76 @@
   const svgTree = '<svg class="svg-tree" xmlns="http://www.w3.org/2000/svg" height="17" viewBox="0 -960 960 960" width="17"><path d="M558-80H402v-160H120l160-240h-80l280-400 280 400h-80l160 240H558v160ZM270-320h160-76 252-76 160-420Zm0 0h420L530-560h76L480-740 354-560h76L270-320Z"/></svg>';
 
   const data = [
-    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, snow:true },
-    { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
     { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, e1: true, snow:true },
-    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, e1: true},
-    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, e1: true},
-    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, e1: true},
-    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, exclamation: true},
-    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '102', bottom:'25', center:'ARRI S60'}, freezed:true},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '103', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '104', bottom:'25', center:'ARRI S60'}, e1: true, freezed:true },
+    { clazz: 'blue',  active: true, selected: false, values: {top: '105', bottom:'25', center:'ARRI S60'}, e1: true},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '106', bottom:'25', center:'ARRI S60'}, e1: true},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '107', bottom:'25', center:'ARRI S60'}, e1: true},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '108', bottom:'25', center:'ARRI S60'}, exclamation: true},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '109', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'purple',  active: true, selected: false, values: {top: '201', bottom:'25', center:'Astera Titan'}},
 
-    { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'purple',  active: true, selected: true, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'purple',  active: true, selected: true, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, snow:true },
-    { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'purple',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'red',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'red',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
+    { clazz: 'purple',  active: true, selected: false, values: {top: '201.1', bottom:'55', center:'Astera Titan'}},
+    { clazz: 'purple',  active: true, selected: true, values: {top: '201.2', bottom:'55', center:'Astera Titan'}},
+    { clazz: 'purple',  active: true, selected: true, values: {top: '201.3', bottom:'55', center:'Astera Titan'}},
+    { clazz: 'purple',  active: true, selected: false, values: {top: '201.4', bottom:'55', center:'Astera Titan'}},
+    { clazz: 'purple',  active: true, selected: false, values: {top: '201.5', bottom:'55', center:'Astera Titan'}, freezed:true },
+    { clazz: 'purple',  active: true, selected: false, values: {top: '201.6', bottom:'55', center:'Astera Titan'}},
+    { clazz: 'purple',  active: true, selected: false, values: {top: '208', bottom:'55', center:'Astera Titan'}},
+    { clazz: 'purple',  active: true, selected: false, values: {top: '207', bottom:'55', center:'Astera Titan'}},
+    { clazz: 'red',  active: true, selected: false, values: {top: '301', bottom:'25', center:'Aputure 600d'}},
+    { clazz: 'red',  active: true, selected: false, values: {top: '302', bottom:'100', center:'Aputure 600d'}},
 
-    { clazz: 'red',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, snow:true },
-    { clazz: 'green',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, snow:true },
-    { clazz: 'green',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'cyan',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}, snow:true },
-    { clazz: 'green',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'blue',  active: true, selected: false, values: {top: '101', bottom:'25', center:'ARRI S60'}},
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
+    { clazz: 'red',  active: true, selected: false, values: {top: '303', bottom:'55', center:'Aputure 600d'}},
+    { clazz: 'red',  active: true, selected: false, values: {top: '304', bottom:'100', center:'Aputure 600d'}, freezed:true },
+    { clazz: 'green',  active: true, selected: false, values: {top: '401', bottom:'100', center:'Kino FreeStyle'}},
+    { clazz: 'green',  active: true, selected: false, values: {top: '402', bottom:'100', center:'Kino FreeStyle'}, freezed:true },
+    { clazz: 'green',  active: true, selected: false, values: {top: '405', bottom:'55', center:'Kino FreeStyle'}},
+    { clazz: 'green',  active: true, selected: false, values: {top: '403', bottom:'55', center:'Kino FreeStyle'}, freezed:true },
+    { clazz: 'green',  active: true, selected: false, values: {top: '404', bottom:'55', center:'Kino FreeStyle'}},
+    { clazz: 'blue',  active: true, selected: false, values: {top: '901', bottom:'25', center:'Kino FreeStyle'}},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '902', bottom:'25', center:''}, f: true},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '903', bottom:'25', center:''}, f: true},
 
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
-    { clazz: 'blue',  active: false, selected: false, values: {top: '101', bottom:'25', center:''}, f: true},
-    { clazz: 'green',  active: false, selected: false, values: {top: '101', bottom:'0', center:''}, tree:true },
-    { clazz: 'green',  active: false, selected: false, values: {top: '101', bottom:'0', center:''}, tree:true },
-    { clazz: 'green',  active: false, selected: false, values: {top: '101', bottom:'0', center:''}, tree:true },
+    { clazz: 'blue',  active: false, selected: false, values: {top: '904', bottom:'25', center:''}, f: true},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '905', bottom:'75', center:''}, f: true},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '909', bottom:'25', center:''}, f: true},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '906', bottom:'25', center:''}, f: true},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '907', bottom:'75', center:''}, f: true},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '908', bottom:'25', center:''}, f: true},
+    { clazz: 'blue',  active: false, selected: false, values: {top: '910', bottom:'25', center:''}, f: true},
+    { clazz: 'green',  active: false, selected: false, values: {top: '131', bottom:'0', center:''}, tree:true },
+    { clazz: 'green',  active: false, selected: false, values: {top: '131', bottom:'0', center:''}, tree:true },
+    { clazz: 'green',  active: false, selected: false, values: {top: '131', bottom:'0', center:''}, tree:true },
   ];
 
   const main = document.querySelector(".main");
 
   data.forEach(item => {
+
+    // outer div:
     const selectionDiv = document.createElement("div");
-    selectionDiv.className = 'selection-div';
-    if (item.selected) {
-      selectionDiv.className = selectionDiv.className + ' selected';
+    const classNames = ['selection-div', item.selected?'selected':'', item.active?'pointer': ''];
+    selectionDiv.className = classNames.join(' ');
+
+    if (item.active) {
+      selectionDiv.addEventListener('click', () => {
+        if (selectionDiv.classList.contains('selected')) {
+          selectionDiv.classList.remove('selected');
+        } else {
+          selectionDiv.classList.add('selected');
+        }
+      });
     }
 
+    // box div:
     const div = document.createElement("div");
-    const classes = ['box', item.clazz];
-    if (!item.active) {
-      classes.push('inactive');
-    }
+    const classes = ['box', item.clazz, (!item.active)?'inactive':'', item.freezed?'freezed':''];
     div.className = classes.join(' ');
+
+    // inner div with 3 sub divs:
     let {top, center, bottom} = item.values;
     if (!center) center = '━━━━';
     let buf = [`
@@ -290,7 +305,7 @@
     </div>
     <div class="relative">
     `];
-    if (item.snow){
+    if (item.freezed){
       buf.push(svgSnow);
     }
     if (item.tree){
@@ -310,7 +325,8 @@
 
     selectionDiv.appendChild(div);
     main.appendChild(selectionDiv);
-  });
+  }
+  );
 
 
 </script>
