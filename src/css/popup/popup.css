@@ -339,3 +339,8 @@ a {
 .btn-right-div > *{
     margin-left: auto;
 }
+.button-div {
+    display: grid;
+    grid-template-columns: 1fr 155px;
+    align-items: center;
+}
