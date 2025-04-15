@@ -34,6 +34,8 @@ const btnCopyImage = document.querySelector(".copy-img-btn");
 const btnCopyValues = document.querySelector(".copy-values-btn");
 const btnCopyHtml = document.querySelector(".copy-html-btn");
 
+// about:
+const btnAbout = document.querySelector(".show-about-btn");
 
 // divs:
 const divText = document.querySelector(".text-div");
@@ -42,6 +44,7 @@ const divActions = document.querySelector(".actions-div");
 const divPalette = document.querySelector(".palette-div");
 const divResizer = document.querySelector(".resizer-div");
 const divClearCache = document.querySelector(".clear-cache-div");
+const divAbout = document.querySelector(".about-div");
 const divPickerHistory = document.querySelector(".picker-div");
 const divRuler = document.querySelector(".ruler-div");
 const divScreenCapture = document.querySelector(".screen-capture-div");
@@ -305,6 +308,10 @@ async function onShowClearCacheButtonClicked() {
   showDiv(divClearCache);
 }
 
+async function onAboutButtonClicked() {
+  showDiv(divAbout);
+}
+
 
 async function onCleanerButtonClicked() {
   showDiv(divDummy);
@@ -502,6 +509,7 @@ function initListener() {
   btnCopyHtml.addEventListener("click", onCopyHtmlButtonClicked);
   btnCopyImage.addEventListener("click", onCopyImageButtonClicked);
   btnEyeDropper.addEventListener("click", onEyeDropperButtonClicked);
+  btnAbout.addEventListener("click", onAboutButtonClicked);
 
   document
     .querySelectorAll('.activable')

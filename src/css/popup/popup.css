@@ -246,6 +246,22 @@ a {
     font-size: 16px;
 }
 
+.about-div {
+    padding: 16px;
+    h3 {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+    h4 {
+        font-size: 18px;
+        margin-bottom: 18px;
+    }
+    p {
+        font-size: 16px;
+        margin-bottom: 6px;
+    }
+}
+
 .ge-error-color {
     color: var(--ge-body-error-color);
 }
