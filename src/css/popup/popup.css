@@ -70,6 +70,7 @@ body {
 .dummy-div,
 .picker-div,
 .clear-cache-div,
+.about-div,
 .screen-capture-div,
 .ruler-div  {
     margin-left: 16px;
@@ -162,6 +163,23 @@ svg path {
 .hidden {
     display: none !important;
 }
+
+.display-only-for-ggl-chrm,
+.display-only-for-mcrsft-dg {
+    display: none;
+}
+body.mcrsft-dg {
+    .display-only-for-mcrsft-dg {
+        display: block;
+    }
+}
+body.ggl-chrm {
+    .display-only-for-ggl-chrm {
+        display: block;
+    }
+}
+
+
 .inline {
     display: inline;
 }
@@ -172,10 +190,10 @@ svg path {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 6px;
+    gap: 1px;
     position: relative;
 }
-.toggle-theme-btn {
+.show-about-btn {
     margin-left: auto;
 }
 .tools-label {

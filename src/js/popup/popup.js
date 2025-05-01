@@ -49,7 +49,9 @@ const divPickerHistory = document.querySelector(".picker-div");
 const divRuler = document.querySelector(".ruler-div");
 const divScreenCapture = document.querySelector(".screen-capture-div");
 const divDummy = document.querySelector(".dummy-div");
-const mainDivs = [divPalette, divResizer, divPickerHistory, divDummy, divRuler, divClearCache, divScreenCapture];
+const mainDivs = [
+  divPalette, divResizer, divPickerHistory, divDummy, divRuler, divClearCache, divScreenCapture, divAbout
+];
 const downLoadImgLink = document.querySelector(".download-img-a");
 
 const inputRemoveAds = document.querySelector('input[name="removeAds"]');
@@ -601,6 +603,7 @@ function initDisplayMessageListener() {
       }
     });
   chrome.runtime.sendMessage("requestDisplayInfo", () => {
+    // ignore
   });
 }
 
@@ -613,9 +616,18 @@ function initDisplayMessageListener() {
  */
 async function go() {
   try {
+
+    if (navigator?.userAgentData?.brands?.length) {
+      const bodyClass = navigator.userAgentData.brands[0].brand
+        .replace(/\s/g, '-')
+        .replace(/[aeiou]/gi, '')
+        .toLowerCase();
+      document.body.classList.add(bodyClass);
+    }
+
     const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
     if (!isUrlAllowed(tab.url)) {
-      divPalette.innerHTML = ``;
+      divPalette.innerHTML = '';
       divActions.innerHTML = '';
       return;
     }
