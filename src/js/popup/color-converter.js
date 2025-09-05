@@ -62,6 +62,97 @@ export function oklchToString(l, c, h, alpha) {
   return `oklch(${ls}% ${cs} ${hs})`;
 }
 
+/**
+ * Convert an RGBA color to an HSLA CSS color string.
+ *
+ * This function takes red, green, blue, and alpha components in the RGBA color space and converts
+ * them into an HSLA-formatted string compatible with CSS (e.g., "hsla(210, 50%, 40%, 0.75)").
+ *
+ * How it works:
+ * - r, g, b are normalized to [0, 1] by dividing by 255.
+ * - Computes max and min among r, g, b to derive lightness (L) and the chroma delta.
+ * - Saturation (S) is computed from the delta and lightness using the standard HSL formula.
+ * - Hue (H) is determined by which channel is the maximum, with wrap-around handling.
+ * - The resulting H, S, L are rounded to integer degrees/percentages, and A is rounded
+ *   to two decimal places for a compact, CSS-friendly output.
+ *
+ * Notes and expectations:
+ * - Input ranges:
+ *   - r, g, b: expected 0–255 (integers are typical, but non-integers are accepted and normalized).
+ *   - a: expected 0.0–1.0.
+ * - No clamping is performed: out-of-range inputs will be used as-is and may produce unexpected results.
+ *   Clamp or validate inputs at call-site if necessary.
+ * - Grayscale colors (r == g == b) yield zero saturation and an undefined hue by definition; this
+ *   implementation returns H = 0 for those cases (a common, acceptable convention).
+ * - Output formatting:
+ *   - H: integer degrees in [0, 360]
+ *   - S, L: integer percentages in [0, 100]
+ *   - A: rounded to 2 decimal places (e.g., 0.7 -> 0.70 becomes 0.7 after parseFloat)
+ *
+ * Performance:
+ * - Runs in constant time (O(1)) and allocates only a few primitives; suitable for hot paths
+ *   such as converting palettes or rendering UI previews.
+ *
+ * Example:
+ * ```javascript
+ * // Convert a semi-transparent red from RGBA to HSLA:
+ * const cssHsla = rgbaToHslaString(255, 0, 0, 0.5);
+ * // cssHsla === "hsla(0, 100%, 50%, 0.5)"
+ *
+ * // A mid-gray with full opacity (S expected to be 0, H conventionally 0):
+ * const gray = rgbaToHslaString(128, 128, 128, 1);
+ * // gray === "hsla(0, 0%, 50%, 1)"
+ *
+ * // Use in the DOM:
+ * const el = document.createElement('div');
+ * el.style.backgroundColor = rgbaToHslaString(30, 144, 255, 0.75); // "hsla(207, 100%, 56%, 0.75)"
+ * document.body.appendChild(el);
+ * ```
+ *
+ * @function rgbaToHslaString
+ * @param {number} r - Red channel, expected in [0, 255].
+ * @param {number} g - Green channel, expected in [0, 255].
+ * @param {number} b - Blue channel, expected in [0, 255].
+ * @param {number} a - Alpha channel (opacity), expected in [0, 1].
+ * @returns {string} HSLA color string in the form "hsla(H, S%, L%, A)" with H, S, L rounded to integers and A to 2 decimals.
+ * @see https://www.w3.org/TR/css-color-4/#the-hsl-notation
+ */
+export function rgbaToHslaString(r, g, b, a) {
+  if (a===undefined || a===null) a = 1;
+  if (a < 0) a = 0;
+  if (a > 1) a = 1;
+
+  r /= 255;
+  g /= 255;
+  b /= 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+
+  let h = 0, s = 0;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+
+    h /= 6;
+  }
+
+  const H = Math.round(h * 360);
+  const S = Math.round(s * 100);
+  const L = Math.round(l * 100);
+  const A = parseFloat(a.toFixed(2));
+
+  return `hsla(${H},${S}%,${L}%,${A})`;
+}
+
 
 /**
  * Converts RGB color values to OKLab color space.

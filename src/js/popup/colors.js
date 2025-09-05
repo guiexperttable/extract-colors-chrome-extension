@@ -1,4 +1,4 @@
-import {hexToTailwind, oklchToString, rgb2oklch} from "./color-converter.js";
+import {hexToTailwind, oklchToString, rgb2oklch, rgbaToHslaString} from "./color-converter.js";
 
 
 /**
@@ -386,6 +386,7 @@ export function renderColors(colors)  {
     const oklch = rgb2oklch(r, g, b, a);
     const oklchStr = oklchToString(...oklch);
     const tw = hexToTailwind(color.hex);
+    const hslaStr = rgbaToHslaString(r, g, b, a);
     buf.push(`
         <div class="chip">
           <div 
@@ -398,7 +399,8 @@ export function renderColors(colors)  {
               style="background-color: ${color.rgba}"></div>
           <div class="color-box-text hex">${color.hex}</div>
           <div class="color-box-text rgb">${color.rgba}</div>
-          <div class="color-box-text oklch">${oklchStr}</div>`);
+          <div class="color-box-text oklch">${oklchStr}</div>
+          <div class="color-box-text oklch">${hslaStr}</div>`);
     if (tw) {
       buf.push(`<div class="color-box-text tailwind">${tw}</div>`);
     }
