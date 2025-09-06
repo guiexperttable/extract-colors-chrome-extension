@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Privacy Policy – Extract Colors DevTool</title>
+  <meta name="description" content="Privacy Policy for the Extract Colors DevTool Chrome extension in accordance with Chrome Web Store Program Policies." />
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, sans-serif; line-height: 1.55; margin: 0; }
+    header { padding: 24px 16px; border-bottom: 1px solid #e5e7eb; background: #fafafa; }
+    main { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+    h1 { font-size: 1.75rem; margin: 0 0 8px; }
+    h2 { font-size: 1.25rem; margin-top: 2rem; }
+    h3 { font-size: 1.05rem; margin-top: 1.25rem; }
+    p { margin: 0.5rem 0 0.75rem; }
+    ul { margin: 0.5rem 0 1rem 1.25rem; }
+    code, kbd { background: #f3f4f6; padding: 0 0.25em; border-radius: 4px; }
+    .muted { color: #6b7280; font-size: 0.95rem; }
+    nav { margin-top: 8px; font-size: 0.95rem; }
+    nav a { color: #2563eb; text-decoration: none; margin-right: 16px; }
+    nav a:hover { text-decoration: underline; }
+    .disclosure { padding: 12px 12px; background: #f6f8ff; border: 1px solid #e5e7eb; border-radius: 8px; }
+    footer { margin-top: 48px; font-size: 0.9rem; color: #6b7280; }
+    .lang-switch { float: right; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="lang-switch"><a href="./datenschutz.html" hreflang="de">Deutsch</a></div>
+    <h1>Privacy Policy – Extract Colors DevTool</h1>
+    <p class="muted">Effective date: 2025-09-06</p>
+    <nav>
+      <a href="#purpose">Purpose</a>
+      <a href="#collection">Data Collection & Use</a>
+      <a href="#permissions">Permissions</a>
+      <a href="#retention">Retention & Storage</a>
+      <a href="#controls">User Controls</a>
+      <a href="#security">Security</a>
+      <a href="#children">Children</a>
+      <a href="#changes">Changes</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+  <main>
+    <section id="purpose">
+      <h2>Sole Purpose</h2>
+      <p>The extension's sole purpose is to help designers and developers extract, inspect, and organize colors from web pages they choose, and to provide auxiliary visual tools (e.g., ruler, screen capture preview) that assist in color analysis. All processing happens locally in the user's browser. The extension does not track browsing behavior, does not build user profiles, and does not transmit page content or extracted colors to external servers.</p>
+      <div class="disclosure">
+        <strong>Disclosure:</strong>
+        <ul>
+          <li>We do not sell or transfer user data to third parties, except as necessary for the extension’s core functionality where permitted by the Chrome Web Store policies.</li>
+          <li>User data is not used or transferred for purposes unrelated to the extension’s sole purpose.</li>
+          <li>User data is not used or transferred to determine creditworthiness or for lending purposes.</li>
+          <li>No remote code execution or remotely hosted code is used.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="collection">
+      <h2>Data Collection and Use</h2>
+      <p>The extension performs processing locally within the browser to sample colors, display overlays (such as rulers), and generate on-screen previews. The extension does not collect or transmit page content, extracted colors, or browsing history to external servers. No tracking or profiling is performed.</p>
+      <h3>Locally Stored Items</h3>
+      <p>We store the following items locally via <code>chrome.storage</code> to provide a consistent experience:</p>
+      <ul>
+        <li>User preferences (e.g., UI options, last used formats)</li>
+        <li>Saved color palettes and recent color history</li>
+        <li>Tool states (e.g., ruler settings)</li>
+      </ul>
+      <p>Data is scoped to the extension and used only to provide and improve color extraction and related tools.</p>
+    </section>
+
+    <section id="permissions">
+      <h2>Permissions and Justifications</h2>
+      <ul>
+        <li><strong>storage</strong> – Used to save user preferences, saved palettes, recent color history, and tool states. Enables a consistent experience across sessions and devices (if sync is enabled). No personal data is stored. Data is scoped to this extension and used only to provide and improve the color extraction workflow.</li>
+        <li><strong>unlimitedStorage</strong> – Color collections, screenshots/previews, and history can exceed default quota. This prevents users from being forced to delete design assets or settings due to size limits. Data remains local; no external transfer occurs.</li>
+        <li><strong>activeTab</strong> – Allows temporary access to the current tab after an explicit user action (e.g., clicking the extension). Required to sample on‑page colors, read computed styles, overlay tools (like the ruler), and generate previews. Not used to access other tabs or run without explicit user intent.</li>
+        <li><strong>scripting</strong> – Injects lightweight scripts into the active page to sample pixel colors under the cursor, read computed styles, render overlays (rulers/guides), and support screen capture previews. Injection occurs only after user initiation. Scripts do not exfiltrate content; processing stays local and only for the active page.</li>
+        <li><strong>system.display</strong> – Reads display characteristics (resolution, scale factor, color space hints) to render accurate overlays/rulers and size screenshots/previews correctly. Improves color fidelity and measurement precision across monitors. The extension does not collect or transmit device‑identifying display data.</li>
+        <li><strong>browsingData</strong> – Used solely to allow the user to clear the extension’s own cached data and temporary artifacts created during color extraction, previews, or screenshots. The extension does not delete unrelated browsing history or data without an explicit user request.</li>
+      </ul>
+    </section>
+
+    <section id="retention">
+      <h2>Data Retention and Storage</h2>
+      <p>Data you save (e.g., palettes, preferences) remains stored locally in Chrome’s extension storage. If Chrome Sync is enabled, eligible items may sync across your devices under your Google account, per Chrome’s own settings. We do not operate external servers for storage.</p>
+      <p>You may clear the extension’s data using built-in controls (see below). When removed, associated local data will be deleted. We do not retain backups.</p>
+    </section>
+
+    <section id="controls">
+      <h2>User Controls and Transparency</h2>
+      <ul>
+        <li>Explicit activation: Functionality that touches the current tab (e.g., sampling colors, overlays) only runs after a clear user action.</li>
+        <li>Clear data: Use the extension’s “Clear cache/data” option to remove its stored items and temporary artifacts.</li>
+        <li>Chrome controls: You can also remove the extension or clear site/extension data via Chrome’s settings.</li>
+      </ul>
+    </section>
+
+    <section id="security">
+      <h2>Security</h2>
+      <p>We aim to minimize data collection and keep processing local. We do not transmit page content or extracted colors to external services. The extension does not execute remote code.</p>
+    </section>
+
+    <section id="children">
+      <h2>Children</h2>
+      <p>This extension is a developer/design utility and is not directed to children. It does not knowingly collect personal information from children.</p>
+    </section>
+
+    <section id="changes">
+      <h2>Changes to This Policy</h2>
+      <p>We may update this policy to reflect changes in functionality or legal requirements. Material changes will be reflected by updating the effective date and publishing the updated policy within this page.</p>
+    </section>
+
+    <section id="contact">
+      <h2>Contact</h2>
+      <p>If you have questions about this policy or privacy within the extension, please contact the developer via the Chrome Web Store listing’s contact method.</p>
+    </section>
+
+    <footer>
+      <p>© Extract Colors DevTool. This Privacy Policy is intended to satisfy the Chrome Web Store Program Policies (Privacy policy section).</p>
+    </footer>
+  </main>
+</body>
+</html>
